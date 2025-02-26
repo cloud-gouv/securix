@@ -1,0 +1,7 @@
+version = 1
+
+[[annotations]]
+SPDX-FileCopyrightText = "NONE"
+SPDX-License-Identifier = "MIT"
+path = [".github/workflows/*", ".gitignore", "REUSE.toml"]
+

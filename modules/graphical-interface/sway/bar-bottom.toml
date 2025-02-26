@@ -1,0 +1,54 @@
+# SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+[theme]
+theme = "gruvbox-dark"
+[icons]
+icons = "awesome5"
+
+[[block]]
+block = "disk_space"
+path = "/"
+info_type = "available"
+alert_unit = "GB"
+interval = 20
+warning = 30.0
+alert = 20.0
+
+[[block]]
+block = "disk_space"
+path = "/nix"
+info_type = "used"
+alert_unit = "GB"
+interval = 60
+warning = 40.0
+alert = 50.0
+
+[[block]]
+block = "memory"
+
+[[block]]
+block = "temperature"
+interval = 10
+chip = "*-isa-*"
+
+[[block]]
+block = "cpu"
+format = " $icon $utilization ({$boost|}$frequency) "
+interval = 1
+
+[[block]]
+block = "load"
+interval = 1
+
+[[block]]
+block = "battery"
+driver = "upower"
+device = "DisplayDevice"
+format = " $icon $percentage $time "
+
+[[block]]
+block = "time"
+interval = 60
+format = " $icon $timestamp.datetime(f:'%a %d/%m %R') "

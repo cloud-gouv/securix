@@ -1,0 +1,18 @@
+jobs:
+  reuse_lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: nixbuild/nix-quick-install-action@v29
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+      with:
+        diagnostic-endpoint: ''
+        use-flakehub: false
+    - name: Check for REUSE compliance
+      run: nix-shell --run 'reuse --root . lint'
+name: '[Sécurix] REUSE Licensing conformance'
+on:
+  pull_request:
+  push:
+    branches:
+    - main

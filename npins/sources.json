@@ -1,0 +1,56 @@
+{
+  "pins": {
+    "agenix": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "ryantm",
+        "repo": "agenix"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "version": "0.15.0",
+      "revision": "564595d0ad4be7277e07fa63b5a991b3c645655d",
+      "url": "https://api.github.com/repos/ryantm/agenix/tarball/0.15.0",
+      "hash": "01dhrghwa7zw93cybvx4gnrskqk97b004nfxgsys0736823956la"
+    },
+    "disko": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "disko"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "version": "v1.9.0",
+      "revision": "49a4936cee640e27d74baee6fd1278285d29b100",
+      "url": "https://api.github.com/repos/nix-community/disko/tarball/v1.9.0",
+      "hash": "0j76ar4qz320fakdii4659w5lww8wiz6yb7g47npywqvf2lbp388"
+    },
+    "lanzaboote": {
+      "type": "GitRelease",
+      "repository": {
+        "type": "GitHub",
+        "owner": "nix-community",
+        "repo": "lanzaboote"
+      },
+      "pre_releases": false,
+      "version_upper_bound": null,
+      "release_prefix": null,
+      "version": "v0.4.1",
+      "revision": "53b8af779b23bdc2ca3dc5bae93aa564c334aa03",
+      "url": "https://api.github.com/repos/nix-community/lanzaboote/tarball/v0.4.1",
+      "hash": "1hda4f0xx56r98kp5hy21f0802c0zf8n6g7li1yz183f1ynp49kr"
+    },
+    "nixpkgs": {
+      "type": "Channel",
+      "name": "nixpkgs-unstable",
+      "url": "https://releases.nixos.org/nixpkgs/nixpkgs-24.11pre697431.86e78d3d2084/nixexprs.tar.xz",
+      "hash": "0wbmh3jc25xan6x6nndfidgkfigip49zqp0rivi6lsdv18sx9mvx"
+    }
+  },
+  "version": 4
+}

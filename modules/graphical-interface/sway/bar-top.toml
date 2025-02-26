@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+[theme]
+theme = "gruvbox-dark"
+[icons]
+icons = "awesome5"
+
+[[block]]
+block = "uptime"
+
+[[block]]
+block = "net"
+device = "^wlp.*"
+format = "$icon $signal_strength $ssid $frequency via $device "
+format_alt = "$ssid $ipv4 $speed_down.eng(prefix:M) $speed_up.eng(prefix:M)"
+interval = 20
+
+[[block]]
+block = "net"
+device = "^enp.*"
+format = " $icon {$ipv4|$ipv6} via $device "
+format_alt = "$speed_up.eng(prefix:M) $speed_down.eng(prefix:M) "
+interval = 20
+missing_format = ""
