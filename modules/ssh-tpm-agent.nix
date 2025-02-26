@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: Elias Coppens <elias.coppens@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -61,6 +62,8 @@ in
           Type = "oneshot";
           RemainAfterExit = "yes";
         };
+
+        wantedBy = [ "network.target" ];
       };
 
       systemd.services.ssh-tpm-genkeys = {
@@ -78,6 +81,8 @@ in
           Type = "oneshot";
           RemainAfterExit = "yes";
         };
+
+        wantedBy = [ "network.target" ];
       };
 
       systemd.sockets.ssh-tpm-agent = {
