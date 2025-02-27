@@ -96,6 +96,8 @@ in
             echo "Repository exists, pulling latest changes..."
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
 
+            git fetch origin || exit 1
+
             UPSTREAM=''${1:-'@{u}'}
             LOCAL=$(git rev-parse @)
             REMOTE=$(git rev-parse "$UPSTREAM")
@@ -124,7 +126,7 @@ in
             mkdir -p "$REPO_DIR" || exit 1
 
             _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
-            git clone "$REPO_URL" "$REPO_DIR" || _notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?" && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
+            git clone "$REPO_URL" "$REPO_DIR" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
 
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
             nixos-rebuild boot --attr terminals."${config.securix.self.identifier}".system
