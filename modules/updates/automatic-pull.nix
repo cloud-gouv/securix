@@ -74,7 +74,7 @@ in
                 if [[ -n "$user" ]]; then
                     # Graphical notification for GUI sessions
                     sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-                        notify-send "$title" "$message"
+                        notify-send "$title" "$message" || true
                 else
                     # Terminal notification for non-GUI sessions
                     sudo -u "$user" echo "$title: $message" | wall
@@ -120,8 +120,12 @@ in
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           else
             echo "Repository does not exist, cloning..."
+            mkdir -p "$REPO_DIR" || exit 1
+
             _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
             git clone "$REPO_URL" "$REPO_DIR" || _notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?" && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
+
+            cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
             nixos-rebuild boot --attr terminals."${config.securix.self.identifier}".system
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           fi
