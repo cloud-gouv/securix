@@ -4,6 +4,8 @@
 
 {
   imports = [
+    # ANSSI compliance
+    ./anssi
     ./journal.nix
     ./console.nix
     ./distribution.nix
