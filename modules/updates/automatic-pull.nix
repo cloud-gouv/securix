@@ -48,6 +48,7 @@ in
         pkgs.gawk
         pkgs.libnotify
         pkgs.sudo
+        pkgs.nixos-rebuild
       ];
       script = ''
         _notify_current_user() {
