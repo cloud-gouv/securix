@@ -9,36 +9,37 @@ let
 in
 {
   # This spawns the dashboard on 127.0.0.1:8082.
-  services.homepage-dashboard = 
-  let
-    mkBookmarkWithIcon = icon: suffix: hostname: {
-      ${hostname} = [
-        {
-          inherit icon;
-          href = "https://${hostname}.${suffix}";
-        }
-      ];
+  services.homepage-dashboard =
+    let
+      mkBookmarkWithIcon = icon: suffix: hostname: {
+        ${hostname} = [
+          {
+            inherit icon;
+            href = "https://${hostname}.${suffix}";
+          }
+        ];
+      };
+    in
+    {
+      enable = true;
+
+      # This syntax may look weird but this is mandated by homepage-dashboard.
+      # TODO: add bookmarks generator
+      bookmarks = [ ];
+
+      # TODO: add services and automatically ping all our seed-bastions & bastions for workers.
+
+      # TODO: kubernetes, etc.
     };
-  in
-  {
-    enable = true;
-
-    # This syntax may look weird but this is mandated by homepage-dashboard.
-    # TODO: add bookmarks generator
-    bookmarks = [ ];
-
-    # TODO: add services and automatically ping all our seed-bastions & bastions for workers.
-
-    # TODO: kubernetes, etc.
-  };
 
   programs.firefox = {
     enable = true;
-    languagePacks = [ "fr" "en-US" ];
-
-    nativeMessagingHosts.packages = [
-      (pkgs.tridactyl-native)
+    languagePacks = [
+      "fr"
+      "en-US"
     ];
+
+    nativeMessagingHosts.packages = [ (pkgs.tridactyl-native) ];
 
     policies = {
       Homepage = {
@@ -62,25 +63,26 @@ in
         Enabled = false;
       };
 
-      ExtensionsSettings = 
-      let
-        extension = shortId: uuid: {
-          name = uuid;
-          value = {
-            install_url = "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
-            installation_mode = "normal_installed";
+      ExtensionsSettings =
+        let
+          extension = shortId: uuid: {
+            name = uuid;
+            value = {
+              install_url = "https://addons.mozilla.org/en-US/firefox/downloads/latest/${shortId}/latest.xpi";
+              installation_mode = "normal_installed";
+            };
           };
-        };
-      in
-      {
-        # Block all manual extension install. You NEED to propose your extension to the Sécurix repository.
-        "*".installation_mode = "blocked";
-      } // (listToAttrs [
-        (extension "ublock-origin" "uBlock0@raymondhill.net")
-        (extension "umatrix" "uMatrix@raymondhill.net")
-        (extension "tree-style-tab" "treestyletab@piro.sakura.ne.jp")
-        (extension "bitwarden-password-manager" "{446900e4-71c2-419f-a6a7-df9c091e268b}")
-      ]);
+        in
+        {
+          # Block all manual extension install. You NEED to propose your extension to the Sécurix repository.
+          "*".installation_mode = "blocked";
+        }
+        // (listToAttrs [
+          (extension "ublock-origin" "uBlock0@raymondhill.net")
+          (extension "umatrix" "uMatrix@raymondhill.net")
+          (extension "tree-style-tab" "treestyletab@piro.sakura.ne.jp")
+          (extension "bitwarden-password-manager" "{446900e4-71c2-419f-a6a7-df9c091e268b}")
+        ]);
 
       DisablePocket = true;
       DisableFirefoxAccounts = true;
