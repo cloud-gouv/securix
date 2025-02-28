@@ -22,7 +22,7 @@ let
       statix = {
         enable = true;
         stages = [ "pre-push" ];
-        settings.ignore = [ "**/npins" ];
+        settings.config = toString ./statix.toml;
       };
 
       nixfmt-rfc-style = {
