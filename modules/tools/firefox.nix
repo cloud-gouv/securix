@@ -145,7 +145,7 @@ in
           Enabled = false;
         };
 
-        ExtensionsSettings =
+        ExtensionSettings =
           let
             extension = shortId: uuid: {
               name = uuid;
