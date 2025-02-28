@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   nix.package = pkgs.lix;
   nix.nixPath = [
     # Always point to the authorized sources.
