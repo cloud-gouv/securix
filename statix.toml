@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2025 Elias Coppens <elias.coppens@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+disabled = [
+		"manual_inherit",
+		"manual_inherit_from",
+		"repeated_keys"
+]
+ignore = [
+		"**/npins"
+]
