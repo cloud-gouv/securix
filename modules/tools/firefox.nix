@@ -128,6 +128,7 @@ in
         DisplayBookmarksToolbar = "always";
         DisableProfileImport = true;
         NoDefaultBookmarks = true;
+        NewTabPage = false;
 
         # Don't save password on Firefox to avoid data losses
         PasswordManagerEnabled = false;
@@ -135,6 +136,9 @@ in
 
         # Unnecessary.
         DontCheckDefaultBrowser = true;
+        # Firefox version is managed by Sécurix
+        AppAutoUpdate = false;
+        DisableAppUpdate = true;
 
         # You are not supposed to watch Netflix on Sécurix.
         EncryptedMediaExtensions = {
@@ -165,6 +169,7 @@ in
         DisablePocket = true;
         DisableFirefoxAccounts = true;
         DisableTelemetry = true;
+        DisableFirefoxStudies = true;
 
         UserMessaging = {
           ExtensionRecommendations = false;
