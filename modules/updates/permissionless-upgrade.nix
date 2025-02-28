@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ lib, pkgs, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
   inherit (lib) mkIf mkEnableOption optionalString;
   self = config.securix.self;
@@ -64,7 +69,11 @@ let
         # On main, it's ABSOLUTELY forbidden to do anything else than --ff-only.
         git -C "$REPO_PATH" pull --ff-only || exit 1
       else
-        ${optionalString (!cfg.enableAnyBranch) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''}
+        ${
+          optionalString (
+            !cfg.enableAnyBranch
+          ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''
+        }
         # Create a secure temporary directory
         TEMP_DIR=$(mktemp -d)
         trap 'git -C "${self.infraRepositoryPath}" worktree remove "$TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
@@ -81,7 +90,7 @@ let
       # Run nixos-rebuild with the given verb
       nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."${self.identifier}".system
     '';
-};
+  };
 in
 {
   options.securix.manual-upgrades = {
@@ -98,10 +107,12 @@ in
           groups = [ "operator" ];
           commands = [
             {
-              command = "${upgradeScript}/bin/upgrade"; options = [ "NOPASSWD" ];
+              command = "${upgradeScript}/bin/upgrade";
+              options = [ "NOPASSWD" ];
             }
             {
-              command = "/run/current-system/sw/bin/upgrade"; options = [ "NOPASSWD" ];
+              command = "/run/current-system/sw/bin/upgrade";
+              options = [ "NOPASSWD" ];
             }
           ];
         }

@@ -6,5 +6,4 @@
 let
   inherit (lib) mapAttrs' filterAttrs nameValuePair;
 in
-{
-}
+{ }

@@ -2,10 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, ... }: 
-let 
+{ config, lib, ... }:
+let
   cfg = config.securix.audit;
-  inherit (lib) mkEnableOption mkIf types mkOption;
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    types
+    mkOption
+    ;
 in
 {
   options.securix.audit = {
@@ -38,7 +43,7 @@ in
         # track shm accesses
         # track mount/unmount
         # track usb keys accesses
-        # track kernel module loading 
+        # track kernel module loading
         # track kexec operations
         # track network cards changes
         # track thunderbolt changes
