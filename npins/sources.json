@@ -30,6 +30,18 @@
       "url": "https://api.github.com/repos/nix-community/disko/tarball/v1.9.0",
       "hash": "0j76ar4qz320fakdii4659w5lww8wiz6yb7g47npywqvf2lbp388"
     },
+    "git-hooks": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "cachix",
+        "repo": "git-hooks.nix"
+      },
+      "branch": "master",
+      "revision": "9364dc02281ce2d37a1f55b6e51f7c0f65a75f17",
+      "url": "https://github.com/cachix/git-hooks.nix/archive/9364dc02281ce2d37a1f55b6e51f7c0f65a75f17.tar.gz",
+      "hash": "1n2qlj5l8c4g7gm5v6rvc4hff3ka8ljv7y62inybli093bd2ypa7"
+    },
     "lanzaboote": {
       "type": "GitRelease",
       "repository": {
