@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.securix.graphical-interface;
   inherit (lib) mkIf;
@@ -34,9 +39,12 @@ in
       fontconfig = {
         enable = true;
         defaultFonts = {
-          monospace = ["Source Code Pro for Powerline" "Roboto Mono for Powerline"];
-          sansSerif = ["Roboto"];
-          serif = ["Roboto Slab"];
+          monospace = [
+            "Source Code Pro for Powerline"
+            "Roboto Mono for Powerline"
+          ];
+          sansSerif = [ "Roboto" ];
+          serif = [ "Roboto Slab" ];
         };
       };
     };

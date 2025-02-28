@@ -9,16 +9,23 @@
   ...
 }:
 let
-  inherit (lib) mkIf mkEnableOption splitString concatStringsSep types mkOption;
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    splitString
+    concatStringsSep
+    types
+    mkOption
+    ;
   cfg = config.securix.vpn.firewall;
 in
 {
   options.securix.vpn.firewall = {
-      enable = mkEnableOption "the firewall that guides all packets into the IPsec tunnel only";
-      genericRulesetFile = mkOption {
-          type = types.path;
-          description = "Chemin vers le fichier générique des règles de pare-feu";
-      };
+    enable = mkEnableOption "the firewall that guides all packets into the IPsec tunnel only";
+    genericRulesetFile = mkOption {
+      type = types.path;
+      description = "Chemin vers le fichier générique des règles de pare-feu";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -30,8 +37,10 @@ in
     networking.nftables = {
       enable = true;
       rulesetFile = pkgs.substituteAll {
-          src = cfg.genericRulesetFile;
-          github_ips = (concatStringsSep ",\n" (map (l: "\t\t${l}") (splitString "\n" (builtins.readFile ./github-ipv4.txt))));
+        src = cfg.genericRulesetFile;
+        github_ips = concatStringsSep ",\n" (
+          map (l: "\t\t${l}") (splitString "\n" (builtins.readFile ./github-ipv4.txt))
+        );
       };
       checkRuleset = false;
     };

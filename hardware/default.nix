@@ -2,8 +2,4 @@
 #
 # SPDX-License-Identifier: MIT
 
-{
-  imports = [
-    ./x280.nix
-  ];
-}
+{ imports = [ ./x280.nix ]; }

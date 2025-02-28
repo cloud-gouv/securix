@@ -2,10 +2,20 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, lib, config, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
   cfg = config.securix.password-manager.bitwarden;
-  inherit (lib) types mkOption mkEnableOption mkIf;
+  inherit (lib)
+    types
+    mkOption
+    mkEnableOption
+    mkIf
+    ;
 in
 {
   options.securix.password-manager.bitwarden = {

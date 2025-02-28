@@ -2,12 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-# Securix OS generic toolkit entrypoint. 
+# Securix OS generic toolkit entrypoint.
 # Use the library to build your OS images and more.
-{ sources ? import ./npins
-, pkgs ? import sources.nixpkgs { } 
-, defaultTags ? [ ]
-, edition ? "unbranded"
+{
+  sources ? import ./npins,
+  pkgs ? import sources.nixpkgs { },
+  defaultTags ? [ ],
+  edition ? "unbranded",
 }:
 let
   git-hooks = import sources.git-hooks;
@@ -21,9 +22,7 @@ let
       statix = {
         enable = true;
         stages = [ "pre-push" ];
-        settings.ignore = [
-          "**/npins"
-        ];
+        settings.ignore = [ "**/npins" ];
       };
 
       nixfmt-rfc-style = {
@@ -42,7 +41,15 @@ let
   };
 in
 {
-  lib = import ./lib { inherit pkgs lib edition defaultTags sources; };
+  lib = import ./lib {
+    inherit
+      pkgs
+      lib
+      edition
+      defaultTags
+      sources
+      ;
+  };
   modules = ./modules;
   shell = pkgs.mkShell {
     packages = [
@@ -50,8 +57,6 @@ in
       (pkgs.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
     ] ++ git-checks.enabledPackages;
 
-    shellHook = lib.concatStringsSep "\n" [
-      git-checks.shellHook
-    ];
+    shellHook = lib.concatStringsSep "\n" [ git-checks.shellHook ];
   };
 }

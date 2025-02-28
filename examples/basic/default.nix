@@ -2,10 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ sources ? import ./npins
-, pkgs ? import sources.nixpkgs { }
-, securix ? ../securix
-, mainDisk ? "/dev/nvme0n1" }:
+{
+  sources ? import ./npins,
+  pkgs ? import sources.nixpkgs { },
+  securix ? ../securix,
+  mainDisk ? "/dev/nvme0n1",
+}:
 let
   securix = import securix {
     edition = "my-team";
@@ -13,42 +15,44 @@ let
     inherit mainDisk pkgs;
   };
   inherit (pkgs) lib;
-in rec {
+in
+rec {
   users = securix.lib.readInventory ./inventory;
   vpn-profiles = import ./vpn-profiles { inherit lib; };
   # Base system is provided.
-  terminals = securix.lib.mkTerminals users vpn-profiles ({ lib, ... }: {
-    imports = [
-      # Any custom module here...
-    ];
+  terminals = securix.lib.mkTerminals users vpn-profiles (
+    { lib, ... }:
+    {
+      imports = [
+        # Any custom module here...
+      ];
 
-    securix = {
-      # Le terminal est multi-opérateur
-      users.allowAnyOperator = true;
+      securix = {
+        # Le terminal est multi-opérateur
+        users.allowAnyOperator = true;
 
-      # Autorise une GUI configurable par l'inventaire.
-      graphical-interface.enable = true;
+        # Autorise une GUI configurable par l'inventaire.
+        graphical-interface.enable = true;
 
-      # Pré-configure des points WiFi par défaut.
-      preconfigured-wifi-stations.enable = true;
+        # Pré-configure des points WiFi par défaut.
+        preconfigured-wifi-stations.enable = true;
 
-      # Configure l'agent TPM2 pour SSH. 
-      ssh.tpm-agent = {
-        hostKeys = true;
-        sshKeys = true;
+        # Configure l'agent TPM2 pour SSH.
+        ssh.tpm-agent = {
+          hostKeys = true;
+          sshKeys = true;
+        };
+
+        # Configure le VPN pour chaque opérateur
+        # avec un pare-feu strict.
+        vpn = {
+          enable = true;
+          firewall.enable = true;
+          pskSecretsPath = "your secret path to your PSK.";
+        };
       };
+    }
+  );
 
-      # Configure le VPN pour chaque opérateur
-      # avec un pare-feu strict.
-      vpn = {
-        enable = true;
-        firewall.enable = true;
-        pskSecretsPath = "your secret path to your PSK.";
-      };
-    };
-  });
-
-  docs = securix.lib.mkDocs {
-    inherit users terminals vpn-profiles;
-  };
+  docs = securix.lib.mkDocs { inherit users terminals vpn-profiles; };
 }

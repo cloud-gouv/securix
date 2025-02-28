@@ -11,12 +11,19 @@ in
   options.securix.graphical-interface = {
     enable = lib.mkEnableOption "the WM/DE interfaces";
     variant = lib.mkOption {
-      type = lib.types.enum [ "kde" "sway" ];
+      type = lib.types.enum [
+        "kde"
+        "sway"
+      ];
       example = "kde";
     };
 
     terminalVariant = lib.mkOption {
-      type = lib.types.enum [ "default" "kitty" "alacritty" ];
+      type = lib.types.enum [
+        "default"
+        "kitty"
+        "alacritty"
+      ];
       default = "default";
     };
   };
@@ -27,7 +34,5 @@ in
     ./fonts.nix
   ];
 
-  config = mkIf cfg.enable {
-    services.libinput.enable = true;
-  };
+  config = mkIf cfg.enable { services.libinput.enable = true; };
 }
