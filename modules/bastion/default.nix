@@ -4,9 +4,20 @@
 
 { config, lib, ... }:
 let
-  inherit (lib) mkEnableOption mkOption mkIf types mapAttrs filterAttrs listToAttrs concatStringsSep nameValuePair optionalString;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    types
+    mapAttrs
+    filterAttrs
+    listToAttrs
+    concatStringsSep
+    nameValuePair
+    optionalString
+    ;
   cfg = config.securix.bastions;
-  entrypointOpts = { ... }: {
+  entrypointOpts = _: {
     options = {
       name = mkOption {
         type = types.str;
@@ -32,28 +43,36 @@ let
     };
   };
 
-  entrypointsPerFQDN = listToAttrs (map (entry: nameValuePair "${entry.name}.${cfg.domainSuffix}" entry) cfg.entrypoints);
+  entrypointsPerFQDN = listToAttrs (
+    map (entry: nameValuePair "${entry.name}.${cfg.domainSuffix}" entry) cfg.entrypoints
+  );
   mkKnownHostEntry = fqdn: value: {
     publicKey = value.publicSSHKey;
     extraHostNames = [ value.address ];
   };
-  mkSshHostEntry = { name, proxyJumps, address, ... }: 
-  let
-    translateEntry = e: builtins.replaceStrings [ "." ] [ "-" ] e;
-    translatedProxyJumps = map translateEntry proxyJumps;
-    fullName = translateEntry "${name}.${cfg.domainSuffix}";
-    shortName = translateEntry name;
-  in
-  ''
-    Host ${shortName} ${fullName}
-      HostName ${address}
-      IdentitiesOnly yes
-      ${optionalString (proxyJumps != []) "ProxyJump ${concatStringsSep ", " translatedProxyJumps}"}
+  mkSshHostEntry =
+    {
+      name,
+      proxyJumps,
+      address,
+      ...
+    }:
+    let
+      translateEntry = e: builtins.replaceStrings [ "." ] [ "-" ] e;
+      translatedProxyJumps = map translateEntry proxyJumps;
+      fullName = translateEntry "${name}.${cfg.domainSuffix}";
+      shortName = translateEntry name;
+    in
+    ''
+      Host ${shortName} ${fullName}
+        HostName ${address}
+        IdentitiesOnly yes
+        ${optionalString (proxyJumps != [ ]) "ProxyJump ${concatStringsSep ", " translatedProxyJumps}"}
 
-    Match Host "${name}*,${shortName}*,${fullName}*,${address}*"
-      IdentitiesOnly yes
-      ${optionalString (proxyJumps != []) "ProxyJump ${concatStringsSep ", " translatedProxyJumps}"}
-  '';
+      Match Host "${name}*,${shortName}*,${fullName}*,${address}*"
+        IdentitiesOnly yes
+        ${optionalString (proxyJumps != [ ]) "ProxyJump ${concatStringsSep ", " translatedProxyJumps}"}
+    '';
 in
 {
   options.securix.bastions = {
@@ -63,17 +82,19 @@ in
       description = "Suffixe de domaine des bastions";
     };
 
-    entrypoints = mkOption {
-      type = types.listOf (types.submodule entrypointOpts);
-    };
+    entrypoints = mkOption { type = types.listOf (types.submodule entrypointOpts); };
   };
 
   config = mkIf cfg.enable {
     # Register the known SSH key
-    programs.ssh.knownHosts = mapAttrs mkKnownHostEntry (filterAttrs (n: v: v.publicSSHKey != null) entrypointsPerFQDN);
+    programs.ssh.knownHosts = mapAttrs mkKnownHostEntry (
+      filterAttrs (n: v: v.publicSSHKey != null) entrypointsPerFQDN
+    );
     # Register the /etc/hosts entry
     networking.extraHosts = ''
-      ${concatStringsSep "\n" (map (entry: "${entry.address}\t${entry.name}.${cfg.domainSuffix}") cfg.entrypoints)}
+      ${concatStringsSep "\n" (
+        map (entry: "${entry.address}\t${entry.name}.${cfg.domainSuffix}") cfg.entrypoints
+      )}
     '';
     # Register the .ssh entry
     programs.ssh.extraConfig = ''
@@ -82,4 +103,3 @@ in
     # TODO: register the Teleport entry?
   };
 }
-

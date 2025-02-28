@@ -7,8 +7,7 @@
 {
   name = "[Sécurix] REUSE Licensing conformance";
 
-  on =
-  {
+  on = {
     pull_request = { };
     push = {
       branches = [ "main" ];
@@ -30,4 +29,3 @@
     };
   };
 }
-

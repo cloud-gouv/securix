@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ ... }:
-{
+_: {
   config = {
     services.openssh.enable = true;
     # TODO: when we will have build capacity, we can re-enable it.

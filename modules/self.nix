@@ -2,18 +2,33 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ vpnProfiles, pkgs, config, lib, ... }:
+{
+  vpnProfiles,
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 let
   cfg = config.securix.self;
-  inherit (lib) mkOption types optional elemAt splitString substring mkDefault;
-  deriveUsernameFromEmail = email: 
-  let
-    parts = splitString "." email;
-    firstName = elemAt 0 parts;
-    lastName = elemAt 1 parts;
-    firstLetter = substring 0 1 firstName;
-    usernameLimit = 32;
-  in 
+  inherit (lib)
+    mkOption
+    types
+    optional
+    elemAt
+    splitString
+    substring
+    mkDefault
+    ;
+  deriveUsernameFromEmail =
+    email:
+    let
+      parts = splitString "." email;
+      firstName = elemAt 0 parts;
+      lastName = elemAt 1 parts;
+      firstLetter = substring 0 1 firstName;
+      usernameLimit = 32;
+    in
     substring 0 usernameLimit "${firstLetter}${lastName}";
 in
 {
@@ -118,7 +133,12 @@ in
     teams = mkOption {
       type = types.listOf types.str;
       description = "Liste des équipes dans lequel l'utilisateur est";
-      example = [ "product-01" "product-02" "financial-dpt" "security-team" ];
+      example = [
+        "product-01"
+        "product-02"
+        "financial-dpt"
+        "security-team"
+      ];
     };
   };
 

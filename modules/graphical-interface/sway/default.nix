@@ -2,15 +2,18 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, config, lib, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 let
   inherit (lib) mkIf;
   cfg = config.securix.graphical-interface;
 in
 {
-  imports = [
-    ./sway-config.nix
-  ];
+  imports = [ ./sway-config.nix ];
 
   config = mkIf (cfg.variant == "sway") {
     environment.systemPackages = with pkgs; [
@@ -27,7 +30,7 @@ in
     programs.gnupg.agent.pinentryPackage = pkgs.pinentry-curses;
     programs.nm-applet.enable = true;
 
-    # Enable the gnome-keyring secrets vault. 
+    # Enable the gnome-keyring secrets vault.
     # Will be exposed through DBus to programs willing to store secrets.
     services.gnome.gnome-keyring.enable = true;
 
@@ -37,14 +40,14 @@ in
       wrapperFeatures.gtk = true;
     };
 
-    services.greetd = {                                                      
-      enable = true;                                                         
-      settings = {                                                           
-        default_session = {                                                  
+    services.greetd = {
+      enable = true;
+      settings = {
+        default_session = {
           command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd sway";
-          user = "greeter";                                                  
-        };                                                                   
-      };                                                                     
+          user = "greeter";
+        };
+      };
     };
   };
 }

@@ -13,7 +13,5 @@
     pkiBundle = "/etc/secureboot";
   };
 
-  environment.systemPackages = [
-    pkgs.sbctl
-  ];
+  environment.systemPackages = [ pkgs.sbctl ];
 }

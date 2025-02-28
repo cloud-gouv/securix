@@ -3,12 +3,17 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.securix.ssh.tpm-agent;
   inherit (lib) mkEnableOption mkIf mkMerge;
 in
-{ 
+{
   options.securix.ssh.tpm-agent = {
     hostKeys = mkEnableOption "the sealing of SSH host keys in the TPM";
     sshKeys = mkEnableOption "the sealing of SSH keys in the TPM";
@@ -124,7 +129,7 @@ in
 
         wantedBy = [ "multi-user.target" ];
       };
-      services.openssh.hostKeys = [];
+      services.openssh.hostKeys = [ ];
       services.openssh.extraConfig = lib.mkAfter ''
         HostKeyAgent /var/tmp/ssh-tpm-agent.sock
         HostKey /etc/ssh/ssh_tpm_host_ecdsa_key

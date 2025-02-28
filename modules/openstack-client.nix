@@ -3,9 +3,21 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ operators, pkgs, lib, config, ... }:
+{
+  operators,
+  pkgs,
+  lib,
+  config,
+  ...
+}:
 let
-  inherit (lib) mkEnableOption mkIf mkOption types mapAttrs;
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkOption
+    types
+    mapAttrs
+    ;
   cfg = config.securix.cloud.openstack-client;
   yaml = pkgs.formats.yaml { };
   cloudOpts = {
@@ -17,28 +29,20 @@ in
 {
   options.securix.cloud.openstack-client = {
     enable = mkEnableOption "the automatic configuration of the OpenStack client";
-    defaults = mkOption {
-      type = types.attrsOf types.unspecified;
-    };
-    clouds = mkOption {
-      type = types.attrsOf (types.submodule cloudOpts);
-    };
-    projects = mkOption {
-      type = types.listOf types.str;
-    };
+    defaults = mkOption { type = types.attrsOf types.unspecified; };
+    clouds = mkOption { type = types.attrsOf (types.submodule cloudOpts); };
+    projects = mkOption { type = types.listOf types.str; };
   };
 
   config = mkIf cfg.enable {
-    environment.etc."openstack/clouds.yaml".source = yaml.generate "clouds.yaml" 
-    {
-      clouds = (mapAttrs (_: cloudConfig: cfg.defaults // cloudConfig) cfg.clouds);
+    environment.etc."openstack/clouds.yaml".source = yaml.generate "clouds.yaml" {
+      clouds = mapAttrs (_: cloudConfig: cfg.defaults // cloudConfig) cfg.clouds;
     };
 
     users.users = mapAttrs (username: config: {
       packages = [
         # Helper to do openstack work.
-        (pkgs.writeShellScriptBin "os-run"
-        ''
+        (pkgs.writeShellScriptBin "os-run" ''
           usage() {
             echo "usage: os-run <cloud> -- <command> [...]"
             echo "Run in the context of a certain cloud any OpenStack-related command, including Terraform"
