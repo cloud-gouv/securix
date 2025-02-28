@@ -1,0 +1,20 @@
+jobs:
+  reuse_lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: nixbuild/nix-quick-install-action@v29
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+      with:
+        diagnostic-endpoint: ''
+        use-flakehub: false
+    - name: Check for statix
+      run: nix-shell --run 'statix check --config statix.toml'
+    - name: Check for formatting
+      run: nix-shell --run 'nixfmt -sc $(find . -name "*.nix" -not -path "./npins")'
+name: '[Sécurix] Formatting check'
+on:
+  pull_request:
+  push:
+    branches:
+    - main
