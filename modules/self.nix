@@ -111,7 +111,6 @@ in
 
     infraRepositoryPath = mkOption {
       type = types.path;
-      readOnly = true;
       default = "/etc/infrastructure";
       description = "Chemin vers le référentiel d'infrastructure";
     };
