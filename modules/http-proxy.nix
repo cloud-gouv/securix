@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: Elias Coppens <elias.coppens@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -12,7 +13,6 @@ let
     concatStringsSep
     ;
   cfg = config.securix.http-proxy;
-  selectedProxy = cfg.availableProxies.${cfg.usedProxy};
 in
 {
   options.securix.http-proxy = {
@@ -38,13 +38,21 @@ in
       ];
       description = "Liste de domaines exclus du proxy";
     };
+
+    usedProxyAddress = mkOption {
+      type = types.str;
+      readOnly = true;
+      internal = true;
+      description = "Adresse du proxy séléctionné";
+    };
   };
 
   config = mkIf cfg.enable {
+    securix.http-proxy.usedProxyAddress = cfg.availableProxies.${cfg.usedProxy};
     environment.sessionVariables = {
-      all_proxy = selectedProxy;
-      http_proxy = selectedProxy;
-      https_proxy = selectedProxy;
+      all_proxy = cfg.usedProxyAddress;
+      http_proxy = cfg.usedProxyAddress;
+      https_proxy = cfg.usedProxyAddress;
       no_proxy = concatStringsSep "," cfg.exceptions;
     };
   };
