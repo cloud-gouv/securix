@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ lib, config, ... }:
+{ lib, config, ... }@args:
 let
   inherit (lib)
     mkEnableOption
@@ -14,6 +14,21 @@ let
     concatStringsSep
     ;
   cfg = config.securix.http-proxy;
+
+  securix-lib = import ../lib/utils.nix args;
+
+  subnetsExceptions = lib.filter (
+    address:
+    (securix-lib.address.isIPv4WithSubnet address) || (securix-lib.address.isIPv6WithSubnet address)
+  ) cfg.exceptions;
+  nonSubnetsExceptions = lib.filter (
+    address:
+    (securix-lib.address.isIPv4WithoutSubnet address)
+    || (securix-lib.address.isIPv6WithoutSubnet address)
+  ) cfg.exceptions;
+  domainsExceptions = lib.filter (
+    address: !((securix-lib.address.isIPv4 address) || (securix-lib.address.isIPv6 address))
+  ) cfg.exceptions;
 in
 {
   options.securix.http-proxy = {
@@ -71,6 +86,12 @@ in
               type = "http_proxy";
               listen.address = "127.0.0.1:8080";
               tls_client = { };
+              dst_host_filter_set = {
+                exact = nonSubnetsExceptions ++ domainsExceptions;
+                child = domainsExceptions;
+                regex = domainsExceptions;
+                subnet = subnetsExceptions;
+              };
             }
           ];
         };
