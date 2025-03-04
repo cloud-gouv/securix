@@ -9,6 +9,7 @@ let
     mkEnableOption
     mkOption
     mkIf
+    mkMerge
     types
     concatStringsSep
     ;
@@ -17,16 +18,6 @@ in
 {
   options.securix.http-proxy = {
     enable = mkEnableOption "configure un proxy HTTP client SOCKS5 globalement";
-
-    availableProxies = mkOption {
-      type = types.attrsOf types.str;
-      description = "Liste des proxies SOCKS5 disponibles";
-    };
-
-    usedProxy = mkOption {
-      type = types.str;
-      description = "Proxy sélectionné";
-    };
 
     exceptions = mkOption {
       type = types.listOf types.str;
@@ -38,22 +29,54 @@ in
       ];
       description = "Liste de domaines exclus du proxy";
     };
-
-    usedProxyAddress = mkOption {
-      type = types.str;
-      readOnly = true;
-      internal = true;
-      description = "Adresse du proxy séléctionné";
-    };
   };
 
-  config = mkIf cfg.enable {
-    securix.http-proxy.usedProxyAddress = cfg.availableProxies.${cfg.usedProxy};
-    environment.sessionVariables = {
-      all_proxy = cfg.usedProxyAddress;
-      http_proxy = cfg.usedProxyAddress;
-      https_proxy = cfg.usedProxyAddress;
-      no_proxy = concatStringsSep "," cfg.exceptions;
-    };
-  };
+  config = mkMerge [
+    (mkIf cfg.enable {
+      networking.proxy = {
+        default = "http://127.0.0.1:8080";
+        noProxy = concatStringsSep "," cfg.exceptions;
+      };
+
+      services.g3proxy = {
+        enable = true;
+        settings = {
+          resolver = [
+            {
+              name = "default";
+              type = "c-ares";
+              # CloudFlare… Not optimal.
+              # TODO: does the MTE have a public DNS?
+              # https://www.joindns4.eu/
+              # 86.54.11.100 (unfiltered resolver)
+              server = "86.54.11.100";
+              # By default, always use secure resolution. Never leak any metadata to upstream DNS servers.
+              # encryption = "dns-over-https";
+            }
+          ];
+
+          escaper = [
+            {
+              name = "default";
+              type = "direct_fixed";
+              no_ipv6 = false;
+              resolver = "default";
+            }
+          ];
+
+          server = [
+            {
+              name = "securix";
+              escaper = "default";
+              type = "http_proxy";
+              listen.address = "127.0.0.1:8080";
+              tls_client = { };
+            }
+          ];
+        };
+      };
+
+      systemd.services.g3proxy.aliases = [ "http-proxy.service" ];
+    })
+  ];
 }
