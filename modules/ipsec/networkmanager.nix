@@ -23,6 +23,7 @@ let
     listToAttrs
     mapAttrs
     mapAttrsToList
+    optionalAttrs
     ;
   mkIPsecConnectionProfile =
     operatorName:
@@ -44,6 +45,8 @@ let
       gateway ? null,
       mkPasswordVariable ? null,
       mkAddress ? null,
+      defaultProxy ? null,
+      availableHttpProxies ? { },
       ...
     }:
     assert lib.assertMsg (mkPasswordVariable == null -> method != "psk")
@@ -101,6 +104,15 @@ let
       ipv6 = {
         method = "disabled";
       };
+
+      user =
+        {
+          "securix.username" = username;
+        }
+        // optionalAttrs (defaultProxy != null) {
+          "securix.default_http_proxy_ip" = "${availableHttpProxies.${defaultProxy}}";
+          "securix.default_http_proxy_name" = defaultProxy;
+        };
     };
 in
 {
@@ -166,6 +178,32 @@ in
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
     ) cfg.pskSecretsPaths;
+
+    networking.networkmanager.dispatcherScripts = [
+      {
+        type = "basic";
+        source = pkgs.writeText "securix-vpn-hooks" ''
+          iface=$1
+          action=$2
+          user=$CONNECTION_USER_SECURIX__USERNAME
+          default_http_proxy_ip=$CONNECTION_USER_SECURIX__DEFAULT_HTTP_PROXY_IP
+          default_http_proxy_name=$CONNECTION_USER_SECURIX__DEFAULT_HTTP_PROXY_NAME
+          if [ "$action" == "vpn-up" ]; then
+            logger "[securix-vpn-hooks] stopping local HTTP proxy to let remote VPN HTTP proxy take over..."
+            systemctl stop http-proxy.service && logger "[securix-vpn-hooks] local HTTP proxy stopped successfully" || logger "[securix-vpn-hooks] local HTTP proxy failed to stop"
+            systemctl start --user "$user" "vpn-http-proxy-tunnel@$default_http_proxy_ip.service" && logger "[securix-vpn-hooks] authenticated to the VPN HTTP proxy '$default_http_proxy_name' successfully" || logger "[securix-vpn-hooks] failed to authenticate to the VPN HTTP proxy"
+          fi
+          if [ "$action" == "vpn-down" ]; then
+            logger "[securix-vpn-hooks] stopping remote VPN HTTP proxy to let local HTTP proxy take over..."
+            systemctl stop --user "$user" vpn-http-proxy-tunnel.target && logger "[securix-vpn-hooks] failed to stop the remote VPN HTTP proxy" || logger "[securix-vpn-hooks] remote VPN HTTP proxy stopped successfully"
+            systemctl start http-proxy.service && logger "[securix-vpn-hooks] local HTTP proxy started successfully" || logger "[securix-vpn-hooks] local HTTP proxy failed to start"
+            # Ensure that any charon-nm process has been killed to avoid the classical error "no vpn secrets" available.
+            ${pkgs.procps}/bin/pkill charon-nm && logger "[securix-vpn-hooks] terminated `charon-nm` ipsec process" || logger "[securix-vpn-hooks] `charon-nm` already exited, no need for killing it."
+          fi
+        '';
+      }
+    ];
+
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
       listToAttrs (
