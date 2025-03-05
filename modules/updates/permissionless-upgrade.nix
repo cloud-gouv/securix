@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: Elias Coppens <elias.coppens@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -61,6 +62,10 @@ let
       unset all_proxy http_proxy https_proxy no_proxy
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
+
+      # Ensure that the origin is the right URL.
+      git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
+      git -C "${self.infraRepositoryPath}" fetch origin
 
       if [ "$BRANCH" == "main" ]; then
         REPO_PATH="${self.infraRepositoryPath}"
