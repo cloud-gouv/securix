@@ -104,7 +104,8 @@ in
     };
 
     bit = mkOption {
-      type = types.int;
+      type = types.nullOr types.int;
+      default = null;
       description = "Octet pour l'adresse IPv4 publique dans le VPN";
       example = 1;
     };
