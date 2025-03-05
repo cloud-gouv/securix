@@ -69,7 +69,6 @@
     git-gr
     lazygit
     jujutsu
-    lazyjj
     # Serial console work.
     minicom
     picocom
