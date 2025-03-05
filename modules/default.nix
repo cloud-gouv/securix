@@ -44,5 +44,7 @@
     ./security-keys.nix
     # Automatic update system
     ./updates
+    # For observability of Securix
+    ./o11y
   ];
 }
