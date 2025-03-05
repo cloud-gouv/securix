@@ -2,4 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ imports = [ ./ipsec ]; }
+{
+  imports = [
+    ./ipsec
+    ./netbird
+  ];
+}
