@@ -32,8 +32,8 @@
     ./auditd.nix
     # Data-only pertaining to the system
     ./self.nix
-    # All the IPsec rules
-    ./ipsec
+    # All the VPN code
+    ./vpn
     # Superadmins options
     ./superadmins
     # All the administration tools
