@@ -49,7 +49,7 @@ in
       users.groups.operator = { };
       security.tpm2.enable = true;
       users.users.${self.username} = mkOperator {
-        developerMode = self.developer;
+        developerMode = self.developer or false;
         inherit (self) hashedPassword;
       };
     }
@@ -61,7 +61,7 @@ in
           (
             username: config:
             mkOperator {
-              developerMode = config.developer;
+              developerMode = config.developer or false;
               inherit (config) hashedPassword;
             }
           )
