@@ -23,6 +23,7 @@ let
     listToAttrs
     mapAttrs
     mapAttrsToList
+    filter
     ;
   mkIPsecConnectionProfile =
     operatorName:
@@ -176,7 +177,7 @@ in
           nameValuePair "${op}-${profileName}" (
             mkIPsecConnectionProfile op opCfg profileName vpnProfiles.${profileName}
           )
-        ) opCfg.allowedVPNs
+        ) (filter (profileName: vpnProfiles.${profileName}.type == "ipsec") opCfg.allowedVPNs)
       )
     ) operators;
   };
