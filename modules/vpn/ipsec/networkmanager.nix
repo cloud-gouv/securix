@@ -11,7 +11,7 @@
   ...
 }:
 let
-  cfg = config.securix.vpn;
+  cfg = config.securix.vpn.ipsec;
   inherit (lib)
     mkIf
     mkEnableOption
@@ -106,7 +106,7 @@ let
     };
 in
 {
-  options.securix.vpn = {
+  options.securix.vpn.ipsec = {
     enable = mkEnableOption "the IPsec connection";
 
     pskSecretsPaths = mkOption {
