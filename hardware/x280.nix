@@ -27,7 +27,10 @@ in
       "rtsx_pci_sdmmc"
     ];
     boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ "kvm-intel" ];
+    boot.kernelModules = [
+      "kvm-intel"
+      "intel_rapl_common"
+    ];
     boot.extraModulePackages = [ ];
 
     hardware.firmware = [
