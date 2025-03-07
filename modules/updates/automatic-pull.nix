@@ -27,6 +27,12 @@ in
       description = "URL de clonage du repo d'infrastructure Sécurix";
     };
 
+    branch = mkOption {
+      type = types.str;
+      default = "main";
+      description = "Branche du dépôt d'infrastructure Sécurix à mettre à jour";
+    };
+
     repoSubdir = mkOption {
       type = types.str;
       default = "securix";
@@ -96,9 +102,11 @@ in
             echo "Repository exists, pulling latest changes..."
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
 
+            git remote set-url origin "${cfg.repoUrl}"
             git fetch origin || exit 1
+            git branch --set-upstream-to="origin/${cfg.branch}" "${cfg.branch}"
 
-            UPSTREAM=''${1:-'@{u}'}
+            UPSTREAM='${cfg.branch}@{u}'
             LOCAL=$(git rev-parse @)
             REMOTE=$(git rev-parse "$UPSTREAM")
             BASE=$(git merge-base @ "$UPSTREAM")
@@ -126,7 +134,7 @@ in
             mkdir -p "$REPO_DIR" || exit 1
 
             _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
-            git clone "$REPO_URL" "$REPO_DIR" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
+            git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
 
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
             nixos-rebuild boot --attr terminals."${config.securix.self.identifier}".system
