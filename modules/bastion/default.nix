@@ -68,10 +68,6 @@ let
         HostName ${address}
         IdentitiesOnly yes
         ${optionalString (proxyJumps != [ ]) "ProxyJump ${concatStringsSep ", " translatedProxyJumps}"}
-
-      Match Host "${name}*,${shortName}*,${fullName}*,${address}*"
-        IdentitiesOnly yes
-        ${optionalString (proxyJumps != [ ]) "ProxyJump ${concatStringsSep ", " translatedProxyJumps}"}
     '';
 in
 {
