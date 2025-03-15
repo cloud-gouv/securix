@@ -233,15 +233,14 @@ rec {
   mkTerminal =
     {
       name,
-      userSpecificModule,
+      machine,
       vpnProfiles,
-      extraOperators ? { },
       modules,
       edition,
     }:
     let
       allModules = [
-        userSpecificModule
+        machine
         ../modules
         ../hardware
         # For Secure Boot.
@@ -250,9 +249,6 @@ rec {
         {
           securix.self.identifier = name;
           securix.self.edition = edition;
-          _module.args.operators = mapAttrs' (
-            fileName: cfg: nameValuePair cfg.securix.self.username cfg.securix.self
-          ) extraOperators;
           _module.args.vpnProfiles = vpnProfiles;
 
           age.identityPaths = [
@@ -275,28 +271,27 @@ rec {
   # Build all artifacts images for the Securix OS.
   mkTerminals =
     {
-      users,
+      machines,
       vpn-profiles,
       edition,
     }:
     baseSystem:
 
     mapAttrs (
-      name: userSpecificModule:
+      name: machine:
       mkTerminal {
-        inherit name userSpecificModule edition;
+        inherit name machine edition;
         # TODO: unify the naming for vpn-profiles...
         vpnProfiles = vpn-profiles;
         # All the users themselves.
-        extraOperators = users;
         modules = [ baseSystem ];
       }
-    ) users;
+    ) machines;
 
   # Build all documentation outputs for the Securix OS.
   mkDocs =
     {
-      users,
+      machines,
       vpn-profiles,
       terminals,
     }:
@@ -339,11 +334,11 @@ rec {
         '';
       inventory =
         let
-          configs = mapAttrs (username: { system, ... }: system.config) terminals;
-          mkUserReport = user: config: ''
-            ## Inventaire de `${user}`
+          configs = mapAttrs (_: { system, ... }: system.config) terminals;
+          mkMachineReport = machine: config: ''
+            ## Machine `${machine}`
 
-            Email: ${config.securix.self.email}
+            Utilisateur par défaut: ${config.securix.self.defaultOperator}
             Machine: ${config.securix.self.hardwareSKU}
             Numéro: ${toString config.securix.self.inventoryId}
           '';
@@ -351,7 +346,7 @@ rec {
         pkgs.writeText "inventory.md" ''
           # Inventaire des terminaux en circulation
 
-          ${concatStringsSep "\n" (mapAttrsToList mkUserReport configs)}
+          ${concatStringsSep "\n" (mapAttrsToList mkMachineReport configs)}
         '';
     };
 }

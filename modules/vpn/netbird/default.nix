@@ -4,7 +4,6 @@
 
 {
   vpnProfiles,
-  operators,
   pkgs,
   lib,
   config,
@@ -18,8 +17,11 @@ let
     listToAttrs
     concatMapAttrs
     filter
+    hasAttr
     ;
-  selectNetbirdVpns = list: filter (vpnName: vpnProfiles.${vpnName}.type == "netbird") list;
+  selectNetbirdVpns =
+    list:
+    filter (vpnName: hasAttr vpnName vpnProfiles && vpnProfiles.${vpnName}.type == "netbird") list;
 in
 {
   options.securix.vpn.netbird = {
@@ -38,7 +40,7 @@ in
       enable = lib.mkForce false;
       clients = concatMapAttrs (
         operatorName:
-        { username, allowedVPNs, ... }:
+        { allowedVPNs, ... }:
         listToAttrs (
           map (
             vpnName:
@@ -61,7 +63,7 @@ in
             }
           ) (selectNetbirdVpns allowedVPNs)
         )
-      ) operators;
+      ) config.securix.users.allowedUsers;
     };
   };
 }
