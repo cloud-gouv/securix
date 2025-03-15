@@ -1,0 +1,34 @@
+table inet firewall {
+	chain rpfilter {
+		type filter hook prerouting priority mangle + 10; policy drop;
+		meta nfproto ipv4 udp sport . udp dport { 68 . 67, 67 . 68 } accept comment "DHCPv4 client/server"
+		fib saddr . mark . iif oif exists accept
+		jump rpfilter-allow
+	}
+
+	chain rpfilter-allow {
+	}
+
+	set ipv4allows {
+        type ipv4_addr
+        flags interval
+        auto-merge
+		elements = [
+@github_ips@
+		]
+    }
+
+	chain input {
+		type filter hook input priority filter
+		policy drop
+		ip saddr @ipv4allows accept
+	}
+
+	chain input-allow {
+		tcp dport 22 accept
+		udp dport { 22, 51820 } accept
+		icmp type echo-request accept comment "allow ping"
+		icmpv6 type != { nd-redirect, 139 } accept comment "Accept all ICMPv6 messages except redirects and node information queries (type 139).  See RFC 4890, section 4.4."
+		ip6 daddr fe80::/64 udp dport 546 accept comment "DHCPv6 client"
+	}
+}
