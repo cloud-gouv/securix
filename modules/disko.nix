@@ -2,9 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ lib, ... }:
+{ config, ... }:
 let
-  disk = "/dev/nvme0n1";
+  disk = config.securix.self.mainDisk;
   mountOptions = [ "noatime" ];
 in
 {

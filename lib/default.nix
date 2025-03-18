@@ -105,12 +105,13 @@ rec {
   #   - sign the first generation with it.
   # - Upgrade process will need the Yubikey for signing.
   buildInstallerImage =
-    mainDisk: modules:
+    modules:
     let
       targetSystem = pkgs.nixos modules;
       targetSystemFormatScript = targetSystem.config.system.build.formatScript;
       targetSystemMountScript = targetSystem.config.system.build.mountScript;
       targetSystemClosure = targetSystem.config.system.build.toplevel;
+      mainDisk = targetSystem.config.securix.self.mainDisk;
     in
     (pkgs.nixos [
       (
@@ -237,7 +238,6 @@ rec {
       extraOperators ? { },
       modules,
       edition,
-      mainDisk,
     }:
     let
       allModules = [
@@ -268,7 +268,7 @@ rec {
       ] ++ modules;
     in
     {
-      installer = buildInstallerImage mainDisk allModules;
+      installer = buildInstallerImage allModules;
       system = pkgs.nixos allModules;
     };
 
@@ -278,19 +278,13 @@ rec {
       users,
       vpn-profiles,
       edition,
-      mainDisk,
     }:
     baseSystem:
 
     mapAttrs (
       name: userSpecificModule:
       mkTerminal {
-        inherit
-          name
-          userSpecificModule
-          edition
-          mainDisk
-          ;
+        inherit name userSpecificModule edition;
         # TODO: unify the naming for vpn-profiles...
         vpnProfiles = vpn-profiles;
         # All the users themselves.

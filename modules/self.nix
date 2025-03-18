@@ -33,6 +33,12 @@ let
 in
 {
   options.securix.self = {
+    mainDisk = mkOption {
+      type = types.str;
+      description = "Disque du système";
+      example = "/dev/nvme0n1";
+    };
+
     edition = mkOption {
       type = types.str;
       description = "Édition du système Sécurix";
