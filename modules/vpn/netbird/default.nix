@@ -34,6 +34,8 @@ in
       netbird-ui
     ];
 
+    services.resolved.enable = true;
+
     services.netbird = {
       enable = lib.mkForce false;
       clients = concatMapAttrs (
