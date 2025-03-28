@@ -26,6 +26,7 @@ let
       # Default values
       BRANCH="main"
       SUBDIR="${self.infraRepositorySubdir}"
+      REMOTE_PULL=true
 
       # Parse arguments
       while [[ "$#" -gt 0 ]]; do
@@ -38,6 +39,9 @@ let
             SUBDIR="$2"
             shift 2
             ;;
+          --do-not-pull)
+            REMOTE_PULL=false
+            shift 1
           --)
             shift
             break
@@ -65,31 +69,34 @@ let
 
       # Ensure that the origin is the right URL.
       git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
-      git -C "${self.infraRepositoryPath}" fetch origin
-
-      if [ "$BRANCH" == "main" ]; then
-        REPO_PATH="${self.infraRepositoryPath}"
-
-        # Update the repo.
-        # On main, it's ABSOLUTELY forbidden to do anything else than --ff-only.
-        git -C "$REPO_PATH" pull --ff-only || exit 1
-      else
-        ${
-          optionalString (
-            !cfg.enableAnyBranch
-          ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''
-        }
-        # Create a secure temporary directory
-        TEMP_DIR=$(mktemp -d)
-        trap 'git -C "${self.infraRepositoryPath}" worktree remove "$TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
-        
-        # Extract a worktree for the specified branch in the temporary directory
-        git -C "${self.infraRepositoryPath}" worktree add "$TEMP_DIR" "$BRANCH" || exit 1
-        REPO_PATH="$TEMP_DIR"
-
-        # Update the worktree.
-        # When it's not main, accept force pushes.
-        git -C "$REPO_PATH" pull --rebase || exit 1
+      
+      if [ $REMOTE_PULL ]; then
+          git -C "${self.infraRepositoryPath}" fetch origin
+          if [ "$BRANCH" == "main" ]; then
+            REPO_PATH="${self.infraRepositoryPath}"
+    
+            # Update the repo.
+            # On main, it's ABSOLUTELY forbidden to do anything else than --ff-only.
+            git switch main
+            git -C "$REPO_PATH" pull --ff-only || exit 1
+          else
+            ${
+              optionalString (
+                !cfg.enableAnyBranch
+              ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''
+            }
+            # Create a secure temporary directory
+            TEMP_DIR=$(mktemp -d)
+            trap 'git -C "${self.infraRepositoryPath}" worktree remove "$TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
+            
+            # Extract a worktree for the specified branch in the temporary directory
+            git -C "${self.infraRepositoryPath}" worktree add "$TEMP_DIR" "$BRANCH" || exit 1
+            REPO_PATH="$TEMP_DIR"
+    
+            # Update the worktree.
+            # When it's not main, accept force pushes.
+            git -C "$REPO_PATH" pull --rebase || exit 1
+          fi
       fi
 
       # Run nixos-rebuild with the given verb
