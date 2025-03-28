@@ -70,7 +70,7 @@ let
       # Ensure that the origin is the right URL.
       git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
       
-      if [ $REMOTE_PULL ]; then
+      if [ "$REMOTE_PULL" = true ]; then
           git -C "${self.infraRepositoryPath}" fetch origin
           if [ "$BRANCH" == "main" ]; then
             REPO_PATH="${self.infraRepositoryPath}"
