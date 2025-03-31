@@ -77,7 +77,7 @@ let
   
           # Update the repo.
           # On main, it's ABSOLUTELY forbidden to do anything else than --ff-only.
-          git switch main
+          git -C "${self.infraRepositoryPath}" switch main
           git -C "$REPO_PATH" pull --ff-only || exit 1
         else
           ${
