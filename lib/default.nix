@@ -155,75 +155,88 @@ rec {
           };
 
           environment.systemPackages = [
-            (pkgs.writeShellScriptBin "autoinstall-terminal" ''
-              #!/usr/bin/env bash
+            (pkgs.writeShellScriptBin "autoinstall-terminal" (
+              ''
+                #!/usr/bin/env bash
 
-              log() {
-                local level="$1"
-                local msg="$2"
-                case "$level" in
-                  info)
-                    ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
-                    ;;
-                  warn)
-                    ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
-                    ;;
-                  error)
-                    ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
-                    ;;
-                  *)
-                    ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
-                    ;;
-                esac
-              }
-
-              log_info() {
-                local msg="$1"
-                log info "$msg"
-              }
-
-              log_warn() {
-                local msg="$1"
-                log warn "$msg"
-              }
-
-              log_error() {
-                local msg="$1"
-                log error "$msg"
+                log() {
+                  local level="$1"
+                  local msg="$2"
+                  case "$level" in
+                    info)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
+                      ;;
+                    warn)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
+                      ;;
+                    error)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
+                      ;;
+                    *)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
+                      ;;
+                  esac
                 }
 
-              box_message() {
-                local msg="$1"
-                ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
-              }
+                log_info() {
+                  local msg="$1"
+                  log info "$msg"
+                }
 
-              umount -R /mnt || true
+                log_warn() {
+                  local msg="$1"
+                  log warn "$msg"
+                }
 
-              box_message "Welcome in the Securix automatic installer."
-              log_info "Here is the list of current block devices."
-              lsblk
+                log_error() {
+                  local msg="$1"
+                  log error "$msg"
+                  }
 
-              ${pkgs.systemd}/bin/udevadm settle
-              log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
-              ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
+                box_message() {
+                  local msg="$1"
+                  ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
+                }
 
-              wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
-              log_info "${mainDisk} re-initialized and formatted."
+                umount -R /mnt || true
 
-              ${pkgs.systemd}/bin/udevadm settle
-              box_message "Repartitioning ${mainDisk}..."
-              ${targetSystemFormatScript}
-              box_message "Mounting ${mainDisk}..."
-              ${targetSystemMountScript}
-              box_message "Provisioning Secure Boot keys..."
-              ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
-              box_message "Burning the image on ${mainDisk}..."
-              ${config.system.build.nixos-install}/bin/nixos-install --no-channel-copy -j $(nproc) --option substituters "" --system "${targetSystemClosure}"
-              box_message "Enrolling Secure Boot keys..."
-              ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
-              lsblk
-              log_info "Installation is complete. You can now reboot in the installed system."
-            '')
+                box_message "Welcome in the Securix automatic installer."
+                log_info "Here is the list of current block devices."
+                lsblk
+
+                ${pkgs.systemd}/bin/udevadm settle
+                log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
+                ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
+
+                wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
+                log_info "${mainDisk} re-initialized and formatted."
+
+                ${pkgs.systemd}/bin/udevadm settle
+                box_message "Repartitioning ${mainDisk}..."
+                ${targetSystemFormatScript}
+                box_message "Mounting ${mainDisk}..."
+                ${targetSystemMountScript}
+                box_message "Provisioning Secure Boot keys..."
+              ''
+              + (
+                if lib.versionOlder pkgs.sbctl.version "0.15" then
+                  ''
+                    ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
+                  ''
+                else
+                  ''
+                    ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
+                  ''
+              )
+              + ''
+                box_message "Burning the image on ${mainDisk}..."
+                ${config.system.build.nixos-install}/bin/nixos-install --no-channel-copy -j $(nproc) --option substituters "" --system "${targetSystemClosure}"
+                box_message "Enrolling Secure Boot keys..."
+                ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
+                lsblk
+                log_info "Installation is complete. You can now reboot in the installed system."
+              ''
+            ))
           ];
         }
       )
