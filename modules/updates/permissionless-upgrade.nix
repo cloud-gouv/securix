@@ -24,7 +24,7 @@ let
       fi
 
       # Default values
-      BRANCH="main"
+      BRANCH="${config.securix.auto-updates.branch}"
       SUBDIR="${self.infraRepositorySubdir}"
       REMOTE_PULL=true
 
@@ -69,15 +69,15 @@ let
 
       # Ensure that the origin is the right URL.
       git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
-      
+
       if [ "$REMOTE_PULL" = true ]; then
         git -C "${self.infraRepositoryPath}" fetch origin
-        if [ "$BRANCH" == "main" ]; then
+        if [ "$BRANCH" == "${config.securix.auto-updates.branch}" ]; then
           REPO_PATH="${self.infraRepositoryPath}"
-  
+
           # Update the repo.
-          # On main, it's ABSOLUTELY forbidden to do anything else than --ff-only.
-          git -C "${self.infraRepositoryPath}" switch main
+          # On main branch, it's ABSOLUTELY forbidden to do anything else than --ff-only.
+          git -C "${self.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
           git -C "$REPO_PATH" pull --ff-only || exit 1
         else
           ${
@@ -92,7 +92,7 @@ let
           # Extract a worktree for the specified branch in the temporary directory
           git -C "${self.infraRepositoryPath}" worktree add "$TEMP_DIR" "$BRANCH" || exit 1
           REPO_PATH="$TEMP_DIR"
-  
+
           # Update the worktree.
           # When it's not main, accept force pushes.
           git -C "$REPO_PATH" pull --rebase || exit 1
