@@ -62,6 +62,7 @@
     rbw # Caching Bitwarden CLI.
     rofi-rbw-wayland # Rofi menu for rbw.
     tree # Tree display
+    gnupg # PGP
     # Git, the full tooling.
     gitAndTools.gitFull
     git-lfs
