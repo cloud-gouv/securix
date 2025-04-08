@@ -97,7 +97,6 @@ in
               echo "No system SSH identities loaded, is the TPM2 broken or the onboarding was insufficient?"
               exit 101
           fi
-          export GIT_SSHCOMMAND="ssh -i /etc/ssh/ssh_tpm_host_ecdsa_key.tpm"
           if [ -d "$REPO_DIR/.git" ]; then
             echo "Repository exists, pulling latest changes..."
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
