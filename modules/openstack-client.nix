@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: MIT
 
 {
-  operators,
   pkgs,
   lib,
   config,
@@ -86,7 +85,7 @@ in
           exec "$@"
         '')
       ];
-    }) operators;
+    }) config.securix.users.allowedUsers;
     # Wrap `os` to fetch the `OS_PASSWORD` from the Vault.
   };
 }

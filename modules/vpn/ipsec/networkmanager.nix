@@ -5,7 +5,6 @@
 {
   pkgs,
   vpnProfiles,
-  operators,
   config,
   lib,
   ...
@@ -24,6 +23,7 @@ let
     mapAttrs
     mapAttrsToList
     filter
+    hasAttr
     ;
   mkIPsecConnectionProfile =
     operatorName:
@@ -172,13 +172,19 @@ in
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
       listToAttrs (
-        map (
-          profileName:
-          nameValuePair "${op}-${profileName}" (
-            mkIPsecConnectionProfile op opCfg profileName vpnProfiles.${profileName}
+        map
+          (
+            profileName:
+            nameValuePair "${op}-${profileName}" (
+              mkIPsecConnectionProfile op opCfg profileName vpnProfiles.${profileName}
+            )
           )
-        ) (filter (profileName: vpnProfiles.${profileName}.type == "ipsec") opCfg.allowedVPNs)
+          (
+            filter (
+              profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec"
+            ) opCfg.allowedVPNs
+          )
       )
-    ) operators;
+    ) config.securix.users.allowedUsers;
   };
 }

@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ operators, lib, ... }:
+{ lib, ... }:
 let
   inherit (lib) mapAttrs' filterAttrs nameValuePair;
 in

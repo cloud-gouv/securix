@@ -2,34 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-{
-  vpnProfiles,
-  pkgs,
-  config,
-  lib,
-  ...
-}:
+{ config, lib, ... }:
 let
   cfg = config.securix.self;
   inherit (lib)
     mkOption
     types
     optional
-    elemAt
-    splitString
-    substring
     mkDefault
     ;
-  deriveUsernameFromEmail =
-    email:
-    let
-      parts = splitString "." email;
-      firstName = elemAt 0 parts;
-      lastName = elemAt 1 parts;
-      firstLetter = substring 0 1 firstName;
-      usernameLimit = 32;
-    in
-    substring 0 usernameLimit "${firstLetter}${lastName}";
 in
 {
   options.securix.self = {
@@ -45,23 +26,13 @@ in
       example = "acme-corp";
     };
 
-    email = mkOption {
-      type = types.str;
-      description = "Adresse email de l'agent";
-    };
-
-    username = mkOption {
-      type = types.str;
-      default = deriveUsernameFromEmail cfg.email;
-      defaultText = ''<première lettre de prénom><nom de famille> tronqué à 32 caractères'';
+    defaultOperator = mkOption {
+      type = types.nullOr types.str;
       description = ''
-        Nom d'utilisateur de la session PAM, dérivé par l'email en calculant:
+        Utilisateur par défaut du poste.
 
-        <première lettre de l'email><nom de famille>
-
-        Tronqué à 32 caractères, limite de PAM.
+        Si aucun utilisateur par défaut n'est renseigné, le poste peut être utilisé par tous les opérateurs de l'équipe.
       '';
-      example = "rlahfa";
     };
 
     inventoryId = mkOption {
@@ -80,7 +51,7 @@ in
       type = types.bool;
       default = false;
       description = ''
-        Mode développeur pour cet opérateur.
+        Mode développeur pour ce poste.
 
         Le mode développeur permet de développer l'OS sécurisé sans les bridages.
         Il n'est pas conçu pour *développer* d'autres choses en meme temps.
@@ -91,29 +62,11 @@ in
       '';
     };
 
-    hashedPassword = mkOption {
-      type = types.str;
-      description = "Mot de passe hachée en ycrypt pour la session utilisateur.";
-    };
-
-    defaultLoginShell = mkOption {
-      type = types.package;
-      default = pkgs.bashInteractive;
-      description = "Shell par défaut de connexion pour la session utilisateur.";
-    };
-
     identifier = mkOption {
       type = types.str;
       internal = true;
       description = "Identifiant de customization de la machine";
       example = "ryan_lahfa";
-    };
-
-    bit = mkOption {
-      type = types.nullOr types.int;
-      default = null;
-      description = "Octet pour l'adresse IPv4 publique dans le VPN";
-      example = 1;
     };
 
     infraRepositoryPath = mkOption {
@@ -129,35 +82,18 @@ in
       example = "securix-security-team";
     };
 
-    allowedVPNs = mkOption {
-      type = types.listOf (types.enum (builtins.attrNames vpnProfiles));
-      default = [ ];
-      description = "Liste des VPNs provisionnés pour l'utilisateur";
-      example = [ "vpn-01" ];
-    };
-
-    teams = mkOption {
-      type = types.listOf types.str;
-      description = "Liste des équipes dans lequel l'utilisateur est";
-      example = [
-        "product-01"
-        "product-02"
-        "financial-dpt"
-        "security-team"
-      ];
+    team = mkOption {
+      type = types.str;
+      description = "Équipe dans lequel la machine est utilisée";
+      example = "security-team";
     };
   };
 
   config = {
     warnings = optional cfg.developer ''
-      Le mode développeur est activé pour ${cfg.email}, cette image n'est pas conforme aux règles de l'ANSSI.
-    '';
-
-    services.getty.helpLine = ''
-      Bienvenue sur Sécurix (identifiant ${toString cfg.inventoryId}), utilisateur principal: ${toString cfg.email}.
+      Le mode développeur est activé pour la machine ${cfg.identifier}, cette image n'est pas conforme aux règles de l'ANSSI.
     '';
 
     networking.hostName = mkDefault "securix-${cfg.edition}-${toString cfg.inventoryId}";
-    users.users.${cfg.username}.shell = cfg.defaultLoginShell;
   };
 }
