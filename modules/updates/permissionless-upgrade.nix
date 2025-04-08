@@ -42,6 +42,7 @@ let
           --do-not-pull)
             REMOTE_PULL=false
             shift 1
+            ;;
           --)
             shift
             break
