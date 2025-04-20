@@ -4,7 +4,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: nixbuild/nix-quick-install-action@v29
-    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - uses: DeterminateSystems/flakehub-cache-action@main
       with:
         diagnostic-endpoint: ''
         use-flakehub: false
