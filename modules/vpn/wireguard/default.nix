@@ -27,6 +27,7 @@ let
     mkEnableOption
     nameValuePair
     unique
+    mapAttrs
     ;
 
   selectWireguardVpns =
@@ -41,12 +42,12 @@ let
   age-yubikey = "${pkgs.age-plugin-yubikey}/bin/age-plugin-yubikey";
 
   # Create users scripts to run
-  mkWireguardScripts =
-    wireguardName:
+  mkWireGuardScripts =
+    { wireguardName, username, bit }:
     let
       wireguard = vpnProfiles.${wireguardName};
       itf = wireguard.interface;
-      adds = wireguard.addresses;
+      address = wireguard.mkAddress bit;
       wgPiv = wireguard.wireguardPivSlot;
       agePiv = toString wireguard.agePivSlot;
       port = toString wireguard.listenPort;
@@ -61,7 +62,7 @@ let
       # TODO: maybe use Network namespace ?
       upScript = pkgs.writeShellScript "wireguard-${wireguardName}-up" ''
         ${ip} link add dev "${itf}" type wireguard
-        ${concatMapStringsSep "\n" (address: "${ip} address add ${address} dev ${itf}") adds}
+        ${ip} address add ${address} dev ${itf}
 
         ${wg} set "${itf}" listen-port ${port} \
           private-key <(${private-key}) \
@@ -76,6 +77,7 @@ let
     in
     rec {
       management = pkgs.writeShellScriptBin "wireguard-${wireguardName}" ''
+        # ${username}
         verb=$1
 
         if [[ "$verb" = "up" ]]; then
@@ -114,10 +116,6 @@ let
     };
 
   allAllowedVPNs = unique (concatMap (o: selectWireguardVpns o.allowedVPNs) (attrValues operators));
-
-  wireguardScripts = listToAttrs (
-    map (vpn: nameValuePair vpn (mkWireguardScripts vpn)) allAllowedVPNs
-  );
 in
 {
   options.securix.vpn.wireguard = {
@@ -129,17 +127,20 @@ in
       pkgs.wireguard-tools
       pkgs.age
       pkgs.age-plugin-yubikey
-    ] ++ (concatMap attrValues (attrValues wireguardScripts));
+    ];
+
+    users.users = mapAttrs (username: config: {
+      packages = concatMap (wireguardName: attrValues (mkWireGuardScripts {
+        inherit wireguardName username;
+        inherit (config) bit;
+      })) (selectWireguardVpns config.allowedVPNs);
+    }) operators;
 
     security.sudo = {
       enable = true;
       extraRules = map (wg: {
         groups = [ "wireguard-${wg}" ];
         commands = [
-          {
-            command = "${wireguardScripts.${wg}.management}/bin/wireguard-${wg}";
-            options = [ "NOPASSWD" ];
-          }
           {
             command = "/run/current-system/sw/bin/wireguard-${wg}";
             options = [ "NOPASSWD" ];
