@@ -105,7 +105,11 @@ rec {
   #   - sign the first generation with it.
   # - Upgrade process will need the Yubikey for signing.
   buildInstallerImage =
-    modules:
+    # Put `compression` to `null` to disable it.
+    {
+      modules,
+      compression ? "zstd -Xcompression-level 6",
+    }:
     let
       targetSystem = pkgs.nixos modules;
       targetSystemFormatScript = targetSystem.config.system.build.formatScript;
@@ -153,6 +157,8 @@ rec {
             font = null;
             keyMap = "fr";
           };
+
+          isoImage.squashfsCompression = compression;
 
           environment.systemPackages = [
             (pkgs.writeShellScriptBin "autoinstall-terminal" (
@@ -251,6 +257,7 @@ rec {
       extraOperators ? { },
       modules,
       edition,
+      compression ? "zstd -Xcompression-level 6",
     }:
     let
       allModules = [
@@ -281,7 +288,10 @@ rec {
       ] ++ modules;
     in
     {
-      installer = buildInstallerImage allModules;
+      installer = buildInstallerImage {
+        modules = allModules;
+        inherit compression;
+      };
       system = pkgs.nixos allModules;
     };
 
@@ -291,13 +301,19 @@ rec {
       users,
       vpn-profiles,
       edition,
+      compression ? "zstd -Xcompression-level 6",
     }:
     baseSystem:
 
     mapAttrs (
       name: userSpecificModule:
       mkTerminal {
-        inherit name userSpecificModule edition;
+        inherit
+          name
+          userSpecificModule
+          edition
+          compression
+          ;
         # TODO: unify the naming for vpn-profiles...
         vpnProfiles = vpn-profiles;
         # All the users themselves.
