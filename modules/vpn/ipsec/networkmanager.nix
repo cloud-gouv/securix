@@ -22,6 +22,7 @@ let
     concatStringsSep
     listToAttrs
     mapAttrs
+    mapAttrs'
     mapAttrsToList
     filter
     ;
@@ -105,10 +106,29 @@ let
         method = "disabled";
       };
     };
+
+  mkCertificateAuthorityFile = certName: path: {
+    name = "${certName}.crt";
+    value.file = path;
+  };
 in
 {
   options.securix.vpn.ipsec = {
     enable = mkEnableOption "the IPsec connection";
+
+    certificateAuthorityFiles = mkOption {
+      type = types.attrsOf types.path;
+      default = [ ];
+      description = ''
+        When IPsec is used with a security key, a mutual authentication is performed between the client and the server.
+        StrongSwan do NOT use the system-wide trust store to assess server identity.
+
+        It makes use of a custom path that needs to collect every certificate as a flat file.
+
+        To make this simple on operators, you can pass an attribute set of certificate files in this list and those will be
+        added to the IPsec trust store under the name they are passed.
+      '';
+    };
 
     pskSecretsPaths = mkOption {
       type = types.attrsOf types.path;
@@ -139,19 +159,22 @@ in
       }
     ];
 
-    environment.etc."strongswan.conf".text = ''
-      charon-nm {
-        plugins {
-          pkcs11 {
-            modules {
-              opensc {
-                path = ${pkgs.opensc}/lib/opensc-pkcs11.so
+    environment.etc = {
+      "strongswan.conf".text = ''
+        charon-nm {
+          ca_dir = /etc/ipsec.d/certs
+          plugins {
+            pkcs11 {
+              modules {
+                opensc {
+                  path = ${pkgs.opensc}/lib/opensc-pkcs11.so
+                }
               }
             }
           }
         }
-      }
-    '';
+      '';
+    } // mapAttrs' mkCertificateAuthorityFile cfg.certificateAuthorityFiles;
 
     nixpkgs.overlays = [
       (self: super: {
