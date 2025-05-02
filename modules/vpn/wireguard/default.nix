@@ -149,7 +149,7 @@ in
         groups = [ "operator" ];
         commands = [
           {
-            command = "/run/current-system/sw/bin/wireguard-${wg}";
+            command = "wireguard-${wg}";
             options = [ "NOPASSWD" ];
           }
         ];
