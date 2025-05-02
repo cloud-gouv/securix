@@ -63,6 +63,7 @@
     rofi-rbw-wayland # Rofi menu for rbw.
     tree # Tree display
     gnupg # PGP
+    connect # for using ssh with a proxy
     # Git, the full tooling.
     gitAndTools.gitFull
     git-lfs
