@@ -43,7 +43,11 @@ let
 
   # Create users scripts to run
   mkWireGuardScripts =
-    { wireguardName, username, bit }:
+    {
+      wireguardName,
+      username,
+      bit,
+    }:
     let
       wireguard = vpnProfiles.${wireguardName};
       itf = wireguard.interface;
@@ -130,16 +134,19 @@ in
     ];
 
     users.users = mapAttrs (username: config: {
-      packages = concatMap (wireguardName: attrValues (mkWireGuardScripts {
-        inherit wireguardName username;
-        inherit (config) bit;
-      })) (selectWireguardVpns config.allowedVPNs);
+      packages = concatMap (
+        wireguardName:
+        attrValues (mkWireGuardScripts {
+          inherit wireguardName username;
+          inherit (config) bit;
+        })
+      ) (selectWireguardVpns config.allowedVPNs);
     }) operators;
 
     security.sudo = {
       enable = true;
       extraRules = map (wg: {
-        groups = [ "wireguard-${wg}" ];
+        groups = [ "operator" ];
         commands = [
           {
             command = "/run/current-system/sw/bin/wireguard-${wg}";
@@ -148,14 +155,5 @@ in
         ];
       }) allAllowedVPNs;
     };
-
-    users.groups = listToAttrs (
-      map (
-        vpnName:
-        nameValuePair "wireguard-${vpnName}" {
-          members = map (o: o.username) (filter (o: elem vpnName o.allowedVPNs) (attrValues operators));
-        }
-      ) allAllowedVPNs
-    );
   };
 }
