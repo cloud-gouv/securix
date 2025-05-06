@@ -158,7 +158,7 @@ in
             }
           ];
         }) (selectWireguardVpns operators.${username}.allowedVPNs)
-      ) operators;
+      ) (builtins.attrNames operators);
     };
   };
 }
