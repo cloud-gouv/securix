@@ -118,8 +118,6 @@ let
 
       '';
     };
-
-  allAllowedVPNs = unique (concatMap (o: selectWireguardVpns o.allowedVPNs) (attrValues operators));
 in
 {
   options.securix.vpn.wireguard = {
@@ -145,15 +143,19 @@ in
 
     security.sudo = {
       enable = true;
-      extraRules = map (wg: {
-        groups = [ "operator" ];
-        commands = [
-          {
-            command = "wireguard-${wg}";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }) allAllowedVPNs;
+      extraRules = concatMap (
+        username:
+        map (wg: {
+          users = [ username ];
+          commands = [
+            {
+              # User-specific binaries.
+              command = "/etc/profiles/per-user/${username}/bin/wireguard-${wg}";
+              options = [ "NOPASSWD" ];
+            }
+          ];
+        }) (selectWireguardVpns operators.${username}.allowedVPNs)
+      ) operators;
     };
   };
 }
