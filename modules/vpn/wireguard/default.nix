@@ -73,6 +73,9 @@ let
           ${concatMapStringsSep " " mkPeerString peers}
 
         ${ip} link set up dev "${itf}"
+        ${concatStringsSep "\n" (
+          concatMap (peer: map (allowedCidr: "${ip} route add ${allowedCidr} dev ${itf}") peer.ips) peers
+        )}
       '';
 
       downScript = pkgs.writeShellScript "wireguard-${wireguardName}-down" ''
