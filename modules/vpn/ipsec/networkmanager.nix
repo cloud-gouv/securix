@@ -118,7 +118,7 @@ in
 
     certificateAuthorityFiles = mkOption {
       type = types.attrsOf types.path;
-      default = [ ];
+      default = { };
       description = ''
         When IPsec is used with a security key, a mutual authentication is performed between the client and the server.
         StrongSwan do NOT use the system-wide trust store to assess server identity.
