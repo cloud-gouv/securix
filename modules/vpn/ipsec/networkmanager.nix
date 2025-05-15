@@ -200,7 +200,7 @@ in
           nameValuePair "${op}-${profileName}" (
             mkIPsecConnectionProfile op opCfg profileName vpnProfiles.${profileName}
           )
-        ) (filter (profileName: vpnProfiles.${profileName}.type == "ipsec") opCfg.allowedVPNs)
+        ) (filter (profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec") opCfg.allowedVPNs)
       )
     ) operators;
   };
