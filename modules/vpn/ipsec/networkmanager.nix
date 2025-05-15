@@ -25,6 +25,7 @@ let
     mapAttrs'
     mapAttrsToList
     filter
+    hasAttr
     ;
   mkIPsecConnectionProfile =
     operatorName:

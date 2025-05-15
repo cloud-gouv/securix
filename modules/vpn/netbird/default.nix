@@ -18,6 +18,7 @@ let
     listToAttrs
     concatMapAttrs
     filter
+    hasAttr
     ;
   selectNetbirdVpns = list: filter (vpnName: hasAttr vpnName vpnProfiles && vpnProfiles.${vpnName}.type == "netbird") list;
 in
