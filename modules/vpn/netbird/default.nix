@@ -18,8 +18,11 @@ let
     listToAttrs
     concatMapAttrs
     filter
+    hasAttr
     ;
-  selectNetbirdVpns = list: filter (vpnName: vpnProfiles.${vpnName}.type == "netbird") list;
+  selectNetbirdVpns =
+    list:
+    filter (vpnName: hasAttr vpnName vpnProfiles && vpnProfiles.${vpnName}.type == "netbird") list;
 in
 {
   options.securix.vpn.netbird = {
