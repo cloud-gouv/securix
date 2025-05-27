@@ -68,6 +68,14 @@ let
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
 
+      # Check if ${self.infraRepositoryPath} exist
+      if [ ! -d "${self.infraRepositoryPath}/.git" ]; then
+            echo "Repository does not exist, cloning..."
+            mkdir -p "${self.infraRepositoryPath}" || exit 1
+
+            git clone "${config.securix.auto-updates.repoUrl}" "${self.infraRepositoryPath}" -b "${config.securix.auto-updates.branch}" 
+      fi
+
       # Ensure that the origin is the right URL.
       git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
 
