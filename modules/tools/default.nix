@@ -64,6 +64,7 @@
     tree # Tree display
     gnupg # PGP
     connect # for using ssh with a proxy
+    jq # Lightweight and flexible command-line JSON processor
     # Git, the full tooling.
     gitAndTools.gitFull
     git-lfs
