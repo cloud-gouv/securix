@@ -63,7 +63,7 @@ let
 
       private-key = "${ykman} piv objects export ${wgPiv} - | ${age} -d -i <(${age-yubikey} -i --slot ${agePiv}) -";
 
-      default-gw = "$(${ip} route show default | grep -v ${itf} | awk '{print $3}')"
+      default-gw = "$(${ip} route show default | grep -v ${itf} | awk '{print $3}')";
 
       mkPeerString =
         peer:
