@@ -16,7 +16,10 @@ in
   config = {
     nix =
       {
-        package = pkgs.lix;
+        # Remove this patch once https://nixpk.gs/pr-tracker.html?pr=419585 lands in a channel of our nixpkgs.
+        package = pkgs.lix.overrideAttrs (old: {
+          patches = (old.patches or [ ]) ++ [ ./patches/LIX_2_91_CVE-2025-46415_46416.patch ];
+        });
         nixPath = [
           # Always point to the authorized sources.
           "nixpkgs=${pkgs.path}"
