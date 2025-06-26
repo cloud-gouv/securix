@@ -60,7 +60,6 @@ let
       peers = wireguard.peers;
       getIpFromEndpoint = endpoint: head (splitString ":" endpoint);
 
-
       private-key = "${ykman} piv objects export ${wgPiv} - | ${age} -d -i <(${age-yubikey} -i --slot ${agePiv}) -";
 
       default-gw = "$(${ip} route show default | grep -v ${itf} | awk '{print $3}')";
@@ -80,16 +79,18 @@ let
 
         ${ip} link set up dev "${itf}"
         ${concatStringsSep "\n" (
-          concatMap (peer:
-            [ "${ip} route add ${getIpFromEndpoint peer.endpoint} via ${default-gw}" ] ++
-            map (allowedCidr: "${ip} route add ${allowedCidr} dev ${itf}") peer.ips) peers
+          concatMap (
+            peer:
+            [ "${ip} route add ${getIpFromEndpoint peer.endpoint} via ${default-gw}" ]
+            ++ map (allowedCidr: "${ip} route add ${allowedCidr} dev ${itf}") peer.ips
+          ) peers
         )}
       '';
 
       downScript = pkgs.writeShellScript "wireguard-${wireguardName}-down" ''
         ${ip} link del dev "${itf}"
         ${concatStringsSep "\n" (
-           map(peer: "${ip} route delete ${getIpFromEndpoint peer.endpoint} via ${default-gw}" ) peers
+          map (peer: "${ip} route delete ${getIpFromEndpoint peer.endpoint} via ${default-gw}") peers
         )}
       '';
     in
