@@ -30,11 +30,12 @@ in
   config = mkIf cfg.enable {
     programs.goldwarden.enable = true;
 
-    systemd.user.services.goldwarden.serviceConfig.ExecStartPost = pkgs.writeShellScript "preconfigure-goldwarden" ''
-      ${lib.getExe config.programs.goldwarden.package} config set-api-url ${cfg.baseUri}/api
-      ${lib.getExe config.programs.goldwarden.package} config set-identity-url ${cfg.baseUri}/identity
-      ${lib.getExe config.programs.goldwarden.package} config set-notifications-url ${cfg.baseUri}/notifications
-      echo "Goldwarden preconfigured for ${cfg.baseUri} instance"
-    '';
+    systemd.user.services.goldwarden.serviceConfig.ExecStartPost =
+      pkgs.writeShellScript "preconfigure-goldwarden" ''
+        ${lib.getExe config.programs.goldwarden.package} config set-api-url ${cfg.baseUri}/api
+        ${lib.getExe config.programs.goldwarden.package} config set-identity-url ${cfg.baseUri}/identity
+        ${lib.getExe config.programs.goldwarden.package} config set-notifications-url ${cfg.baseUri}/notifications
+        echo "Goldwarden preconfigured for ${cfg.baseUri} instance"
+      '';
   };
 }
