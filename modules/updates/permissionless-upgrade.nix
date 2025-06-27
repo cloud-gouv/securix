@@ -81,11 +81,9 @@ let
           git -C "${self.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
           git -C "$REPO_PATH" pull --ff-only || exit 1
         else
-          ${
-            optionalString (
-              !cfg.enableAnyBranch
-            ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''
-          }
+          ${optionalString (
+            !cfg.enableAnyBranch
+          ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''}
           # Create a secure temporary directory
           TEMP_DIR=$(mktemp -d)
           trap 'git -C "${self.infraRepositoryPath}" worktree remove "$TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
