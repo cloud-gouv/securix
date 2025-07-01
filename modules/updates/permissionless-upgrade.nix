@@ -68,6 +68,14 @@ let
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
 
+      # Check if ${self.infraRepositoryPath} exist
+      if [ ! -d "${self.infraRepositoryPath}/.git" ]; then
+            echo "Repository does not exist, cloning..."
+            mkdir -p "${self.infraRepositoryPath}" || exit 1
+
+            git clone "${config.securix.auto-updates.repoUrl}" "${self.infraRepositoryPath}" -b "${config.securix.auto-updates.branch}" 
+      fi
+
       # Ensure that the origin is the right URL.
       git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
 
@@ -81,11 +89,9 @@ let
           git -C "${self.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
           git -C "$REPO_PATH" pull --ff-only || exit 1
         else
-          ${
-            optionalString (
-              !cfg.enableAnyBranch
-            ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''
-          }
+          ${optionalString (
+            !cfg.enableAnyBranch
+          ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''}
           # Create a secure temporary directory
           TEMP_DIR=$(mktemp -d)
           trap 'git -C "${self.infraRepositoryPath}" worktree remove "$TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
