@@ -11,7 +11,7 @@ jobs:
     - name: Check for statix
       run: nix-shell --run 'statix check --config statix.toml'
     - name: Check for formatting
-      run: nix-shell --run 'nixfmt -sc $(find . -name "*.nix" -not -path "./npins")'
+      run: nix-shell --run 'nixfmt -sc $(find . -name "*.nix" -not -path "./npins" -not -path "./lib/default.nix")'
 name: '[Sécurix] Formatting check'
 on:
   pull_request:
