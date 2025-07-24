@@ -23,7 +23,7 @@
     ./known-hosts.nix
     # SOCKS5 proxy for API and documentation access
     ./g3proxy
-    ./http-proxy.nix
+    ./http-proxy
     # Our Root CAs
     ./pki.nix
     ./shells.nix

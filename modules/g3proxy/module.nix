@@ -18,15 +18,21 @@ let
     mkOption
     mkIf
     literalExpression
+    types
     ;
 
   settingsFormat = pkgs.formats.yaml { };
 
-  package = pkgs.callPackage ./package.nix { };
+  package = cfg.package;
 in
 {
   options.services.g3proxy = {
     enable = mkEnableOption "g3proxy";
+
+    package = mkOption {
+      type = types.package;
+      default = pkgs.callPackage ./package.nix { };
+    };
 
     settings = mkOption {
       type = settingsFormat.type;
