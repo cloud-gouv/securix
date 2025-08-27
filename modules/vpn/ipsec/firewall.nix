@@ -33,7 +33,9 @@ in
       enable = true;
       dnssec = "false";
       llmnr = "false";
-      extraConfig = [ "MulticastDNS=false" ];
+      extraConfig = ''
+        MulticastDNS=false
+      '';
     };
     networking.firewall.enable = false;
     networking.nftables = {
