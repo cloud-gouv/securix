@@ -2,9 +2,9 @@ jobs:
   reuse_lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: nixbuild/nix-quick-install-action@v29
-    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+    - uses: nixbuild/nix-quick-install-action@25aff27c252e0c8cdda3264805f7b6bcd92c8718 # v29
+    - uses: DeterminateSystems/flakehub-cache-action@32535c52afc77462da86ce84e675eec3cd305d8a # main
       with:
         diagnostic-endpoint: ''
         use-flakehub: false
