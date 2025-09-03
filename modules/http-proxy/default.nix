@@ -96,7 +96,22 @@ in
         })
       ];
 
-      # Static allocation of UID/GID for g3proxy. 
+      security.sudo = {
+        enable = true;
+        extraRules = [
+          {
+            groups = [ "operator" ];
+            commands = [
+              {
+                command = "/run/current-system/sw/bin/proxy-switcher";
+                options = [ "NOPASSWD" ];
+              }
+            ];
+          }
+        ];
+      };
+
+      # Static allocation of UID/GID for g3proxy.
       # Necessary to perform the nftables rule targeting.
       ids.uids.g3proxy = 398;
       ids.gids.g3proxy = 398;
