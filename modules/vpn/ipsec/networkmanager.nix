@@ -30,10 +30,31 @@ let
     mergeAttrsList
     mkDefault
     ;
-  isValidIpsecProfile = profileName: hasAttr profileName vpnProfiles 
-  && vpnProfiles.${profileName}.type == "ipsec";
-  mapValidIpsecProfiles = f: profiles: map (profileName: f profileName vpnProfiles.${profileName})
-  (filter isValidIpsecProfile profiles);
+  isValidIpsecProfile =
+    profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec";
+  mapValidIpsecProfiles =
+    f: profiles:
+    map (profileName: f profileName vpnProfiles.${profileName}) (filter isValidIpsecProfile profiles);
+  ipsecProxies = concatMapAttrs (
+    op: opCfg:
+    # We merge all the available HTTP proxies together.
+    mergeAttrsList (
+      mapValidIpsecProfiles
+        (
+          profileName: profile:
+          # We keep a back pointer to which VPN this proxy is attached to.
+          # NOTE(Ryan): this means that multiple VPNs which refers to the same proxy as default.
+          (mapAttrs (_: proxy: proxy // { vpn = profileName; }) profile.availableHttpProxies)
+        )
+        # We ignore every VPNs that has NO proxies.
+        (
+          filter (
+            profileName:
+            hasAttr profileName vpnProfiles && (vpnProfiles.${profileName}.availableHttpProxies or { }) != { }
+          ) opCfg.allowedVPNs
+        )
+    )
+  ) operators;
   mkIPsecConnectionProfile =
     operatorName:
     {
@@ -196,6 +217,9 @@ in
       "STRONGSWAN_CONF=/etc/strongswan.conf"
     ];
 
+    # Add all available proxies and default proxies for
+    # IPsec VPN profiles.
+    securix.automatic-http-proxy = ipsecProxies;
     networking.networkmanager.enableStrongSwan = true;
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
