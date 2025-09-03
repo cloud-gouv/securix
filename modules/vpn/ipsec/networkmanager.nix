@@ -26,7 +26,14 @@ let
     mapAttrsToList
     filter
     hasAttr
+    filterAttrs
+    mergeAttrsList
+    mkDefault
     ;
+  isValidIpsecProfile = profileName: hasAttr profileName vpnProfiles 
+  && vpnProfiles.${profileName}.type == "ipsec";
+  mapValidIpsecProfiles = f: profiles: map (profileName: f profileName vpnProfiles.${profileName})
+  (filter isValidIpsecProfile profiles);
   mkIPsecConnectionProfile =
     operatorName:
     {
@@ -196,18 +203,10 @@ in
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
       listToAttrs (
-        map
-          (
-            profileName:
-            nameValuePair "${op}-${profileName}" (
-              mkIPsecConnectionProfile op opCfg profileName vpnProfiles.${profileName}
-            )
-          )
-          (
-            filter (
-              profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec"
-            ) opCfg.allowedVPNs
-          )
+        mapValidIpsecProfiles (
+          profileName: profile:
+          nameValuePair "${op}-${profileName}" (mkIPsecConnectionProfile op opCfg profileName profile)
+        ) opCfg.allowedVPNs
       )
     ) operators;
   };
