@@ -74,26 +74,32 @@ in
         noProxy = concatStringsSep "," cfg.exceptions;
       };
 
+      nixpkgs.overlays = [
+        (self: super: {
+          proxy-switcher = pkgs.writeShellApplication {
+            name = "proxy-switcher";
+            # disables shellcheck.
+            checkPhase = "";
+            text =
+              let
+                noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./proxy-switcher.sh)));
+              in
+              noShebang;
+            runtimeInputs = [
+              # for g3proxy-ctl
+              config.services.g3proxy.package
+              pkgs.jq
+              # For whiptail.
+              pkgs.newt
+            ];
+          };
+        })
+      ];
+
       environment.etc."proxy-switcher/proxies.json".source = proxyConfigFile;
       environment.systemPackages = [
         config.services.g3proxy.package
-        (pkgs.writeShellApplication {
-          name = "proxy-switcher";
-          # disables shellcheck.
-          checkPhase = "";
-          text =
-            let
-              noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./proxy-switcher.sh)));
-            in
-            noShebang;
-          runtimeInputs = [
-            # for g3proxy-ctl
-            config.services.g3proxy.package
-            pkgs.jq
-            # For whiptail.
-            pkgs.newt
-          ];
-        })
+        pkgs.proxy-switcher
       ];
 
       security.sudo = {
