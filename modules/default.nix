@@ -22,7 +22,8 @@
     # Known hosts for our clouds.
     ./known-hosts.nix
     # SOCKS5 proxy for API and documentation access
-    ./http-proxy.nix
+    ./g3proxy
+    ./http-proxy
     # Our Root CAs
     ./pki.nix
     ./shells.nix

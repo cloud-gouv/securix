@@ -24,9 +24,9 @@ in
       }
       // (lib.optionalAttrs proxyCfg.enable {
         envVars = {
-          http_proxy = proxyCfg.usedProxyAddress;
-          https_proxy = proxyCfg.usedProxyAddress;
-          all_proxy = proxyCfg.usedProxyAddress;
+          http_proxy = config.networking.proxy.default;
+          https_proxy = config.networking.proxy.default;
+          all_proxy = config.networking.proxy.default;
           no_proxy = lib.concatStringsSep "," proxyCfg.exceptions;
         };
       });
