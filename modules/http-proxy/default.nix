@@ -8,5 +8,7 @@
     ./http-proxy.nix
     # Authentication method to HTTP proxies via SSH forward, implemented as socket activated SSH units.
     ./ssh-forward.nix
+    # High-level module to automatically connect to HTTP proxies with built-in authentication methods.
+    ./automatic.nix
   ];
 }
