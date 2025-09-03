@@ -219,7 +219,52 @@ in
 
     # Add all available proxies and default proxies for
     # IPsec VPN profiles.
-    securix.automatic-http-proxy = ipsecProxies;
+    securix.automatic-http-proxy = {
+      enable = mkDefault true;
+      proxies = ipsecProxies;
+    };
+    # Automatically switch to the default proxy of the
+    # enabled VPN.
+    networking.networkmanager.dispatcherScripts =
+      let
+        defaultProxiesPerVPN = filterAttrs (n: arg: arg.default or false) ipsecProxies;
+        mkSwitchFor =
+          proxyName:
+          { vpn, ... }:
+          ''
+            # Hook for ${vpn}
+            # Default proxy: ${proxyName}
+            if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
+              logger "[IPsec proxy hook] Automatically switching to proxy ${proxyName}"
+              ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName}
+              # FIXME(Ryan): this hardcodes the SSH forward method for this proxy.
+              # We should check if that's needed and perhaps encode `bringupLogic` as a property of the proxy.
+              systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
+              systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyName}.service
+            else
+              logger "[IPsec proxy hook] Skipping ${proxyName} for $CONNECTION_ID as it doesn't match $user-${vpn}.nmconnection"
+            fi
+          '';
+      in
+      [
+        {
+          type = "basic";
+          source = pkgs.writeText "automatic-proxy-switch-up-hook" ''
+            if [ "$2" != "vpn-up" ]; then
+              logger "exit: event $2, waiting for a vpn-up event"
+              exit
+            fi
+
+            # This retrieves the caller user of the dispatcher.
+            # NOTE(Ryan): this logic is brittle. on a multi-seat system,
+            # there's multiple results.
+            # NetworkManager should pass who sent the D-Bus message as an environment variable.
+            user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
+            ${concatStringsSep "\n" (mapAttrsToList mkSwitchFor defaultProxiesPerVPN)}
+          '';
+        }
+      ];
+
     networking.networkmanager.enableStrongSwan = true;
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
