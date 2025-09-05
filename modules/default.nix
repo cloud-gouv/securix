@@ -13,8 +13,6 @@
     ./power-saving.nix
     ./authorized-users.nix
     ./package-manager.nix
-    # Automatic setup of SSH tunnels
-    ./ssh-forward.nix
     # Autoconfiguration of OpenStack
     ./openstack-client.nix
     # The management of our entrypoints for our static bastions.

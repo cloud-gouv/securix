@@ -26,7 +26,35 @@ let
     mapAttrsToList
     filter
     hasAttr
+    filterAttrs
+    mergeAttrsList
+    mkDefault
     ;
+  isValidIpsecProfile =
+    profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec";
+  mapValidIpsecProfiles =
+    f: profiles:
+    map (profileName: f profileName vpnProfiles.${profileName}) (filter isValidIpsecProfile profiles);
+  ipsecProxies = concatMapAttrs (
+    op: opCfg:
+    # We merge all the available HTTP proxies together.
+    mergeAttrsList (
+      mapValidIpsecProfiles
+        (
+          profileName: profile:
+          # We keep a back pointer to which VPN this proxy is attached to.
+          # NOTE(Ryan): this means that multiple VPNs which refers to the same proxy as default.
+          (mapAttrs (_: proxy: proxy // { vpn = profileName; }) profile.availableHttpProxies)
+        )
+        # We ignore every VPNs that has NO proxies.
+        (
+          filter (
+            profileName:
+            hasAttr profileName vpnProfiles && (vpnProfiles.${profileName}.availableHttpProxies or { }) != { }
+          ) opCfg.allowedVPNs
+        )
+    )
+  ) operators;
   mkIPsecConnectionProfile =
     operatorName:
     {
@@ -189,6 +217,54 @@ in
       "STRONGSWAN_CONF=/etc/strongswan.conf"
     ];
 
+    # Add all available proxies and default proxies for
+    # IPsec VPN profiles.
+    securix.automatic-http-proxy = {
+      enable = mkDefault true;
+      proxies = ipsecProxies;
+    };
+    # Automatically switch to the default proxy of the
+    # enabled VPN.
+    networking.networkmanager.dispatcherScripts =
+      let
+        defaultProxiesPerVPN = filterAttrs (n: arg: arg.default or false) ipsecProxies;
+        mkSwitchFor =
+          proxyName:
+          { vpn, ... }:
+          ''
+            # Hook for ${vpn}
+            # Default proxy: ${proxyName}
+            if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
+              logger "[IPsec proxy hook] Automatically switching to proxy ${proxyName}"
+              ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName}
+              # FIXME(Ryan): this hardcodes the SSH forward method for this proxy.
+              # We should check if that's needed and perhaps encode `bringupLogic` as a property of the proxy.
+              systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
+              systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyName}.service
+            else
+              logger "[IPsec proxy hook] Skipping ${proxyName} for $CONNECTION_ID as it doesn't match $user-${vpn}.nmconnection"
+            fi
+          '';
+      in
+      [
+        {
+          type = "basic";
+          source = pkgs.writeText "automatic-proxy-switch-up-hook" ''
+            if [ "$2" != "vpn-up" ]; then
+              logger "exit: event $2, waiting for a vpn-up event"
+              exit
+            fi
+
+            # This retrieves the caller user of the dispatcher.
+            # NOTE(Ryan): this logic is brittle. on a multi-seat system,
+            # there's multiple results.
+            # NetworkManager should pass who sent the D-Bus message as an environment variable.
+            user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
+            ${concatStringsSep "\n" (mapAttrsToList mkSwitchFor defaultProxiesPerVPN)}
+          '';
+        }
+      ];
+
     networking.networkmanager.enableStrongSwan = true;
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
@@ -196,18 +272,10 @@ in
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
       listToAttrs (
-        map
-          (
-            profileName:
-            nameValuePair "${op}-${profileName}" (
-              mkIPsecConnectionProfile op opCfg profileName vpnProfiles.${profileName}
-            )
-          )
-          (
-            filter (
-              profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec"
-            ) opCfg.allowedVPNs
-          )
+        mapValidIpsecProfiles (
+          profileName: profile:
+          nameValuePair "${op}-${profileName}" (mkIPsecConnectionProfile op opCfg profileName profile)
+        ) opCfg.allowedVPNs
       )
     ) operators;
   };
