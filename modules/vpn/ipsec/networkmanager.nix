@@ -35,20 +35,6 @@ let
   mapValidIpsecProfiles =
     f: profiles:
     map (profileName: f profileName vpnProfiles.${profileName}) (filter isValidIpsecProfile profiles);
-  adaptProxyConfig =
-    proxy:
-    if (proxy.auth.sshForward.enable or false) then
-      (
-        proxy
-        // {
-          remote = {
-            address = "127.0.0.1";
-            port = proxy.auth.sshForward.localPort;
-          };
-        }
-      )
-    else
-      proxy;
   ipsecProxies = concatMapAttrs (
     op: opCfg:
     # We merge all the available HTTP proxies together.
@@ -58,9 +44,7 @@ let
           profileName: profile:
           # We keep a back pointer to which VPN this proxy is attached to.
           # NOTE(Ryan): this means that multiple VPNs which refers to the same proxy as default.
-          (mapAttrs (
-            _: proxy: adaptProxyConfig (proxy // { vpn = profileName; })
-          ) profile.availableHttpProxies)
+          (mapAttrs (_: proxy: proxy // { vpn = profileName; }) profile.availableHttpProxies)
         )
         # We ignore every VPNs that has NO proxies.
         (
