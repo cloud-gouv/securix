@@ -35,6 +35,7 @@ let
       remote = {
         address = mkOption {
           type = types.str;
+          default = "127.0.0.1";
           description = "Adresse IP du proxy d'accès distant";
         };
 
@@ -53,9 +54,18 @@ let
                     La cible SSH sert alors de bastion d'authentification du proxy d'accès.
         '';
 
-        localPort = mkOption {
-          type = types.port;
-          description = "Port local du proxy d'accès distant après SSH forward";
+        remote = {
+          address = mkOption {
+            type = types.str;
+            default = "127.0.0.1";
+            description = "Adresse IP du proxy d'accès distant";
+          };
+
+          port = mkOption {
+            type = types.port;
+            default = 8080;
+            description = "Port du proxy d'accès distant";
+          };
         };
 
         target = mkOption {
@@ -76,11 +86,12 @@ let
     }:
     {
       enable = true;
-      description = "Tunnel SSH vers un proxy d'accès (${proxyName})";
-      inherit (auth.sshForward) target localPort;
+      inherit (auth.sshForward) target;
       inherit vpn;
-      remoteAddress = remote.address;
-      remotePort = remote.port;
+      description = "Tunnel SSH vers un proxy d'accès (${proxyName})";
+      localPort = remote.port;
+      remoteAddress = auth.sshForward.remote.address;
+      remotePort = auth.sshForward.remote.port;
     };
 in
 {
