@@ -249,7 +249,7 @@ in
       [
         {
           type = "basic";
-          source = pkgs.writeText "automatic-proxy-switch-up-hook" ''
+          source = pkgs.writeText "10-automatic-proxy-switch-up-hook" ''
             if [ "$2" != "vpn-up" ]; then
               logger "exit: event $2, waiting for a vpn-up event"
               exit
@@ -261,6 +261,22 @@ in
             # NetworkManager should pass who sent the D-Bus message as an environment variable.
             user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
             ${concatStringsSep "\n" (mapAttrsToList mkSwitchFor defaultProxiesPerVPN)}
+          '';
+        }
+        {
+          type = "basic";
+          source = pkgs.writeText "20-automatic-proxy-switch-down-hook" ''
+            if [ "$2" != "vpn-down" ]; then
+              logger "exit: event $2, waiting for a vpn-down event"
+              exit
+            fi
+            # This retrieves the caller user of the dispatcher.
+            # NOTE(Ryan): this logic is brittle. on a multi-seat system,
+            # there's multiple results.
+            # NetworkManager should pass who sent the D-Bus message as an environment variable.
+            user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
+            systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
+            ${pkgs.proxy-switcher}/bin/proxy-switcher np
           '';
         }
       ];
