@@ -9,6 +9,13 @@ DAEMON_GROUP="default"
 INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
 
+# Ensure the script is run as root
+if [ "$EUID" -ne 0 ]; then
+  echo "This script must be run as root (use sudo)." >&2
+  exit 1
+fi
+
+
 publish_proxy() {
   local selected_proxy_ipv4="$1"
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
