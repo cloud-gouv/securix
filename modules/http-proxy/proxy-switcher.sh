@@ -96,4 +96,5 @@ else
   publish_proxy "$SELECTED_ADDR"
 fi
 
+export current_proxy="$CHOICE"
 echo "Done."
