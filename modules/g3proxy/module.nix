@@ -56,7 +56,9 @@ in
   };
 
   config = mkIf cfg.enable {
-    services.g3proxy.settings.log = lib.mkDefault "stdout";
+    #services.g3proxy.settings.log = lib.mkDefault "stdout";
+    services.g3proxy.settings.log = lib.mkForce "journal";
+
     systemd.services.g3proxy = {
       description = "g3proxy server";
       wantedBy = [ "multi-user.target" ];
