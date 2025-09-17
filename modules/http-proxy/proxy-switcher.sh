@@ -16,6 +16,13 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Ensure the state file exists
+if [ ! -f "$STATE_FILE" ]; then
+  echo "Creating state file at '$STATE_FILE'..."
+  mkdir -p "$(dirname "$STATE_FILE")"
+  touch "$STATE_FILE"
+fi
+
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
