@@ -8,6 +8,7 @@ CONFIG_FILE="/etc/proxy-switcher/proxies.json"
 DAEMON_GROUP="default"
 INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
+STATE_FILE="/var/lib/proxy-switcher/current"
 
 # Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
@@ -58,6 +59,9 @@ if [ "$#" -ge 2 ]; then
       exit 0
       ;;
   esac
+
+  echo "$1" > "$STATE_FILE"
+
 fi
 
 # TUI fallback if no argument specified.
@@ -96,5 +100,6 @@ else
   publish_proxy "$SELECTED_ADDR"
 fi
 
-export current_proxy="$CHOICE"
+echo "$CHOICE" > "$STATE_FILE"
+
 echo "Done."
