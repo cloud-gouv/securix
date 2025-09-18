@@ -16,30 +16,62 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# send_notification_to_user() {
+#   local title="$1"
+#   local message="$2"
+
+#   # Get the graphical user (like in networkmanager)
+#   local user
+#   local awk_path=$(command -v awk)
+#   user=$(loginctl list-sessions --no-legend | tr -s ' ' | cut -d' ' -f3 | grep -vE '^(root|gdm)$' | head -n1)
+
+#   if [ -z "$user" ]; then
+#     echo "No graphical user found."
+#     return 1
+#   fi
+
+#   # Get the user's UID
+#   local uid
+#   uid=$(id -u "$user")
+
+#   local display=":0"
+#   local dbus_address="unix:path=/run/user/$uid/bus"
+
+#   # Run notify-send as the user with the correct environment variables
+#   runuser -u "$user" -- env DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
+#   logger "Notify ok"
+# }
+
 send_notification_to_user() {
   local title="$1"
   local message="$2"
 
-  # Get the graphical user (like in networkmanager)
-  local user
-  local awk_path=$(command -v awk)
-  user=$(loginctl list-sessions --no-legend | tr -s ' ' | cut -d' ' -f3 | grep -vE '^(root|gdm)$' | head -n1)
+  # Get all active sessions with a valid user
+  mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
 
-  if [ -z "$user" ]; then
-    echo "No graphical user found."
-    return 1
+  # Check if there are active sessions
+  if [[ ''${#sessions[@]} -eq 0 ]]; then
+      echo "No active sessions found." >&2
+      return 1
   fi
 
-  # Get the user's UID
-  local uid
-  uid=$(id -u "$user")
+  for session in "''${sessions[@]}"; do
+      # Extract session details: ID, user, and display
+      local session_id user display
+      session_id=$(echo "$session" | awk '{print $1}')
+      uid=$(echo "$session" | awk '{print $2}')
+      user=$(echo "$session" | awk '{print $3}')
 
-  local display=":0"
-  local dbus_address="unix:path=/run/user/$uid/bus"
-
-  # Run notify-send as the user with the correct environment variables
-  sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
-  logger "Notify ok"
+      # Notify each user/session
+      if [[ -n "$user" ]]; then
+          # Graphical notification for GUI sessions
+          sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+              notify-send "$title" "$message" || true
+      else
+          # Terminal notification for non-GUI sessions
+          sudo -u "$user" echo "$title: $message" | wall
+      fi
+  done
 }
 
 publish_proxy() {
