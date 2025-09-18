@@ -30,6 +30,7 @@ fi
 publish_proxy() {
   local selected_proxy_ipv4="$1"
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
+  echo "$selected_proxy_ipv4" > "$STATE_FILE"
 }
 
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -70,8 +71,6 @@ if [ "$#" -ge 2 ]; then
       ;;
   esac
 
-  echo "$1" > "$STATE_FILE"
-
 fi
 
 # TUI fallback if no argument specified.
@@ -109,7 +108,5 @@ else
   echo "Switching to: $SELECTED_ADDR"
   publish_proxy "$SELECTED_ADDR"
 fi
-
-echo "$CHOICE" > "$STATE_FILE"
 
 echo "Done."
