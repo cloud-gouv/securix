@@ -232,6 +232,7 @@ in
           proxyName:
           { vpn, ... }:
           ''
+            set -x
             logger "Hook for ${vpn}"
             logger "Default proxy: ${proxyName}"
             if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
