@@ -22,7 +22,8 @@ send_notification_to_user() {
 
   # Get the graphical user (like in networkmanager)
   local user
-  user=$(loginctl list-sessions --no-legend | awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$' | head -n1)
+  local awk_path=$(command -v awk)
+  user=$(loginctl list-sessions --no-legend | $awk_path '{print $3}' | sort -u | grep -vE '^(root|gdm)$' | head -n1)
 
   if [ -z "$user" ]; then
     echo "No graphical user found."
@@ -38,6 +39,7 @@ send_notification_to_user() {
 
   # Run notify-send as the user with the correct environment variables
   sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
+  logger "Notify ok"
 }
 
 publish_proxy() {
