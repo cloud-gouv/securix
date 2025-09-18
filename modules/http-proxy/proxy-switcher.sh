@@ -39,10 +39,11 @@ send_notification_to_user() {
   local display=":0"
   local dbus_address="unix:path=/run/user/$uid/bus"
   local sudo_path=$(command -v sudo || echo "/run/current-system/sw/bin/sudo")
-  
+  local notify_send_path=$(command -v notify-send || echo "/run/current-system/sw/bin/notify-send")
+
   # Run notify-send as the user with the correct environment variables
   # sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
-  "$sudo_path" -u "$user" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
+  "$sudo_path" -u "$user" DBUS_SESSION_BUS_ADDRESS="$dbus_address" "$notify_send_path" "$title" "$message"
   logger "Notify ok"
 }
 
