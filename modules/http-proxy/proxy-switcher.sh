@@ -24,7 +24,7 @@ send_notification_to_user() {
 
   # Get the graphical user (like in networkmanager)
   local user
-  local awk_path=$(command -v awk)
+  local awk_path=$(command -v awk || echo "/run/current-system/sw/bin/awk")
   user=$(loginctl list-sessions --no-legend | "$awk_path" '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
 
   if [ -z "$user" ]; then
