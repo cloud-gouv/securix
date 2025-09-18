@@ -105,5 +105,7 @@
     man-pages-posix
     # Browser
     firefox
+    # Notify-send
+    libnotify
   ];
 }
