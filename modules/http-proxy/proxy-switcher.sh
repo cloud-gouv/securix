@@ -16,10 +16,34 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+send_notification_to_user() {
+  local title="$1"
+  local message="$2"
+
+  # Get the graphical user (like in networkmanager)
+  local user
+  user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$' | head -n1)
+
+  if [ -z "$user" ]; then
+    echo "No graphical user found."
+    return 1
+  fi
+
+  # Get the user's UID
+  local uid
+  uid=$(id -u "$user")
+
+  local display=":0"
+  local dbus_address="unix:path=/run/user/$uid/bus"
+
+  # Run notify-send as the user with the correct environment variables
+  sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
+}
+
 publish_proxy() {
   local selected_proxy_ipv4="$1"
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
-  notify-send "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4 ."
+  send_notification_to_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4 ."
 }
 
 if [ ! -f "$CONFIG_FILE" ]; then

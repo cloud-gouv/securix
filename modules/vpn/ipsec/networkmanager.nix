@@ -232,12 +232,10 @@ in
           proxyName:
           { vpn, ... }:
           ''
-            set -x
-            logger "Hook for ${vpn}"
-            logger "Default proxy: ${proxyName}"
+            # "Hook for ${vpn}"
+            # "Default proxy: ${proxyName}"
             if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
               logger "[IPsec proxy hook] Automatically switching to proxy ${proxyName}"
-              logger "je vais faire un proxy-switcher (non root)"
               ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName} --cli
               # FIXME(Ryan): this hardcodes the SSH forward method for this proxy.
               # We should check if that's needed and perhaps encode `bringupLogic` as a property of the proxy.
