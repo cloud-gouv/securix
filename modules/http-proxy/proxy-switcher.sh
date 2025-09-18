@@ -9,8 +9,6 @@ DAEMON_GROUP="default"
 INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
 
-set -x 
-
 # Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
   echo "This script must be run as root (use sudo)." >&2
