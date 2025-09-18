@@ -93,17 +93,6 @@ in
               pkgs.newt
             ];
           };
-
-          current-proxy = pkgs.writeShellApplication {
-            name = "current-proxy";
-            # disables shellcheck.
-            checkPhase = "";
-            text =
-              let
-                noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./current-proxy.sh)));
-              in
-              noShebang;
-          };
         })
       ];
 
