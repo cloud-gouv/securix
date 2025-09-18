@@ -9,6 +9,8 @@ DAEMON_GROUP="default"
 INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
 
+set -x 
+
 # Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
   echo "This script must be run as root (use sudo)." >&2
@@ -16,39 +18,42 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-send_notification_to_user() {
+_notify_current_user() {
   local title="$1"
   local message="$2"
 
-  # Get the graphical user (like in networkmanager)
-  local user
-  local awk_path=$(command -v awk || echo "/run/current-system/sw/bin/awk")
-  user=$(loginctl list-sessions --no-legend | "$awk_path" '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
+  # Get all active sessions with a valid user
+  mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
 
-  if [ -z "$user" ]; then
-    echo "No graphical user found."
-    return 1
+  # Check if there are active sessions
+  if [[ ''${#sessions[@]} -eq 0 ]]; then
+      echo "No active sessions found." >&2
+      return 1
   fi
 
-  # Get the user's UID
-  local uid
-  uid=$(id -u "$user")
+  for session in "''${sessions[@]}"; do
+      # Extract session details: ID, user, and display
+      local session_id user display
+      session_id=$(echo "$session" | awk '{print $1}')
+      uid=$(echo "$session" | awk '{print $2}')
+      user=$(echo "$session" | awk '{print $3}')
 
-  local display=":0"
-  local dbus_address="unix:path=/run/user/$uid/bus"
-  local sudo_path=$(command -v sudo || echo "/run/current-system/sw/bin/sudo")
-  local notify_send_path=$(command -v notify-send || echo "/run/current-system/sw/bin/notify-send")
-
-  # Run notify-send as the user with the correct environment variables
-  # sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
-  "$sudo_path" -u "$user" DBUS_SESSION_BUS_ADDRESS="$dbus_address" "$notify_send_path" "$title" "$message"
-  logger "Notify ok"
+      # Notify each user/session
+      if [[ -n "$user" ]]; then
+          # Graphical notification for GUI sessions
+          sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+              notify-send "$title" "$message" || true
+      else
+          # Terminal notification for non-GUI sessions
+          sudo -u "$user" echo "$title: $message" | wall
+      fi
+  done
 }
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
-  send_notification_to_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4 ."
+  _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4 ."
 }
 
 if [ ! -f "$CONFIG_FILE" ]; then
