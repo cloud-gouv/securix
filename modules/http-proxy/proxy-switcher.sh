@@ -49,7 +49,7 @@ send_notification_to_user() {
   local message="$2"
 
   # Get all active sessions with a valid user
-  mapfile -t sessions < <(loginctl list-sessions --no-legend | $awk_path '{print $1, $2, $3}' | grep -v '^ ')
+  mapfile -t sessions < <(loginctl list-sessions --no-legend | "$awk_path" '{print $1, $2, $3}' | grep -v '^ ')
 
   # Check if there are active sessions
   if [[ ''${#sessions[@]} -eq 0 ]]; then
@@ -57,12 +57,12 @@ send_notification_to_user() {
       return 1
   fi
 
-  for session in "''${sessions[@]}"; do
+  for session in "${sessions[@]}"; do
       # Extract session details: ID, user, and display
       local session_id user display
-      session_id=$(echo "$session" | $awk_path '{print $1}')
-      uid=$(echo "$session" | $awk_path '{print $2}')
-      user=$(echo "$session" | $awk_path '{print $3}')
+      session_id=$(echo "$session" | "$awk_path" '{print $1}')
+      uid=$(echo "$session" | "$awk_path" '{print $2}')
+      user=$(echo "$session" | "$awk_path" '{print $3}')
 
       # Notify each user/session
       if [[ -n "$user" ]]; then
