@@ -238,7 +238,7 @@ in
             if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
               logger "[IPsec proxy hook] Automatically switching to proxy ${proxyName}"
               logger "je vais faire un proxy-switcher (non root)"
-              ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName}
+              ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName} --cli
               # FIXME(Ryan): this hardcodes the SSH forward method for this proxy.
               # We should check if that's needed and perhaps encode `bringupLogic` as a property of the proxy.
               systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
