@@ -40,58 +40,15 @@ send_notification_to_user() {
   local dbus_address="unix:path=/run/user/$uid/bus"
 
   # Run notify-send as the user with the correct environment variables
-  sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
+  # sudo -u "$user" DISPLAY="$display" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
   sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="$dbus_address" notify-send "$title" "$message"
   logger "Notify ok"
 }
-
-send_notification_to_user2() {
-  local awk_path
-  awk_path=$(command -v awk)
-
-  local title="$1"
-  local message="$2"
-
-  # Get all active sessions with a valid user (filter out root and gdm)
-  mapfile -t sessions < <(loginctl list-sessions --no-legend | "$awk_path" '{print $1, $2, $3}' | grep -vE ' (root|gdm)$')
-
-  if [[ ${#sessions[@]} -eq 0 ]]; then
-      echo "No active sessions found." >&2
-      return 1
-  fi
-
-  for session in "${sessions[@]}"; do
-      local session_id seat user uid
-
-      session_id=$(echo "$session" | "$awk_path" '{print $1}')
-      seat=$(echo "$session"     | "$awk_path" '{print $2}')
-      user=$(echo "$session"     | "$awk_path" '{print $3}')
-
-      # Skip invalid users
-      if [[ -z "$user" ]]; then
-          continue
-      fi
-
-      # Get UID safely
-      uid=$(id -u "$user" 2>/dev/null) || continue
-
-      # Check if D-Bus session bus exists
-      if [[ -e "/run/user/$uid/bus" ]]; then
-          DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-          sudo -u "$user" notify-send "$title" "$message" || true
-      else
-          # Fallback to wall
-          echo "$title: $message" | wall
-      fi
-  done
-}
-
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
   send_notification_to_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4 ."
-  send_notification_to_user2 "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4 ."
 }
 
 if [ ! -f "$CONFIG_FILE" ]; then
