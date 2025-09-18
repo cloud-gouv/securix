@@ -56,8 +56,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    #services.g3proxy.settings.log = lib.mkDefault "stdout";
-    services.g3proxy.settings.log = lib.mkForce "journal";
+    services.g3proxy.settings.log = lib.mkDefault "stdout";
 
     systemd.services.g3proxy = {
       description = "g3proxy server";

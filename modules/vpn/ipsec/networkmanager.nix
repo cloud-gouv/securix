@@ -232,8 +232,8 @@ in
           proxyName:
           { vpn, ... }:
           ''
-            # "Hook for ${vpn}"
-            # "Default proxy: ${proxyName}"
+            # Hook for ${vpn}
+            # Default proxy: ${proxyName}
             if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
               logger "[IPsec proxy hook] Automatically switching to proxy ${proxyName}"
               ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName} --cli
