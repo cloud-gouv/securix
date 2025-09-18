@@ -23,13 +23,7 @@ send_notification_to_user() {
   # Get the graphical user (like in networkmanager)
   local user
   local awk_path=$(command -v awk)
-  user=$(loginctl list-sessions --no-legend | while read -r session _ user; do
-    # Exclude root and gdm
-    if [ "$user" != "root" ] && [ "$user" != "gdm" ]; then
-      echo "$user"
-      break
-    fi
-  done)
+  user=$(loginctl list-sessions --no-legend | tr -s ' ' | cut -d' ' -f3 | grep -vE '^(root|gdm)$' | head -n1)
 
   if [ -z "$user" ]; then
     echo "No graphical user found."
