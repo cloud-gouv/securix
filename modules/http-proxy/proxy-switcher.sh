@@ -12,13 +12,61 @@ PID=$(systemctl show -p MainPID --value http-proxy.service)
 # Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
   echo "This script must be run as root (use sudo)." >&2
+  logger "This script must be run as root (use sudo)"
   exit 1
 fi
 
+_notify_current_user() {
+  local title="$1"
+  local message="$2"
+
+  # Get all active sessions with a valid user
+  mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
+
+  # Check if there are active sessions
+  if [[ ''${#sessions[@]} -eq 0 ]]; then
+      echo "No active sessions found." >&2
+      return 1
+  fi
+
+  for session in "''${sessions[@]}"; do
+      # Extract session details: ID, user, and display
+      local session_id user display
+      session_id=$(echo "$session" | awk '{print $1}')
+      uid=$(echo "$session" | awk '{print $2}')
+      user=$(echo "$session" | awk '{print $3}')
+
+      # Notify each user/session
+      if [[ -n "$user" ]]; then
+          # Graphical notification for GUI sessions
+          sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+              notify-send "$title" "$message" || true
+      else
+          # Terminal notification for non-GUI sessions
+          sudo -u "$user" echo "$title: $message" | wall
+      fi
+  done
+}
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
+  local proxy_name=""
+
+  if [ $# -gt 1 ]; then
+    proxy_name="$2"
+  fi
+
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
+  
+  if [ "$selected_proxy_ipv4" = "$INTERNAL_FORWARD_PROXY" ]; then
+    _notify_current_user "[Proxy-Switcher] Connexion" "Pas de proxy distant utilisé (forward proxy local actif)."
+  else
+    if [ -n "$proxy_name" ]; then
+      _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy distant : $proxy_name ($selected_proxy_ipv4)."
+    else
+      _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4."
+    fi
+  fi
 }
 
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -53,7 +101,7 @@ if [ "$#" -ge 2 ]; then
         exit 1
       fi
       echo "Switching to: $SELECTED_ADDR"
-      publish_proxy "$SELECTED_ADDR"
+      publish_proxy "$SELECTED_ADDR" "$1"
       echo "Done."
       exit 0
       ;;
@@ -93,7 +141,7 @@ if [ "$CHOICE" = "np" ]; then
 else
   SELECTED_ADDR=$(jq -r --arg k "$CHOICE" '.[$k]' "$CONFIG_FILE")
   echo "Switching to: $SELECTED_ADDR"
-  publish_proxy "$SELECTED_ADDR"
+  publish_proxy "$SELECTED_ADDR" "$CHOICE"
 fi
 
 echo "Done."

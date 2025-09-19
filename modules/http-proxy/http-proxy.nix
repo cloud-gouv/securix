@@ -91,6 +91,10 @@ in
               pkgs.jq
               # For whiptail.
               pkgs.newt
+              # For notify user
+              pkgs.gawk
+              pkgs.libnotify
+              pkgs.sudo
             ];
           };
         })
