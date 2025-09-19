@@ -50,7 +50,11 @@ _notify_current_user() {
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
-  local proxy_name="$2"
+  local proxy_name=""
+
+  if [ $# -gt 1 ]; then
+    proxy_name="$2"
+  fi
 
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
   
@@ -58,7 +62,7 @@ publish_proxy() {
     _notify_current_user "[Proxy-Switcher] Connexion" "Pas de proxy distant utilisé (forward proxy local actif)."
   else
     if [ -n "$proxy_name" ]; then
-      _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy distant : $proxy_name."
+      _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy distant : $proxy_name ($selected_proxy_ipv4)."
     else
       _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4."
     fi
