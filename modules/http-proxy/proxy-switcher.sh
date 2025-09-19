@@ -50,12 +50,18 @@ _notify_current_user() {
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
+  local proxy_name="$2"
+
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
   
   if [ "$selected_proxy_ipv4" = "$INTERNAL_FORWARD_PROXY" ]; then
     _notify_current_user "[Proxy-Switcher] Connexion" "Pas de proxy distant utilisé (forward proxy local actif)."
   else
-    _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4."
+    if [ -n "$proxy_name" ]; then
+      _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy distant : $proxy_name."
+    else
+      _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4."
+    fi
   fi
 }
 
@@ -91,7 +97,7 @@ if [ "$#" -ge 2 ]; then
         exit 1
       fi
       echo "Switching to: $SELECTED_ADDR"
-      publish_proxy "$SELECTED_ADDR"
+      publish_proxy "$SELECTED_ADDR" "$1"
       echo "Done."
       exit 0
       ;;
@@ -131,7 +137,7 @@ if [ "$CHOICE" = "np" ]; then
 else
   SELECTED_ADDR=$(jq -r --arg k "$CHOICE" '.[$k]' "$CONFIG_FILE")
   echo "Switching to: $SELECTED_ADDR"
-  publish_proxy "$SELECTED_ADDR"
+  publish_proxy "$SELECTED_ADDR" "$CHOICE"
 fi
 
 echo "Done."
