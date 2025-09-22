@@ -72,7 +72,6 @@ in
         ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
         ExecStop = "${package}/bin/g3proxy-ctl --control-dir $RUNTIME_DIRECTORY -G default -p $MAINPID offline";
 
-        Environment = "RUST_LOG=debug";
         WorkingDirectory = "/var/lib/g3proxy";
         StateDirectory = "g3proxy";
         RuntimeDirectory = "g3proxy";
