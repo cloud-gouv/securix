@@ -123,6 +123,7 @@ in
       environment.systemPackages = [
         config.services.g3proxy.package
         pkgs.proxy-switcher
+        pkgs.current-proxy
       ];
 
       security.sudo = {
@@ -133,6 +134,10 @@ in
             commands = [
               {
                 command = "/run/current-system/sw/bin/proxy-switcher";
+                options = [ "NOPASSWD" ];
+              }
+              {
+                command = "/run/current-system/sw/bin/current-proxy";
                 options = [ "NOPASSWD" ];
               }
             ];

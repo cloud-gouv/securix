@@ -10,14 +10,15 @@ INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
 STATE_FILE="/run/proxy/current"
 
-set -x
-
 # Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
   echo "This script must be run as root (use sudo)." >&2
   logger "This script must be run as root (use sudo)"
   exit 1
 fi
+
+# Saving to $STATE_FILE isn't a good option, but we're waiting for a getter method in g3proxy
+# https://github.com/bytedance/g3/issues/935
 
 #Ensure the state file exists
 if [ ! -f "$STATE_FILE" ]; then
@@ -67,15 +68,17 @@ publish_proxy() {
   fi
 
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
-  
+
   if [ "$selected_proxy_ipv4" = "$INTERNAL_FORWARD_PROXY" ]; then
     _notify_current_user "[Proxy-Switcher] Connexion" "Pas de proxy distant utilisé (forward proxy local actif)."
+    echo "Pas de proxy distant utilisé ($selected_proxy_ipv4)" > "$STATE_FILE"
   else
     if [ -n "$proxy_name" ]; then
       _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy distant : $proxy_name ($selected_proxy_ipv4)."
     else
       _notify_current_user "[Proxy-Switcher] Connexion" "Vous êtes maintenant connecté au proxy $selected_proxy_ipv4."
     fi
+      echo "$proxy_name ($selected_proxy_ipv4)" > "$STATE_FILE"
   fi
 }
 
