@@ -8,6 +8,7 @@ CONFIG_FILE="/etc/proxy-switcher/proxies.json"
 DAEMON_GROUP="default"
 INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
+STATE_FILE="/run/proxy/current"
 
 # Ensure the script is run as root
 if [ "$EUID" -ne 0 ]; then
@@ -15,6 +16,11 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+#Ensure the state file exists
+if [ ! -f "$STATE_FILE" ]; then
+  echo "Creating state file at '$STATE_FILE'..."
+  mkdir -p "$(dirname "$STATE_FILE")"
+  touch "$STATE_FILE"
 
 publish_proxy() {
   local selected_proxy_ipv4="$1"
