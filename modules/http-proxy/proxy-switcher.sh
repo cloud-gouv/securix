@@ -25,6 +25,19 @@ if [ ! -f "$STATE_FILE" ]; then
   echo "Creating state file at '$STATE_FILE'..."
   mkdir -p "$(dirname "$STATE_FILE")"
   touch "$STATE_FILE"
+
+  chmod 644 "$STATE_FILE"
+  chown root:root "$STATE_FILE"
+else
+
+  file_owner=$(stat -c '%U' "$STATE_FILE")
+  file_group=$(stat -c '%G' "$STATE_FILE")
+  file_perm=$(stat -c '%a' "$STATE_FILE")
+
+  if [ "$file_owner" != "root" ] || [ "$file_group" != "root" ] || [ "$file_perm" -ne 644 ]; then
+    chown root:root "$STATE_FILE"
+    chmod 644 "$STATE_FILE"
+  fi
 fi
 
 _notify_current_user() {

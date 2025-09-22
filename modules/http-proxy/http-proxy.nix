@@ -107,13 +107,6 @@ in
                 noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./current-proxy.sh)));
               in
               noShebang;
-            runtimeInputs = [
-              # for g3proxy-ctl
-              # config.services.g3proxy.package
-              # pkgs.jq
-              # For whiptail.
-              # pkgs.newt
-            ];
           };
 
         })
