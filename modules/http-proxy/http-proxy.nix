@@ -167,6 +167,7 @@ in
               name = "dynamic";
               type = "proxy_float";
               source.type = "passive";
+              cache_file = "/run/proxy/current.json";
             }
           ];
 
