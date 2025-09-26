@@ -97,6 +97,17 @@ in
               pkgs.sudo
             ];
           };
+
+          current-proxy = pkgs.writeShellApplication {
+            name = "current-proxy";
+            # disables shellcheck
+            checkPhase = "";
+            text =
+              let
+                noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./current-proxy.sh)));
+              in
+              noShebang;
+          };
         })
       ];
 
@@ -104,6 +115,7 @@ in
       environment.systemPackages = [
         config.services.g3proxy.package
         pkgs.proxy-switcher
+        pkgs.current-proxy
       ];
 
       security.sudo = {
@@ -114,6 +126,10 @@ in
             commands = [
               {
                 command = "/run/current-system/sw/bin/proxy-switcher";
+                options = [ "NOPASSWD" ];
+              }
+              {
+                command = "/run/current-system/sw/bin/current-proxy";
                 options = [ "NOPASSWD" ];
               }
             ];

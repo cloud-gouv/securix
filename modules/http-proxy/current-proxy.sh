@@ -4,10 +4,10 @@
 #
 # SPDX-License-Identifier: MIT
 
-CURRENT_PROXY_FILE="/tmp/current-proxy.json"
+CURRENT_PROXY_FILE="$(find /tmp -type d -name "*g3proxy*" 2>/dev/null)/tmp/current-proxy.json"
 PROXIES_LIST_FILE="/etc/proxy-switcher/proxies.json"
 
-if [ -f "$CURRENT_PROXY_FILE" && -f "$PROXIES_LIST_FILE" ]; then
+if [ -f "$CURRENT_PROXY_FILE" ] && [ -f "$PROXIES_LIST_FILE" ]; then
     CURRENT_PROXY_IP=$(jq -r '.[0].addr' "$CURRENT_PROXY_FILE")
 
     if [ -z "$CURRENT_PROXY_IP" ]; then
@@ -18,11 +18,14 @@ if [ -f "$CURRENT_PROXY_FILE" && -f "$PROXIES_LIST_FILE" ]; then
     MATCH=$(jq -r --arg ip "$CURRENT_PROXY_IP" 'to_entries[] | select(.value == $ip ) | .key' "$PROXIES_LIST_FILE")
 
     if [ -z "$MATCH" ]; then
-        echo "Aucun proxy avec l'adresse IP $CURRENT_PROXY_IP dans la liste"
-        exit 1
+        if [ "$CURRENT_PROXY_IP" = "127.0.0.1:8081" ]; then
+            echo "Vous n'êtes pas connecté à un proxy distant (proxy interne utilisé)"
+            exit
+        else
+            echo "Vous êtes connecté sur le proxy $CURRENT_PROXY_IP dans la liste"
+            exit 1
+        fi
     fi
 
-    NAME=$(echo "$MATCH" | jq -r '.name')
-
-    echo "Vous êtes connecté sur le proxy $NAME ($CURRENT_PROXY_IP)"
+    echo "Vous êtes connecté sur le proxy $MATCH ($CURRENT_PROXY_IP)"
 fi
