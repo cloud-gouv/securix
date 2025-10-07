@@ -63,7 +63,7 @@ let
         fi
 
         if ! ${pkgs.openssh}/bin/ssh -NT -o ServerAliveInterval=1 -o ExitOnForwardFailure=yes -L 127.0.0.1:${toString localPort}:${remoteAddress}:${toString remotePort} ${target}; then
-          notify-send "[HTTP Proxy] Échec" "Échec de l'établissement du tunnel vers ${name} depuis ${target} ; est-ce que le VPN ou Internet est opérationnel ? si vous utilisez un yubikey, est-ce qu'elle est branché ?"
+          notify-send "[HTTP Proxy] Échec" "Échec de l'établissement du tunnel vers ${name} depuis ${target} ; est-ce que le VPN ou Internet est opérationnel ? Si vous utilisez un yubikey, est-ce qu'elle est branchée ? L'erreur exacte peut être vue avec journalctl."
         else
           notify-send "[HTTP Proxy] Coupé" "La connexion via SSH vers le proxy HTTP ${name} a été stoppé."
         fi
