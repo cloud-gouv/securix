@@ -34,6 +34,8 @@
     ./vpn
     # Superadmins options
     ./superadmins
+    # Special PAM authentication options, e.g. Yubikey and so on.
+    ./pam
     # All the administration tools
     ./tools
     # Graphical interfaces
