@@ -4,10 +4,7 @@
 
 { pkgs, ... }:
 {
-  imports = [
-    ./password-manager.nix
-    ./firefox.nix
-  ];
+  imports = [ ./firefox.nix ];
 
   programs.mtr.enable = true;
 
