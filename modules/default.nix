@@ -32,6 +32,8 @@
     ./self.nix
     # All the VPN code
     ./vpn
+    # Admins (IT staff) options
+    ./admins
     # Superadmins options
     ./superadmins
     # Special PAM authentication options, e.g. Yubikey and so on.
