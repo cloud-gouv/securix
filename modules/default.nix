@@ -8,7 +8,6 @@
     ./console.nix
     ./distribution.nix
     ./bootloader.nix
-    ./filesystems.nix
     ./networking.nix
     ./power-saving.nix
     ./authorized-users.nix
@@ -45,5 +44,7 @@
     ./updates
     # For observability of Securix
     ./o11y
+    # All the (default) filesystem definitions
+    ./filesystems
   ];
 }
