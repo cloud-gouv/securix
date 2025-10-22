@@ -5,7 +5,7 @@
 { lib, ... }:
 {
   imports = [
-    "${(import ../npins).disko}/module.nix"
+    "${(import ../../npins).disko}/module.nix"
     ./disko.nix
   ];
 }
