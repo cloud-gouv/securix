@@ -24,6 +24,7 @@ let
     mapAttrs
     concatMap
     mapAttrsToList
+    optionalAttrs
     ;
   autoImport =
     inventoryFile:
@@ -59,29 +60,22 @@ rec {
   #  a string which represents the table in Markdown.
   mkMarkdownNetworkMatrixTable =
     lines:
-    mkMarkdownTable
-      [
-        "Sous-réseau CIDR"
-        "Port source"
-        "Port destination"
-        "Protocoles"
-      ]
-      (
-        map (
-          {
-            cidr,
-            from,
-            to,
-            protos,
-          }:
-          [
-            cidr
-            (toString from)
-            (concatStringsSep ", " (map toString to))
-            (concatStringsSep "," protos)
-          ]
-        ) lines
-      );
+    mkMarkdownTable [ "Sous-réseau CIDR" "Port source" "Port destination" "Protocoles" ] (
+      map (
+        {
+          cidr,
+          from,
+          to,
+          protos,
+        }:
+        [
+          cidr
+          (toString from)
+          (concatStringsSep ", " (map toString to))
+          (concatStringsSep "," protos)
+        ]
+      ) lines
+    );
 
   # This will read the user-specific inventory and return an attribute set of { $user = $module }
   # This can be used to further customize the final OS image.
@@ -104,149 +98,225 @@ rec {
   #   - db signer should be pre-provisioned on the Yubikey and enrolled in the system.
   #   - sign the first generation with it.
   # - Upgrade process will need the Yubikey for signing.
-  buildInstallerImage =
+  buildInstallerSystem =
     # Put `compression` to `null` to disable it.
     {
-      modules,
-      compression ? "zstd -Xcompression-level 6",
+      targetSystem,
+      extraInstallerModules ? [ ],
+      consoleKeymap ? "fr",
+      # Takes precedence over the default install script.
+      installScript ? null,
     }:
     let
-      targetSystem = pkgs.nixos modules;
       targetSystemFormatScript = targetSystem.config.system.build.formatScript;
       targetSystemMountScript = targetSystem.config.system.build.mountScript;
       targetSystemClosure = targetSystem.config.system.build.toplevel;
       mainDisk = targetSystem.config.securix.self.mainDisk;
-    in
-    (pkgs.nixos [
-      (
-        { config, modulesPath, ... }:
-        {
-          imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-base.nix" ];
 
-          # Reset the original message.
-          services.getty.helpLine = lib.mkForce ''
-            This is the Securix live offline installer image edition ${edition}.
-
-            This installer will install your system in ${mainDisk}, if that's not what you want,
-            contact the system administrators.
-
-            Run: `autoinstall-terminal` to start the automatic installation process.
+      # These are the scripts fragments that depends on whether we are a generic installer or not.
+      diskProcedureScript = ''
+        box_message "Repartitioning ${mainDisk}..."
+        ${targetSystemFormatScript}
+        box_message "Mounting ${mainDisk}..."
+        ${targetSystemMountScript}
+      '';
+      installProcedureScript =
+        config:
+        if installScript != null then
+          installScript
+        else
+          ''
+            ${config.system.build.nixos-install}/bin/nixos-install --no-channel-copy -j $(nproc) --option substituters "" --system "${targetSystemClosure}"
           '';
-          services.getty.autologinUser = lib.mkForce "root";
+    in
+    pkgs.nixos (
+      extraInstallerModules
+      ++ [
+        (
+          {
+            pkgs,
+            config,
+            lib,
+            ...
+          }:
+          {
+            networking.hostName = lib.mkDefault "generic-installer";
+            # Reset the original message.
+            services.getty.helpLine = lib.mkForce ''
+              This is the Securix live offline installer image edition ${edition}.
 
-          networking.hostName = "m${toString targetSystem.config.securix.self.inventoryId}";
-          boot.kernelParams = [
-            "console=ttyS0,115200"
-            "console=tty0"
-          ];
-          system.nixos.distroId = "securix";
-          system.nixos.tags =
-            [
-              # Taint with the inventory ID not to mis-install the wrong inventory image.
-              "m${toString targetSystem.config.securix.self.inventoryId}"
-              "installer"
-            ]
-            ++ defaultTags
-            # Taint developer images.
-            ++ optional targetSystem.config.securix.self.developer "developer";
-          isoImage.storeContents = [ targetSystemClosure ];
+              This installer will install your system in ${mainDisk}, if that's not what you want,
+              contact the system administrators.
 
-          time.timeZone = "Europe/Paris";
-          console = {
-            # Let the kernel be smart.
-            font = null;
-            keyMap = "fr";
-          };
+              Run: `autoinstall-terminal` to start the automatic installation process.
+            '';
+            services.getty.autologinUser = lib.mkForce "root";
 
-          isoImage.squashfsCompression = compression;
+            boot.kernelParams = [
+              "console=ttyS0,115200"
+              "console=tty0"
+            ];
+            system.nixos.distroId = lib.mkDefault "securix";
+            system.nixos.tags = [ "installer" ] ++ defaultTags;
 
-          environment.systemPackages = [
-            (pkgs.writeShellScriptBin "autoinstall-terminal" (
-              ''
-                #!/usr/bin/env bash
+            time.timeZone = "Europe/Paris";
+            console = {
+              # Let the kernel be smart.
+              font = null;
+              keyMap = consoleKeymap;
+            };
 
-                log() {
-                  local level="$1"
-                  local msg="$2"
-                  case "$level" in
-                    info)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
-                      ;;
-                    warn)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
-                      ;;
-                    error)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
-                      ;;
-                    *)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
-                      ;;
-                  esac
-                }
+            environment.systemPackages = [
+              (pkgs.writeShellScriptBin "autoinstall-terminal" (
+                ''
+                  #!/usr/bin/env bash
 
-                log_info() {
-                  local msg="$1"
-                  log info "$msg"
-                }
-
-                log_warn() {
-                  local msg="$1"
-                  log warn "$msg"
-                }
-
-                log_error() {
-                  local msg="$1"
-                  log error "$msg"
+                  log() {
+                    local level="$1"
+                    local msg="$2"
+                    case "$level" in
+                      info)
+                        ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
+                        ;;
+                      warn)
+                        ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
+                        ;;
+                      error)
+                        ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
+                        ;;
+                      *)
+                        ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
+                        ;;
+                    esac
                   }
 
-                box_message() {
-                  local msg="$1"
-                  ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
-                }
+                  log_info() {
+                    local msg="$1"
+                    log info "$msg"
+                  }
 
-                umount -R /mnt || true
+                  log_warn() {
+                    local msg="$1"
+                    log warn "$msg"
+                  }
 
-                box_message "Welcome in the Securix automatic installer."
-                log_info "Here is the list of current block devices."
-                lsblk
+                  log_error() {
+                    local msg="$1"
+                    log error "$msg"
+                    }
 
-                ${pkgs.systemd}/bin/udevadm settle
-                log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
-                ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
+                  box_message() {
+                    local msg="$1"
+                    ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
+                  }
 
-                wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
-                log_info "${mainDisk} re-initialized and formatted."
+                  umount -R /mnt || true
 
-                ${pkgs.systemd}/bin/udevadm settle
-                box_message "Repartitioning ${mainDisk}..."
-                ${targetSystemFormatScript}
-                box_message "Mounting ${mainDisk}..."
-                ${targetSystemMountScript}
-                box_message "Provisioning Secure Boot keys..."
-              ''
-              + (
-                if lib.versionOlder pkgs.sbctl.version "0.15" then
-                  ''
-                    ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
-                  ''
-                else
-                  ''
-                    ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
-                  ''
-              )
-              + ''
-                box_message "Burning the image on ${mainDisk}..."
-                ${config.system.build.nixos-install}/bin/nixos-install --no-channel-copy -j $(nproc) --option substituters "" --system "${targetSystemClosure}"
-                box_message "Enrolling Secure Boot keys..."
-                ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
-                lsblk
-                log_info "Installation is complete. You can now reboot in the installed system."
-              ''
-            ))
-          ];
-        }
-      )
-    ]).config.system.build.isoImage;
+                  box_message "Welcome in the Securix automatic installer."
+                  log_info "Here is the list of current block devices."
+                  lsblk
+
+                  ${pkgs.systemd}/bin/udevadm settle
+                  log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
+                  ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
+
+                  wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
+                  log_info "${mainDisk} re-initialized and formatted."
+
+                  ${pkgs.systemd}/bin/udevadm settle
+                  ${diskProcedureScript}
+                  box_message "Provisioning Secure Boot keys..."
+                ''
+                + (
+                  if lib.versionOlder pkgs.sbctl.version "0.15" then
+                    ''
+                      ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
+                    ''
+                  else
+                    ''
+                      ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
+                    ''
+                )
+                + ''
+                  box_message "Burning the image on ${mainDisk}..."
+                  ${installProcedureScript config}
+                  box_message "Enrolling Secure Boot keys..."
+                  ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
+                  lsblk
+                  log_info "Installation is complete. You can now reboot in the installed system."
+                ''
+              ))
+            ];
+          }
+        )
+      ]
+    );
+
+  # This produces directly an ISO to flash on a USB/CD/DVD to install further the system.
+  buildUSBInstaller =
+    {
+      modules,
+      extraInstallerModules ? [ ],
+      consoleKeymap ? "fr",
+      installScript ? null,
+      compression ? "zstd -Xcompression-level 6",
+    }@args:
+    let
+      targetSystem = pkgs.nixos modules;
+      targetSystemClosure = targetSystem.config.system.build.toplevel;
+    in
+    buildInstallerSystem (
+      (removeAttrs args [
+        "modules"
+        "compression"
+      ])
+      // {
+        inherit targetSystem;
+        extraInstallerModules = extraInstallerModules ++ [
+          (
+            { lib, modulesPath, ... }:
+            {
+              imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-base.nix" ];
+              # This is an intermediate priority override, normal override is 100, mkDefault is 1000. We take the middle here.
+              networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.inventoryId}";
+              system.nixos.tags =
+                [ "m${toString targetSystem.config.securix.self.inventoryId}" ]
+                # Taint developer images.
+                ++ optional targetSystem.config.securix.self.developer "developer";
+
+              isoImage.storeContents = [ targetSystemClosure ];
+              isoImage.squashfsCompression = compression;
+            }
+          )
+        ];
+      }
+    );
+  buildUSBInstallerISO = args: (buildUSBInstaller args).config.system.build.isoImage;
+  # Deprecated alias
+  buildInstallerImage = lib.warn "`buildInstallerImage` is deprecated, prefer `buildUSBInstallerISO` to it." buildUSBInstallerISO;
+
+  # This produces directly a system toplevel which will contain netboot information (iPXE script)
+  # that you can use to network boot the installer.
+  buildNetbootInstaller =
+    {
+      extraInstallerModules ? [ ],
+      consoleKeymap ? "fr",
+      baseModules,
+      installScript,
+    }@args:
+    buildInstallerSystem (
+      (removeAttrs args [ "baseModules" ])
+      // {
+        targetSystem = pkgs.nixos baseModules;
+        extraInstallerModules = extraInstallerModules ++ [
+          {
+            boot.loader.grub.enable = false;
+            boot.initrd.availableKernelModules = [ "cdc_ncm" ];
+            system.nixos.tags = [ "netinstaller" ];
+          }
+        ];
+      }
+    );
 
   # Build the artifact images for the Securix OS for a given machine.
   mkTerminal =
@@ -266,6 +336,7 @@ rec {
         ../hardware
         # For Secure Boot.
         (import sources.lanzaboote).nixosModules.lanzaboote
+        "${sources.disko}/module.nix"
         "${sources.agenix}/modules/age.nix"
         {
           securix.self.machine.identifier = name;
@@ -288,7 +359,13 @@ rec {
       ] ++ modules;
     in
     {
-      installer = buildInstallerImage {
+      modules = allModules;
+      partitioningModules = [
+        "${sources.disko}/module.nix"
+        ../modules/filesystems
+        ../modules/self.nix
+      ];
+      installer = buildUSBInstallerISO {
         modules = allModules;
         inherit compression;
       };
