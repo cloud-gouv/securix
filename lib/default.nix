@@ -268,7 +268,7 @@ rec {
         (import sources.lanzaboote).nixosModules.lanzaboote
         "${sources.agenix}/modules/age.nix"
         {
-          securix.self.identifier = name;
+          securix.self.machine.identifier = name;
           securix.self.edition = edition;
           _module.args.operators = mapAttrs' (
             fileName: cfg: nameValuePair cfg.securix.self.username cfg.securix.self

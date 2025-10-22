@@ -126,7 +126,7 @@ in
             git pull || exit 1
 
             _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
-            nixos-rebuild boot --attr terminals."${config.securix.self.identifier}".system
+            nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           else
             echo "Repository does not exist, cloning..."
@@ -136,7 +136,7 @@ in
             git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
 
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
-            nixos-rebuild boot --attr terminals."${config.securix.self.identifier}".system
+            nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           fi
       '';
