@@ -13,6 +13,14 @@
 let
   cfg = config.securix.users;
   self = config.securix.self;
+  operatorGroups = [
+    "networkmanager"
+    "video" # webcam?
+    "dialout" # console série
+    "wireshark" # debuggage trames
+    "tss" # tpm2
+    "operator" # can upgrade the system permissionlessly
+  ];
   mkOperator =
     { developerMode, hashedPassword }:
     {
@@ -20,18 +28,20 @@ let
       inherit hashedPassword;
       extraGroups =
         # In developer mode, you are allowed to use `sudo`.
-        optional developerMode "wheel" ++ [
-          "networkmanager"
-          "video" # webcam?
-          "dialout" # console série
-          "wireshark" # debuggage trames
-          "tss" # tpm2
-          "operator" # can upgrade the system permissionlessly
-        ];
+        optional developerMode "wheel" ++ operatorGroups;
+    };
+  mkAdmin =
+    { hashedPassword }:
+    {
+      isNormalUser = true;
+      inherit hashedPassword;
+      extraGroups = operatorGroups ++ [ "wheel" ];
     };
   inherit (lib)
     mkMerge
     mkIf
+    mkOption
+    types
     mkEnableOption
     optional
     filterAttrs
@@ -41,18 +51,19 @@ in
 {
   options.securix.users = {
     allowAnyOperator = mkEnableOption "the possibility for any operator to log in on this machine.";
+    enableMutableUsers = mkEnableOption "the possibility for a user to change his password via passwd or an admin to create new accounts imperatively.";
   };
 
   config = mkMerge [
-    {
-      users.mutableUsers = false;
+    (mkIf (self.user.username != null) {
+      users.mutableUsers = cfg.enableMutableUsers;
       users.groups.operator = { };
       security.tpm2.enable = true;
-      users.users.${self.username} = mkOperator {
-        developerMode = self.developer or false;
-        inherit (self) hashedPassword;
+      users.users.${self.user.username} = mkOperator {
+        developerMode = self.user.developer or false;
+        inherit (self.user) hashedPassword;
       };
-    }
+    })
     # We need to add all the other users then
     # and enable a user to decrypt the partition.
     (mkIf cfg.allowAnyOperator {
