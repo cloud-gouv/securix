@@ -18,7 +18,7 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "x280") {
+  config = mkIf (config.securix.self.machine.hardwareSKU == "x280") {
     boot.initrd.availableKernelModules = [
       "xhci_pci"
       "nvme"

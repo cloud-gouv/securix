@@ -107,7 +107,7 @@ let
       fi
 
       # Run nixos-rebuild with the given verb
-      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."${self.identifier}".system
+      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."${self.machine.identifier}".system
     '';
   };
 in
