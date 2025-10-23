@@ -5,7 +5,8 @@
 # Securix OS generic toolkit entrypoint.
 # Use the library to build your OS images and more.
 {
-  sources ? import ./npins,
+  sourcesOverrides ? sources: sources,
+  sources ? sourcesOverrides (import ./npins),
   pkgs ? import sources.nixpkgs { },
   defaultTags ? [ ],
   edition ? "unbranded",
