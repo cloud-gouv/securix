@@ -5,7 +5,10 @@
 { lib, ... }:
 {
   imports = [
-    "${(import ../../npins).disko}/module.nix"
-    ./disko.nix
+    ./options.nix
+    # Here's a list of layouts that are supported by the Securix framework.
+    # Migrating between layouts is not supported, you need to reinstall.
+    ./securix_v1.nix
+    ./office_v1.nix
   ];
 }

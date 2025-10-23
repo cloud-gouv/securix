@@ -5,18 +5,11 @@
 { lib, config, ... }:
 let
   cfg = config.securix.filesystems;
-  inherit (lib) mkIf mkEnableOption;
+  inherit (lib) mkIf;
   disk = config.securix.self.mainDisk;
-  mountOptions = [ "noatime" ];
 in
 {
-  options.securix.filesystems = {
-    enableDefault = mkEnableOption "the default partitioning layout" // {
-      default = true;
-    };
-  };
-
-  config = mkIf cfg.enableDefault {
+  config = mkIf (cfg.enable && cfg.layout == "securix_v1") {
     disko.devices = {
       disk = {
         ${disk} = {
