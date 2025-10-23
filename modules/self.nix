@@ -71,7 +71,7 @@ in
     };
 
     hardwareSKU = mkOption {
-      type = types.enum [ "x280" ];
+      type = types.enum [ "x280" "hp645G11" "latitude5340" ];
       description = "Identifiant de configuration du matériel";
       example = "x280";
     };
