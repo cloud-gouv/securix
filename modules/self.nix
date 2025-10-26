@@ -73,8 +73,9 @@ in
     hardwareSKU = mkOption {
       type = types.enum [
         "x280"
-        "hp645G11"
+        "elitebook645G11"
         "latitude5340"
+        "t14Gen6"
       ];
       description = "Identifiant de configuration du matériel";
       example = "x280";

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Pauline Legrand <pauline.legrand@numerique.gouv.fr>
+# SPDX-FileCopyrightText: 2025 Julien DAUPHANT <julien.dauphant@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -18,16 +18,20 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "latitude5340") {
+  config = mkIf (config.securix.self.hardwareSKU == "t14Gen6") {
     boot.initrd.availableKernelModules = [
       "xhci_pci"
-      "thunderbolt"
       "nvme"
       "usb_storage"
       "sd_mod"
+      "thunderbolt"
     ];
-    boot.initrd.kernelModules = [ ];
+    boot.initrd.kernelModules = [ "xe" ];
     boot.kernelModules = [ "kvm-intel" ];
+    boot.kernelParams = [
+      "acpi_backlight=native"
+      "psmouse.synaptics_intertouch=0"
+    ];
     boot.extraModulePackages = [ ];
 
     hardware.firmware = [
@@ -36,8 +40,18 @@ in
       pkgs.wireless-regdb
     ];
 
+    hardware.graphics.extraPackages = [
+      pkgs.intel-media-driver
+      pkgs.intel-compute-runtime
+      pkgs.vpl-gpu-rt
+    ];
+
+    hardware.trackpoint.enable = lib.mkDefault true;
+    hardware.trackpoint.emulateWheel = lib.mkDefault config.hardware.trackpoint.enable;
+    services.fstrim.enable = lib.mkDefault true;
+
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-    powerManagement.cpuFreqGovernor = lib.mkDefault "powersave";
+    services.throttled.enable = lib.mkDefault false;
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
   };
 }
