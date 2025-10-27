@@ -90,6 +90,43 @@ rec {
       name: _: nameValuePair (removeSuffix ".nix" name) (autoImport "${dir}/${name}")
     ) customizations;
 
+  # This will read the 2nd generation of inventory for Bureautix based systems.
+  # A 2nd generation inventory contains:
+  # - machines/ directory with ideally a serial-number like identifier as a filename dot nix, e.g. `000000000.nix`
+  # - users/ directory with all users specific configuration.
+  # The reader will look for each machines, find all users relevant to return.
+  # Expected return: { <serial number>.userModules.<user module name> = { }; ... }
+  # You can take this output and build all terminals with it.
+  readInventory2 =
+    # `layout` is for reserved for future improvements of the inventory system.
+    {
+      dir,
+      layout ? "v1",
+    }:
+    let
+      readFilesFromSubDir =
+        subdir:
+        filterAttrs (name: type: type == "regular" && hasSuffix ".nix" name) (
+          builtins.readDir "${dir}/${subdir}"
+        );
+      machines = readFilesFromSubDir "machines";
+    in
+    mapAttrs' (
+      name: _:
+      nameValuePair (removeSuffix ".nix" name) rec {
+        machineModule = autoImport "${dir}/machines/${name}";
+        # NOTE: this is an abuse of the module system, we should not perform a direct access here...
+        # We should rather aim to make the machine module autonomous and perform an evaluation at the right moment.
+        userModules = map (
+          username:
+          if !builtins.pathExists "${dir}/users/${username}.nix" then
+            throw "User '${username}' does not exist in the inventory but is referenced by machine '${name}'!"
+          else
+            autoImport "${dir}/users/${username}.nix"
+        ) machineModule.securix.self.machine.users;
+      }
+    ) machines;
+
   # This will build an ISO installer that will automatically partition the target system.
   # FIXME:
   # - LUKS2 should probably get enrolled with the Yubikey as well (?).
