@@ -9,7 +9,7 @@
   lib,
   pkgs,
   ...
-}:
+}@args:
 let
   inherit (lib)
     filterAttrs
@@ -326,7 +326,7 @@ rec {
       vpnProfiles,
       extraOperators ? { },
       modules,
-      edition,
+      edition ? args.edition,
       compression ? "zstd -Xcompression-level 6",
     }:
     let
