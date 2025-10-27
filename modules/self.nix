@@ -183,6 +183,16 @@ in
         example = "securix-security-team";
       };
 
+      users = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          List of assigned usernames to this machine.
+          Such a username must exist in the inventory of users and is identified by its filename without the extension.
+        '';
+        example = [ "rlahfa" ];
+      };
+
       # Legacy attribute only for original Securix systems.
       identifier = mkOption {
         type = types.str;
