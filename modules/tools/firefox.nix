@@ -84,9 +84,6 @@ in
           ) (lib.attrsToList value);
         }
       ) (lib.attrsToList cfg.bookmarks);
-      # TODO: add services and automatically ping all our seed-bastions & bastions for workers.
-
-      # TODO: kubernetes, etc.
     };
 
     programs.firefox = {
@@ -138,7 +135,7 @@ in
 
         # You are not supposed to watch Netflix on Sécurix.
         EncryptedMediaExtensions = {
-          Enabled = false;
+          Enabled = lib.mkDefault false;
         };
 
         ExtensionSettings =
