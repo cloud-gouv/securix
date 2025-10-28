@@ -5,7 +5,8 @@
 {
   imports = [
     ./x280.nix
-    ./hp645G11.nix
+    ./elitebook645g11.nix
     ./latitude5340.nix
+    ./t14g6.nix
   ];
 }
