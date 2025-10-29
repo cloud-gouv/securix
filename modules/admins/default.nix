@@ -23,9 +23,14 @@ let
           description = "PAM name for this account";
         };
 
-        tokens = mkOption {
+        u2f_keys = mkOption {
           type = types.listOf types.str;
-          description = "List of PAM U2F tokens that are allowed to connect to this account";
+          description = ''
+            List of PAM U2F keys that are allowed to connect to this account
+
+            NOTE: you have to use pamu2cfg with the same parameters for appid
+            and origin as the one described in `config.securix.pam.u2f`.
+          '';
         };
       };
     };
