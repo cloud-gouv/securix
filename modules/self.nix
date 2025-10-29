@@ -97,6 +97,16 @@ in
         description = "Mot de passe hachée en ycrypt pour la session utilisateur.";
       };
 
+      u2f_keys = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          Liste de clefs U2F générés par `pamu2cfg`
+          NOTE: Il faut passer les bons paramètres appid et origin à pamu2cfg si on veut que la clef soit reconnue.
+          Ces paramètres sont documentés dans `config.securix.pam.u2f`.
+        '';
+      };
+
       defaultLoginShell = mkOption {
         type = types.package;
         default = pkgs.bashInteractive;
@@ -259,6 +269,7 @@ in
         Le mode développeur est activé pour ${cfg.user.email}, cette image n'est pas conforme aux règles de l'ANSSI.
       '';
       users.users.${cfg.user.username}.shell = cfg.user.defaultLoginShell;
+      securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
     })
   ];
 }
