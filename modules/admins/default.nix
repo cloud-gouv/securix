@@ -42,7 +42,7 @@ let
       isNormalUser = true;
       extraGroups = [ "wheel" ];
     };
-  mkAdminU2F = _: { name, tokens, ... }: nameValuePair name tokens;
+  mkAdminU2F = _: { name, u2f_keys, ... }: nameValuePair name u2f_keys;
 in
 {
   options.securix.admins = {
