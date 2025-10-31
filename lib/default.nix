@@ -293,53 +293,44 @@ rec {
                   log error "$msg"
                   }
 
-                  log_info() {
-                    local msg="$1"
-                    log info "$msg"
-                  }
+                box_message() {
+                  local msg="$1"
+                  ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
+                }
 
-                  log_warn() {
-                    local msg="$1"
-                    log warn "$msg"
-                  }
+                umount -R /mnt || true
 
-                  log_error() {
-                    local msg="$1"
-                    log error "$msg"
-                    }
+                box_message "Welcome in the Securix automatic installer."
+                log_info "Here is the list of current block devices."
+                lsblk
 
-                  box_message() {
-                    local msg="$1"
-                    ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
-                  }
+                ${pkgs.systemd}/bin/udevadm settle
+                log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
+                ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
 
-                  umount -R /mnt || true
+                wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
+                log_info "${mainDisk} re-initialized and formatted."
 
-                  box_message "Welcome in the Securix automatic installer."
-                  log_info "Here is the list of current block devices."
-                  lsblk
-
-                  ${pkgs.systemd}/bin/udevadm settle
-                  log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
-                  ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
-
-                  wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
-                  log_info "${mainDisk} re-initialized and formatted."
-
-                  ${pkgs.systemd}/bin/udevadm settle
-                  ${diskProcedureScript}
-                  else
-                  ${optionalString createSecureBootKeys createSecureBootKeysScript}
-                  box_message "Burning the image on ${mainDisk}..."
-                  ${installProcedureScript config}
-                  ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
-                  ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
-                  ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
-                  ${postInstallScript}
-                  lsblk
-                  log_info "Installation is complete. You can now reboot in the installed system."
-                ''
-              ))
+                ${pkgs.systemd}/bin/udevadm settle
+                ${diskProcedureScript}
+                # At this point, we need to assert that /mnt is on another disk and well mounted.
+                # Otherwise, we should fail the installation.
+                if mountpoint -q /mnt && ! df -T /mnt | grep -q 'tmpfs'; then
+                  log_info "/mnt is confirmed to be a mountpoint on a persistent disk. Partitioning step has succeeded."
+                else
+                  log_error "/mnt is not a mountpoint or resides on a /tmpfs. The installation cannot succeed. Exiting."
+                  exit 1
+                fi
+                ${optionalString createSecureBootKeys createSecureBootKeysScript}
+                box_message "Burning the image on ${mainDisk}..."
+                ${installProcedureScript config}
+                ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
+                ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
+                ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
+                ${postInstallScript}
+                lsblk
+                log_info "Installation is complete. You can now reboot in the installed system."
+              '')
             ];
           }
         )
