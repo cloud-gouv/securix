@@ -10,26 +10,10 @@
 
   environment.systemPackages = with pkgs; [
     # Text editors
-    neovim
-    emacs
     vscodium
     vim
     # TPM2
     tpm2-tools
-    # Terraform operations
-    opentofu
-    # Vault-like operations
-    # Uncomment when we have upgraded to NixOS 25.05.
-    # openbao
-    # AWS S3 operations
-    rclone
-    awscli2
-    s3cmd
-    restic
-    # Bastion
-    teleport_16
-    # OpenStack CLI - contient: heat, designate, barbican, etc.
-    openstackclient-full
     # A TPM-backed agent for SSH keys
     ssh-tpm-agent
     # VNC remoting
@@ -55,8 +39,6 @@
     ripgrep # super fast `grep`
     ripgrep-all # multi-format fast `grep`
     pwgen # Password generator.
-    bitwarden-cli # Bitwarden CLI.
-    rbw # Caching Bitwarden CLI.
     rofi-rbw-wayland # Rofi menu for rbw.
     tree # Tree display
     gnupg # PGP
@@ -81,21 +63,6 @@
     unzip
     # To calculate things
     libqalculate
-    # Troubleshooting
-    iperf3
-    tcpdump
-    tshark
-    wireshark
-    dnsutils
-    conntrack-tools
-    pwru # Packet, where are you? - eBPF tooling
-    strace
-    gdb
-    # Network calculators
-    sipcalc
-    ipv6calc
-    # D-Bus debugging
-    d-spy
     # Offline documentation
     linux-manual
     glibcInfo
