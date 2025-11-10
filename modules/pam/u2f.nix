@@ -52,6 +52,7 @@ in
         inherit (cfg) origin;
         appid = cfg.appId;
         authfile = "/etc/u2f-mappings";
+        cue = true;
       };
     };
   };
