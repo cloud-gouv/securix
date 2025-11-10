@@ -66,7 +66,6 @@
     # Troubleshooting
     iperf3
     tcpdump
-    tshark
     dnsutils
     conntrack-tools
     pwru # Packet, where are you? - eBPF tooling
