@@ -63,6 +63,20 @@
     unzip
     # To calculate things
     libqalculate
+    # Troubleshooting
+    iperf3
+    tcpdump
+    tshark
+    dnsutils
+    conntrack-tools
+    pwru # Packet, where are you? - eBPF tooling
+    strace
+    gdb
+    # Network calculators
+    sipcalc
+    ipv6calc
+    # D-Bus debugging
+    d-spy
     # Offline documentation
     linux-manual
     glibcInfo
