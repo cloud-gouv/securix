@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2025 Pauline Legrand <pauline.legrand@numerique.gouv.fr>
+# SPDX-FileCopyrightText: 2025 Julien Dauphant <julien.dauphant@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
