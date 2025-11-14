@@ -14,6 +14,7 @@ in
       type = lib.types.enum [
         "kde"
         "sway"
+        "cinnamon"
       ];
       example = "kde";
     };
@@ -30,6 +31,7 @@ in
 
   imports = [
     ./plasma.nix
+    ./cinnamon
     ./sway
     ./fonts.nix
   ];
