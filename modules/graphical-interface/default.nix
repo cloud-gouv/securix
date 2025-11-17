@@ -31,7 +31,7 @@ in
 
   imports = [
     ./plasma.nix
-    ./cinnamon
+    ./cinnamon.nix
     ./sway
     ./fonts.nix
   ];
