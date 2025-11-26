@@ -24,6 +24,7 @@ let
     mapAttrs
     concatMap
     mapAttrsToList
+    any
     optionalAttrs
     ;
   autoImport =
@@ -159,11 +160,26 @@ rec {
       '';
       installProcedureScript =
         config:
+        let
+          # If root has any of the password option, do not ask for the root password.
+          dontRequiresRootPassword = any (k: targetSystem.config.users.users.root.${k} != null) [
+            "initialHashedPassword"
+            "hashedPassword"
+            "hashedPasswordFile"
+            "initialPassword"
+            "password"
+          ];
+        in
         if installScript != null then
           installScript
         else
           ''
-            ${config.system.build.nixos-install}/bin/nixos-install --no-channel-copy -j $(nproc) --option substituters "" --system "${targetSystemClosure}"
+            ${config.system.build.nixos-install}/bin/nixos-install \
+              --no-channel-copy \
+              ${lib.optionalString dontRequiresRootPassword "--no-root-password"} \
+              -j $(nproc) \
+              --option substituters "" \
+              --system "${targetSystemClosure}"
           '';
     in
     pkgs.nixos (
