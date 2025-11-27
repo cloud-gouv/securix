@@ -15,7 +15,7 @@ let
   cfg = config.securix.tools;
 in
 {
-  imports = [ ./firefox.nix ];
+  imports = [ ./browsers ];
 
   options.securix.tools = {
     enable = mkEnableOption "Install tools";
