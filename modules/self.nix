@@ -175,7 +175,7 @@ in
           "elitebook645g11"
           "latitude5340"
           "t14g6"
-          "t14s"
+          "x9-15"
         ];
         description = "Identifiant de configuration du matériel";
         example = "x280";
