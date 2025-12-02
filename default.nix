@@ -12,9 +12,11 @@
   edition ? "unbranded",
 }:
 let
+  # Import our own overlays.
+  pkgs' = pkgs.extend (import ./pkgs/overlay.nix);
   git-hooks = import sources.git-hooks;
 
-  inherit (pkgs) lib;
+  inherit (pkgs') lib;
 
   git-checks = git-hooks.run {
     src = ./.;
@@ -43,19 +45,20 @@ let
 in
 {
   lib = import ./lib {
+    pkgs = pkgs';
     inherit
-      pkgs
       lib
       edition
       defaultTags
       sources
       ;
   };
+  pkgs = pkgs';
   modules = ./modules;
-  shell = pkgs.mkShell {
+  shell = pkgs'.mkShell {
     packages = [
-      pkgs.npins
-      (pkgs.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
+      pkgs'.npins
+      (pkgs'.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
     ] ++ git-checks.enabledPackages;
 
     shellHook = lib.concatStringsSep "\n" [ git-checks.shellHook ];
