@@ -8,6 +8,6 @@
     ./elitebook645g11.nix
     ./latitude5340.nix
     ./t14g6.nix
-    ./t14s.nix
+    ./x9-15.nix
   ];
 }
