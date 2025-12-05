@@ -21,6 +21,7 @@ let
     concatStringsSep
     genList
     length
+    optionalString
     mapAttrs
     concatMap
     mapAttrsToList
@@ -34,6 +35,16 @@ let
     in
     assert builtins.isFunction fnOrAttrs || builtins.isAttrs fnOrAttrs;
     if builtins.isFunction fnOrAttrs then fnOrAttrs { inherit pkgs; } else fnOrAttrs;
+  defaultPreprovisionOptions = {
+    # Self contained Secure Boot means that we generate the PK/KEK/db on the target system.
+    # We could have other mechanisms like "remote-signing" that would connect
+    # to a server, retrieve public key information and gets remote signing
+    # started.
+    # We could also use a Yubikey for the signing.
+    secureBoot = "self-contained";
+    tpm2HostKeys = true;
+    ageHostKeys = true;
+  };
 in
 rec {
   # This will build a Markdown table.
@@ -129,21 +140,17 @@ rec {
     ) machines;
 
   # This will build an ISO installer that will automatically partition the target system.
-  # FIXME:
-  # - LUKS2 should probably get enrolled with the Yubikey as well (?).
-  # - We should enroll a static set of PK/KEK which comes from the image.
-  # - Secure Boot key should not be created on the disk.
-  #   - db signer should be pre-provisioned on the Yubikey and enrolled in the system.
-  #   - sign the first generation with it.
-  # - Upgrade process will need the Yubikey for signing.
   buildInstallerSystem =
     # Put `compression` to `null` to disable it.
     {
       targetSystem,
       extraInstallerModules ? [ ],
+      preprovisionOptions ? defaultPreprovisionOptions,
       consoleKeymap ? "fr",
       # Takes precedence over the default install script.
       installScript ? null,
+      # The post-install script, use it to run various things like sending data to a form or whatever.
+      postInstallScript ? "",
     }:
     let
       targetSystemFormatScript = targetSystem.config.system.build.formatScript;
@@ -157,6 +164,51 @@ rec {
         ${targetSystemFormatScript}
         box_message "Mounting ${mainDisk}..."
         ${targetSystemMountScript}
+      '';
+
+      createSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
+      # TODO: this is very wrong.
+      # We should be migrating to /var/lib as well.
+      createSecureBootKeysScript =
+        ''
+          box_message "Provisioning Secure Boot keys..."
+        ''
+        + (
+          if lib.versionOlder pkgs.sbctl.version "0.15" then
+            ''
+              ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
+            ''
+          else
+            ''
+              ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
+            ''
+        );
+      enrollSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
+      secureBootEnrollmentScript = ''
+        box_message "Enrolling Secure Boot keys..."
+        ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
+      '';
+      # This is actually an normal host SSH key generation step.
+      # SSH host keys can be used as age keys.
+      # We export the public key here.
+      ageKeysProvisionScript = ''
+        # Generate normal host SSH keys.
+        box_message "Generating age keys..."
+        ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.openssh}/bin/ssh-keygen -A"
+        log_info "age host SSH keys available in /mnt/etc/ssh/ssh_host_ed25519_key*"
+      '';
+      # We export the public key here.
+      tpm2ProvisionScript = ''
+        # Check if TPM2 device exists
+        if [ -e /dev/tpm0 ]; then
+          # TPM2 is available, generate TPM2-backed host SSH keys
+          box_message "TPM2 device detected, generating TPM2-backed host SSH keys..."
+          ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.ssh-tpm-agent}/bin/ssh-tpm-keygen -A"
+          log_info "TPM2-backed host SSH keys available in /mnt/etc/ssh/ssh_tpm_host_ecdsa_key*"
+        else
+          # No TPM2 device detected, skip key generation
+          box_message "No TPM2 device detected, skipping TPM2-backed SSH key generation."
+        fi
       '';
       installProcedureScript =
         config:
@@ -220,85 +272,81 @@ rec {
             };
 
             environment.systemPackages = [
-              (pkgs.writeShellScriptBin "autoinstall-terminal" (
-                ''
-                  #!/usr/bin/env bash
+              (pkgs.writeShellScriptBin "autoinstall-terminal" ''
+                #!/usr/bin/env bash
 
-                  log() {
-                    local level="$1"
-                    local msg="$2"
-                    case "$level" in
-                      info)
-                        ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
-                        ;;
-                      warn)
-                        ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
-                        ;;
-                      error)
-                        ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
-                        ;;
-                      *)
-                        ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
-                        ;;
-                    esac
+                log() {
+                  local level="$1"
+                  local msg="$2"
+                  case "$level" in
+                    info)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
+                      ;;
+                    warn)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
+                      ;;
+                    error)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
+                      ;;
+                    *)
+                      ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
+                      ;;
+                  esac
+                }
+
+                log_info() {
+                  local msg="$1"
+                  log info "$msg"
+                }
+
+                log_warn() {
+                  local msg="$1"
+                  log warn "$msg"
+                }
+
+                log_error() {
+                  local msg="$1"
+                  log error "$msg"
                   }
 
-                  log_info() {
-                    local msg="$1"
-                    log info "$msg"
-                  }
+                box_message() {
+                  local msg="$1"
+                  ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
+                }
 
-                  log_warn() {
-                    local msg="$1"
-                    log warn "$msg"
-                  }
+                umount -R /mnt || true
 
-                  log_error() {
-                    local msg="$1"
-                    log error "$msg"
-                    }
+                box_message "Welcome in the Securix automatic installer."
+                log_info "Here is the list of current block devices."
+                lsblk
 
-                  box_message() {
-                    local msg="$1"
-                    ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
-                  }
+                ${pkgs.systemd}/bin/udevadm settle
+                log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
+                ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
 
-                  umount -R /mnt || true
+                wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
+                log_info "${mainDisk} re-initialized and formatted."
 
-                  box_message "Welcome in the Securix automatic installer."
-                  log_info "Here is the list of current block devices."
-                  lsblk
-
-                  ${pkgs.systemd}/bin/udevadm settle
-                  log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
-                  ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
-
-                  wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
-                  log_info "${mainDisk} re-initialized and formatted."
-
-                  ${pkgs.systemd}/bin/udevadm settle
-                  ${diskProcedureScript}
-                  box_message "Provisioning Secure Boot keys..."
-                ''
-                + (
-                  if lib.versionOlder pkgs.sbctl.version "0.15" then
-                    ''
-                      ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
-                    ''
-                  else
-                    ''
-                      ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
-                    ''
-                )
-                + ''
-                  box_message "Burning the image on ${mainDisk}..."
-                  ${installProcedureScript config}
-                  box_message "Enrolling Secure Boot keys..."
-                  ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
-                  lsblk
-                  log_info "Installation is complete. You can now reboot in the installed system."
-                ''
-              ))
+                ${pkgs.systemd}/bin/udevadm settle
+                ${diskProcedureScript}
+                # At this point, we need to assert that /mnt is on another disk and well mounted.
+                # Otherwise, we should fail the installation.
+                if mountpoint -q /mnt && ! df -T /mnt | grep -q 'tmpfs'; then
+                  log_info "/mnt is confirmed to be a mountpoint on a persistent disk. Partitioning step has succeeded."
+                else
+                  log_error "/mnt is not a mountpoint or resides on a /tmpfs. The installation cannot succeed. Exiting."
+                  exit 1
+                fi
+                ${optionalString createSecureBootKeys createSecureBootKeysScript}
+                box_message "Burning the image on ${mainDisk}..."
+                ${installProcedureScript config}
+                ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
+                ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
+                ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
+                ${postInstallScript}
+                lsblk
+                log_info "Installation is complete. You can now reboot in the installed system."
+              '')
             ];
           }
         )
@@ -312,6 +360,8 @@ rec {
       extraInstallerModules ? [ ],
       consoleKeymap ? "fr",
       installScript ? null,
+      postInstallScript ? "",
+      preprovisionOptions ? defaultPreprovisionOptions,
       compression ? "zstd -Xcompression-level 6",
     }@args:
     let
@@ -356,6 +406,8 @@ rec {
       consoleKeymap ? "fr",
       baseModules,
       installScript,
+      postInstallScript ? "",
+      preprovisionOptions ? defaultPreprovisionOptions,
     }@args:
     buildInstallerSystem (
       (removeAttrs args [ "baseModules" ])
@@ -417,6 +469,7 @@ rec {
         "${sources.disko}/module.nix"
         ../modules/filesystems
         ../modules/self.nix
+        ../modules/pam
       ];
       installer = buildUSBInstallerISO {
         modules = allModules;
