@@ -60,7 +60,7 @@ let
     {
       username,
       email,
-      bit,
+      bit ? null,
       ...
     }:
     profileName:
@@ -77,7 +77,7 @@ let
       mkAddress ? null,
       ...
     }:
-    assert lib.assertMsg (bit != null)
+    assert lib.assertMsg (bit != null -> mkAddress != null)
       "Il n'est pas possible de générer un profil IPsec si le paramètre `bit` n'est pas rempli pour l'administrateur ${operatorName}";
     assert lib.assertMsg (mkPasswordVariable == null -> method != "psk")
       "Si la méthode PSK est spécifié pour le tunnel `${profileName}`, une façon de récupérer le mot de passe via une variable d'environnement doit etre spécifié.";
