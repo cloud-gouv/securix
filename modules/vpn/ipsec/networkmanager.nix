@@ -205,14 +205,6 @@ in
       '';
     } // mapAttrs' mkCertificateAuthorityFile cfg.certificateAuthorityFiles;
 
-    nixpkgs.overlays = [
-      (self: super: {
-        strongswan = super.strongswan.overrideAttrs (old: {
-          patches = (old.patches or [ ]) ++ [ ./support-local-ts.patch ];
-        });
-      })
-    ];
-
     systemd.services.NetworkManager.serviceConfig.Environment = [
       "STRONGSWAN_CONF=/etc/strongswan.conf"
     ];
