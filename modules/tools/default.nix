@@ -46,7 +46,7 @@
     jq # Lightweight and flexible command-line JSON processor
     yq # Same as jq but for YAML
     # Git, the full tooling.
-    gitAndTools.gitFull
+    gitFull
     git-lfs
     git-absorb
     git-gr
