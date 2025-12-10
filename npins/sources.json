@@ -59,9 +59,9 @@
     },
     "nixpkgs": {
       "type": "Channel",
-      "name": "nixos-24.11",
-      "url": "https://releases.nixos.org/nixos/24.11/nixos-24.11.718912.1f426f65ac4e/nixexprs.tar.xz",
-      "hash": "1shsniwaqzf2d3a8rx4bmr5jgigii32r5v5sbr9brkmp6sfnwmgm"
+      "name": "nixos-25.11",
+      "url": "https://releases.nixos.org/nixos/25.11/nixos-25.11.1056.d9bc5c7dceb3/nixexprs.tar.xz",
+      "hash": "148dkksh8z1amk7jvp0a79k19aydxbzvhbhicbs41wwhkqk9yb57"
     }
   },
   "version": 3
