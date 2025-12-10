@@ -281,7 +281,7 @@ in
         }
       ];
 
-    networking.networkmanager.enableStrongSwan = true;
+    networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
     ) cfg.pskSecretsPaths;
