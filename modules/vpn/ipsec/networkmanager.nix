@@ -125,7 +125,7 @@ let
       vpn-secrets = mkIf (method == "psk") { password = mkPasswordVariable operatorName; };
 
       ipv4 = {
-        method = if localSubnet == "%any" then "disabled" else "auto";
+        method = if localSubnet == "%any" then "auto" else "disabled"; 
         address1 = mkIf (localSubnet != "%any") "${mkAddress bit},${gateway}";
         ignore-auto-dns = true;
       };
