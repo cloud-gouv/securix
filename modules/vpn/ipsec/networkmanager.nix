@@ -75,6 +75,7 @@ let
       gateway ? null,
       mkPasswordVariable ? null,
       mkAddress ? null,
+      dns ? null,
       ...
     }:
     assert lib.assertMsg (bit != null -> mkAddress != null)
@@ -129,6 +130,7 @@ let
         method = if localSubnet == "%any" then "auto" else "disabled"; 
         address1 = mkIf (localSubnet != "%any") "${mkAddress bit},${gateway}";
         ignore-auto-dns = true;
+        inherit dns;
       };
 
       ipv6 = {
