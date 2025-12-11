@@ -29,6 +29,7 @@ let
     filterAttrs
     mergeAttrsList
     mkDefault
+    mkRenamedOptionModule
     ;
   isValidIpsecProfile =
     profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec";
@@ -160,15 +161,19 @@ in
       '';
     };
 
-    pskSecretsPaths = mkOption {
+    secretsPaths = mkOption {
       type = types.attrsOf types.path;
       default = { };
-      description = "Chemin vers toutes les PSKs, non nécessaire en mode certificats.";
+      description = "Chemin vers vers les secrets (PSK, IPs, ...) transmit au profil VPN";
     };
   };
 
+  imports = [
+    (mkRenamedOptionModule [ "securix" "vpn" "ipsec" "pskSecretsPaths" ] [ "securix" "vpn" "ipsec" "secretsPaths" ])
+  ];
+
   config = mkIf cfg.enable {
-    age.secrets = mapAttrs (_: path: { file = path; }) cfg.pskSecretsPaths;
+    age.secrets = mapAttrs (_: path: { file = path; }) cfg.secretsPaths;
 
     # This is an extra rule to allow any user to do `sudo pkill charon-nm` to reset the VPN state.
     # Sometimes, when you suspend your system while having the VPN enabled and you get out of suspend state.
@@ -278,7 +283,7 @@ in
     networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
-    ) cfg.pskSecretsPaths;
+    ) cfg.secretsPaths;
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
       listToAttrs (
