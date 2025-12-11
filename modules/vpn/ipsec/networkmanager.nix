@@ -137,7 +137,7 @@ let
 
   mkCertificateAuthorityFile = certName: path: {
     name = "${certName}.crt";
-    value.file = path;
+    value.source = path;
   };
 in
 {
