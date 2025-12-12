@@ -16,6 +16,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+if [ -f "$EXTRA_ENV_FILE" ]; then
+    set -a
+    source "$EXTRA_ENV_FILE"
+    set +a
+fi
+
 _notify_current_user() {
   local title="$1"
   local message="$2"
@@ -74,6 +80,9 @@ if [ ! -f "$CONFIG_FILE" ]; then
   exit 1
 fi
 
+CONFIG_FILE_DATA=$(envsubst < "$CONFIG_FILE")
+
+
 # CLI mode.
 if [ "$#" -ge 2 ]; then
   if ! command -v jq >/dev/null 2>&1; then
@@ -84,7 +93,7 @@ if [ "$#" -ge 2 ]; then
   case "$1" in
     --list)
       echo "Available proxies:"
-      jq -r 'keys[]' "$CONFIG_FILE" | sed 's/^/  - /'
+      jq -r 'keys[]'  <<< "$CONFIG_FILE_DATA" | sed 's/^/  - /'
       echo "  - np (No Proxy, use internal forward proxy)"
       exit 0
       ;;
@@ -95,7 +104,7 @@ if [ "$#" -ge 2 ]; then
       exit 0
       ;;
     *)
-      SELECTED_ADDR=$(jq -r --arg k "$1" '.[$k] // empty' "$CONFIG_FILE")
+      SELECTED_ADDR=$(jq -r --arg k "$1" '.[$k] // empty' <<< "$CONFIG_FILE_DATA" )
       if [ -z "$SELECTED_ADDR" ]; then
         echo "Error: Proxy '$1' not found in $CONFIG_FILE"
         exit 1
@@ -114,11 +123,11 @@ if ! command -v jq >/dev/null 2>&1 || ! command -v whiptail >/dev/null 2>&1; the
   exit 1
 fi
 
-KEYS=($(jq -r 'keys[]' "$CONFIG_FILE"))
+KEYS=($(jq -r 'keys[]' <<< "$CONFIG_FILE_DATA"))
 MENU_ITEMS=()
 
 for key in "${KEYS[@]}"; do
-  ADDR=$(jq -r --arg k "$key" '.[$k]' "$CONFIG_FILE")
+  ADDR=$(jq -r --arg k "$key" '.[$k]' <<< "$CONFIG_FILE_DATA")
   MENU_ITEMS+=("$key" "$ADDR")
 done
 
@@ -139,7 +148,7 @@ if [ "$CHOICE" = "np" ]; then
   echo "Switching to internal forward proxy..."
   publish_proxy "$INTERNAL_FORWARD_PROXY"
 else
-  SELECTED_ADDR=$(jq -r --arg k "$CHOICE" '.[$k]' "$CONFIG_FILE")
+  SELECTED_ADDR=$(jq -r --arg k "$CHOICE" '.[$k]' <<< "$CONFIG_FILE_DATA")
   echo "Switching to: $SELECTED_ADDR"
   publish_proxy "$SELECTED_ADDR" "$CHOICE"
 fi
