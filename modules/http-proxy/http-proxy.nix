@@ -65,6 +65,12 @@ in
       ];
       description = "Liste de domaines exclus du proxy";
     };
+
+    secretsPath = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Chemin vers vers les secrets injectés dans les scripts de gestion de proxy";
+    };
   };
 
   config = mkMerge [
@@ -80,6 +86,9 @@ in
             name = "proxy-switcher";
             # disables shellcheck.
             checkPhase = "";
+            runtimeEnv = {  
+              EXTRA_ENV_FILE = cfg.secretsPath;
+            };
             text =
               let
                 noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./proxy-switcher.sh)));
@@ -95,6 +104,7 @@ in
               pkgs.gawk
               pkgs.libnotify
               pkgs.sudo
+              pkgs.gettext
             ];
           };
 
@@ -102,11 +112,17 @@ in
             name = "current-proxy";
             # disables shellcheck
             checkPhase = "";
+            runtimeEnv = {  
+              EXTRA_ENV_FILE = cfg.secretsPath;
+            };
             text =
               let
                 noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./current-proxy.sh)));
               in
               noShebang;
+            runtimeInputs = [
+              pkgs.gettext
+            ];
           };
         })
       ];

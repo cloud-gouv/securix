@@ -7,6 +7,12 @@
 CURRENT_PROXY_FILE="$(find /tmp -type d -name "*g3proxy*" 2>/dev/null)/tmp/current-proxy.json"
 PROXIES_LIST_FILE="/etc/proxy-switcher/proxies.json"
 
+if [ -f "$EXTRA_ENV_FILE" ]; then
+    set -a
+    source "$EXTRA_ENV_FILE"
+    set +a
+fi
+
 if [ -f "$CURRENT_PROXY_FILE" ] && [ -f "$PROXIES_LIST_FILE" ]; then
     CURRENT_PROXY_IP=$(jq -r '.[0].addr' "$CURRENT_PROXY_FILE")
 
@@ -15,7 +21,7 @@ if [ -f "$CURRENT_PROXY_FILE" ] && [ -f "$PROXIES_LIST_FILE" ]; then
         exit 1
     fi
 
-    MATCH=$(jq -r --arg ip "$CURRENT_PROXY_IP" 'to_entries[] | select(.value == $ip ) | .key' "$PROXIES_LIST_FILE")
+    MATCH=$(envsubst < "$PROXIES_LIST_FILE" | jq -r --arg ip "$CURRENT_PROXY_IP" 'to_entries[] | select(.value == $ip ) | .key')
 
     if [ -z "$MATCH" ]; then
         if [ "$CURRENT_PROXY_IP" = "127.0.0.1:8081" ]; then
