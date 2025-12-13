@@ -40,8 +40,7 @@ in
     networking.firewall.enable = false;
     networking.nftables = {
       enable = true;
-      rulesetFile = pkgs.substituteAll {
-        src = cfg.genericRulesetFile;
+      rulesetFile = pkgs.replaceVars cfg.genericRulesetFile {
         github_ips = concatStringsSep ",\n" (
           map (l: "\t\t${l}") (splitString "\n" (builtins.readFile ./github-ipv4.txt))
         );
