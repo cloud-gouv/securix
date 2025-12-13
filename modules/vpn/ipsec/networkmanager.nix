@@ -94,34 +94,33 @@ let
         type = "vpn";
       };
 
-      vpn =
-        {
-          address = endpoint;
-          remote-identity = mkIf (remote-identity != null) remote-identity;
-          encap = "yes";
-          ipcomp = "no";
-          # It's automatically derived when the cert is on the smartcard.
-          local-identity = mkIf (method != "cert-on-security-token") email;
-          proposal = "yes";
-          inherit ike esp;
-          remote-ts = concatStringsSep ";" remoteSubnets;
-          local-ts = mkIf (mkAddress != null) (mkAddress bit);
-          virtual = if (localSubnet == "%any") then "yes" else "no";
-          service-type = "org.freedesktop.NetworkManager.strongswan";
-        }
-        // (
-          if method == "cert-on-security-token" then
-            {
-              method = "smartcard";
-              cert-source = "smartcard";
-              password-flags = 1; # Ask the agent for the PIN.
-            }
-          else
-            {
-              method = "psk";
-              password-flags = 0;
-            }
-        );
+      vpn = {
+        address = endpoint;
+        remote-identity = mkIf (remote-identity != null) remote-identity;
+        encap = "yes";
+        ipcomp = "no";
+        # It's automatically derived when the cert is on the smartcard.
+        local-identity = mkIf (method != "cert-on-security-token") email;
+        proposal = "yes";
+        inherit ike esp;
+        remote-ts = concatStringsSep ";" remoteSubnets;
+        local-ts = mkIf (mkAddress != null) (mkAddress bit);
+        virtual = if (localSubnet == "%any") then "yes" else "no";
+        service-type = "org.freedesktop.NetworkManager.strongswan";
+      }
+      // (
+        if method == "cert-on-security-token" then
+          {
+            method = "smartcard";
+            cert-source = "smartcard";
+            password-flags = 1; # Ask the agent for the PIN.
+          }
+        else
+          {
+            method = "psk";
+            password-flags = 0;
+          }
+      );
 
       vpn-secrets = mkIf (method == "psk") { password = mkPasswordVariable operatorName; };
 
@@ -203,15 +202,8 @@ in
           }
         }
       '';
-    } // mapAttrs' mkCertificateAuthorityFile cfg.certificateAuthorityFiles;
-
-    nixpkgs.overlays = [
-      (self: super: {
-        strongswan = super.strongswan.overrideAttrs (old: {
-          patches = (old.patches or [ ]) ++ [ ./support-local-ts.patch ];
-        });
-      })
-    ];
+    }
+    // mapAttrs' mkCertificateAuthorityFile cfg.certificateAuthorityFiles;
 
     systemd.services.NetworkManager.serviceConfig.Environment = [
       "STRONGSWAN_CONF=/etc/strongswan.conf"
@@ -281,7 +273,7 @@ in
         }
       ];
 
-    networking.networkmanager.enableStrongSwan = true;
+    networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
     ) cfg.pskSecretsPaths;

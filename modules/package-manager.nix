@@ -14,21 +14,20 @@ let
 in
 {
   config = {
-    nix =
-      {
-        package = pkgs.lix;
-        nixPath = [
-          # Always point to the authorized sources.
-          "nixpkgs=${pkgs.path}"
-        ];
-      }
-      // (lib.optionalAttrs proxyCfg.enable {
-        envVars = {
-          http_proxy = config.networking.proxy.default;
-          https_proxy = config.networking.proxy.default;
-          all_proxy = config.networking.proxy.default;
-          no_proxy = lib.concatStringsSep "," proxyCfg.exceptions;
-        };
-      });
+    nix = {
+      package = pkgs.lix;
+      nixPath = [
+        # Always point to the authorized sources.
+        "nixpkgs=${pkgs.path}"
+      ];
+    }
+    // (lib.optionalAttrs proxyCfg.enable {
+      envVars = {
+        http_proxy = config.networking.proxy.default;
+        https_proxy = config.networking.proxy.default;
+        all_proxy = config.networking.proxy.default;
+        no_proxy = lib.concatStringsSep "," proxyCfg.exceptions;
+      };
+    });
   };
 }

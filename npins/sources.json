@@ -1,19 +1,17 @@
 {
   "pins": {
     "agenix": {
-      "type": "GitRelease",
+      "type": "Git",
       "repository": {
         "type": "GitHub",
         "owner": "ryantm",
         "repo": "agenix"
       },
-      "pre_releases": false,
-      "version_upper_bound": null,
-      "release_prefix": null,
-      "version": "0.15.0",
-      "revision": "564595d0ad4be7277e07fa63b5a991b3c645655d",
-      "url": "https://api.github.com/repos/ryantm/agenix/tarball/0.15.0",
-      "hash": "01dhrghwa7zw93cybvx4gnrskqk97b004nfxgsys0736823956la"
+      "branch": "main",
+      "submodules": false,
+      "revision": "fcdea223397448d35d9b31f798479227e80183f6",
+      "url": "https://github.com/ryantm/agenix/archive/fcdea223397448d35d9b31f798479227e80183f6.tar.gz",
+      "hash": "1d4m7hsq727q7ndjqmgyl8vkbkqjwps962ygmv2mcc5dbqzgn963"
     },
     "disko": {
       "type": "GitRelease",
@@ -25,6 +23,7 @@
       "pre_releases": false,
       "version_upper_bound": null,
       "release_prefix": null,
+      "submodules": false,
       "version": "v1.9.0",
       "revision": "49a4936cee640e27d74baee6fd1278285d29b100",
       "url": "https://api.github.com/repos/nix-community/disko/tarball/v1.9.0",
@@ -38,6 +37,7 @@
         "repo": "git-hooks.nix"
       },
       "branch": "master",
+      "submodules": false,
       "revision": "9364dc02281ce2d37a1f55b6e51f7c0f65a75f17",
       "url": "https://github.com/cachix/git-hooks.nix/archive/9364dc02281ce2d37a1f55b6e51f7c0f65a75f17.tar.gz",
       "hash": "1n2qlj5l8c4g7gm5v6rvc4hff3ka8ljv7y62inybli093bd2ypa7"
@@ -52,6 +52,7 @@
       "pre_releases": false,
       "version_upper_bound": null,
       "release_prefix": null,
+      "submodules": false,
       "version": "v0.4.2",
       "revision": "f0212638a2ec787a7841882f4477d40ae24f0a5d",
       "url": "https://api.github.com/repos/nix-community/lanzaboote/tarball/v0.4.2",
@@ -59,10 +60,10 @@
     },
     "nixpkgs": {
       "type": "Channel",
-      "name": "nixos-24.11",
-      "url": "https://releases.nixos.org/nixos/24.11/nixos-24.11.718912.1f426f65ac4e/nixexprs.tar.xz",
-      "hash": "1shsniwaqzf2d3a8rx4bmr5jgigii32r5v5sbr9brkmp6sfnwmgm"
+      "name": "nixos-25.11",
+      "url": "https://releases.nixos.org/nixos/25.11/nixos-25.11.1056.d9bc5c7dceb3/nixexprs.tar.xz",
+      "hash": "148dkksh8z1amk7jvp0a79k19aydxbzvhbhicbs41wwhkqk9yb57"
     }
   },
-  "version": 3
+  "version": 5
 }
