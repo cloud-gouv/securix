@@ -59,7 +59,8 @@ in
     packages = [
       pkgs'.npins
       (pkgs'.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
-    ] ++ git-checks.enabledPackages;
+    ]
+    ++ git-checks.enabledPackages;
 
     shellHook = lib.concatStringsSep "\n" [ git-checks.shellHook ];
   };
