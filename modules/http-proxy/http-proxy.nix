@@ -178,8 +178,8 @@ in
               # DNS4EU co-funded by European Union initiative.
               # https://www.joindns4.eu/learn/dns4eu-public-service-launched
               server = [
-                "86.54.11.11"
-                "86.54.11.211"
+                "86.54.11.1"
+                "86.54.11.201"
               ];
             }
           ];
