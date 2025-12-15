@@ -77,10 +77,10 @@ in
       default = { };
       example = [
         {
-           exact = [ "allowed-domain.example.com" ];
-           child = [ "allowed-all-subdomain.example.com" ];
-           regex = [ "allowed-*.example.com" ];
-           subnet = [ "10.0.0.0/16" ];
+          exact = [ "allowed-domain.example.com" ];
+          child = [ "allowed-all-subdomain.example.com" ];
+          regex = [ "allowed-*.example.com" ];
+          subnet = [ "10.0.0.0/16" ];
         }
       ];
       description = ''
@@ -90,13 +90,11 @@ in
         - `child` : domaines et tous leurs sous-domaines.
         - `regex` : expressions régulières pour les domaines.
         - `subnet` : sous-réseaux IP au format CIDR.
-    
+
         Exemple : { exact = [ "exemple.com" ]; subnet = [ "192.168.1.0/24" ]; }
       '';
     };
   };
-
- 
 
   config = mkMerge [
     (mkIf cfg.enable {
@@ -108,7 +106,10 @@ in
       nixpkgs.overlays = [
         (self: super: {
           g3proxy = super.g3proxy.overrideAttrs (old: {
-            cargoBuildFlags = (old.cargoBuildFlags or [ ]) ++ [ "-p" "g3proxy-ctl" ];
+            cargoBuildFlags = (old.cargoBuildFlags or [ ]) ++ [
+              "-p"
+              "g3proxy-ctl"
+            ];
           });
         })
         (self: super: {
@@ -116,7 +117,7 @@ in
             name = "proxy-switcher";
             # disables shellcheck.
             checkPhase = "";
-            runtimeEnv = {  
+            runtimeEnv = {
               EXTRA_ENV_FILE = cfg.secretsPath;
             };
             text =
@@ -142,7 +143,7 @@ in
             name = "current-proxy";
             # disables shellcheck
             checkPhase = "";
-            runtimeEnv = {  
+            runtimeEnv = {
               EXTRA_ENV_FILE = cfg.secretsPath;
             };
             text =
@@ -150,9 +151,7 @@ in
                 noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./current-proxy.sh)));
               in
               noShebang;
-            runtimeInputs = [
-              pkgs.gettext
-            ];
+            runtimeInputs = [ pkgs.gettext ];
           };
         })
       ];

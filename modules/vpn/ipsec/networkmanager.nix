@@ -127,7 +127,7 @@ let
       vpn-secrets = mkIf (method == "psk") { password = mkPasswordVariable operatorName; };
 
       ipv4 = {
-        method = if localSubnet == "%any" then "auto" else "disabled"; 
+        method = if localSubnet == "%any" then "auto" else "disabled";
         address1 = mkIf (localSubnet != "%any") "${mkAddress bit},${gateway}";
         ignore-auto-dns = true;
         inherit dns;
@@ -169,7 +169,10 @@ in
   };
 
   imports = [
-    (mkRenamedOptionModule [ "securix" "vpn" "ipsec" "pskSecretsPaths" ] [ "securix" "vpn" "ipsec" "secretsPaths" ])
+    (mkRenamedOptionModule
+      [ "securix" "vpn" "ipsec" "pskSecretsPaths" ]
+      [ "securix" "vpn" "ipsec" "secretsPaths" ]
+    )
   ];
 
   config = mkIf cfg.enable {
