@@ -107,6 +107,11 @@ in
 
       nixpkgs.overlays = [
         (self: super: {
+          g3proxy = super.g3proxy.overrideAttrs (old: {
+            cargoBuildFlags = (old.cargoBuildFlags or [ ]) ++ [ "-p" "g3proxy-ctl" ];
+          });
+        })
+        (self: super: {
           proxy-switcher = pkgs.writeShellApplication {
             name = "proxy-switcher";
             # disables shellcheck.
@@ -121,7 +126,7 @@ in
               noShebang;
             runtimeInputs = [
               # for g3proxy-ctl
-              config.services.g3proxy.package
+              pkgs.g3proxy
               pkgs.jq
               # For whiptail.
               pkgs.newt
@@ -154,7 +159,7 @@ in
 
       environment.etc."proxy-switcher/proxies.json".source = proxyConfigFile;
       environment.systemPackages = [
-        config.services.g3proxy.package
+        pkgs.g3proxy
         pkgs.proxy-switcher
         pkgs.current-proxy
       ];
