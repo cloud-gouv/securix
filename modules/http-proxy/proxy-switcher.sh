@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 CONFIG_FILE="/etc/proxy-switcher/proxies.json"
-DAEMON_GROUP="default"
+DAEMON_GROUP=""
 INTERNAL_FORWARD_PROXY="127.0.0.1:8081"
 PID=$(systemctl show -p MainPID --value http-proxy.service)
 
@@ -84,7 +84,7 @@ CONFIG_FILE_DATA=$(envsubst < "$CONFIG_FILE")
 
 
 # CLI mode.
-if [ "$#" -ge 2 ]; then
+if [ "$#" -ge 1 ]; then
   if ! command -v jq >/dev/null 2>&1; then
     echo "This script requires 'jq'. Please make it available in the environment."
     exit 1
