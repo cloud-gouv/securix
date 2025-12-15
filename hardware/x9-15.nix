@@ -28,7 +28,8 @@ in
       "sd_mod"
     ];
     boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ "kvm-intel" ];
+    boot.kernelModules = [ "kvm-intel" "uvcvideo" ];
+    hardware.camera.enable = true;
     boot.extraModulePackages = [ ];
 
     hardware.firmware = [
