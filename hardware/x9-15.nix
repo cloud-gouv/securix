@@ -26,10 +26,10 @@ in
       "nvme"
       "usb_storage"
       "sd_mod"
+      "uvcvideo"
     ];
     boot.initrd.kernelModules = [ ];
     boot.kernelModules = [ "kvm-intel" "uvcvideo" ];
-    hardware.camera.enable = true;
     boot.extraModulePackages = [ ];
 
     hardware.firmware = [
