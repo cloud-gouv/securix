@@ -47,7 +47,8 @@ rustPlatform.buildRustPackage rec {
     c-ares
     lua5_4
     openssl
-  ] ++ lib.optionals stdenv.isDarwin [ darwin.apple_sdk.frameworks.Security ];
+  ]
+  ++ lib.optionals stdenv.isDarwin [ darwin.apple_sdk.frameworks.Security ];
 
   meta = {
     description = "Enterprise-oriented Generic Proxy Solutions";
