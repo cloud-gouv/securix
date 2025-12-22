@@ -52,6 +52,14 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 
 Les contributions sont les bienvenues ! Consultez les issues ouvertes et le guide de contribution pour participer.
 
+### Lancement des tests
+
+Les tests sont basés sur le framework de test NixOS. Ils permettent de
+lancer sécurix dans une VM puis exécuter des tests sur le comportement
+de cette VM.
+
+`nix-build -A tests`
+
 ## Licence
 
 Sécurix est distribué sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
