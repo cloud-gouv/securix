@@ -29,6 +29,7 @@ let
     filterAttrs
     mergeAttrsList
     mkDefault
+    mkRenamedOptionModule
     ;
   isValidIpsecProfile =
     profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec";
@@ -60,7 +61,7 @@ let
     {
       username,
       email,
-      bit,
+      bit ? null,
       ...
     }:
     profileName:
@@ -75,9 +76,10 @@ let
       gateway ? null,
       mkPasswordVariable ? null,
       mkAddress ? null,
+      dns ? null,
       ...
     }:
-    assert lib.assertMsg (bit != null)
+    assert lib.assertMsg (bit != null -> mkAddress != null)
       "Il n'est pas possible de générer un profil IPsec si le paramètre `bit` n'est pas rempli pour l'administrateur ${operatorName}";
     assert lib.assertMsg (mkPasswordVariable == null -> method != "psk")
       "Si la méthode PSK est spécifié pour le tunnel `${profileName}`, une façon de récupérer le mot de passe via une variable d'environnement doit etre spécifié.";
@@ -125,9 +127,10 @@ let
       vpn-secrets = mkIf (method == "psk") { password = mkPasswordVariable operatorName; };
 
       ipv4 = {
-        method = if localSubnet == "%any" then "disabled" else "auto";
+        method = if localSubnet == "%any" then "auto" else "disabled";
         address1 = mkIf (localSubnet != "%any") "${mkAddress bit},${gateway}";
         ignore-auto-dns = true;
+        inherit dns;
       };
 
       ipv6 = {
@@ -137,7 +140,7 @@ let
 
   mkCertificateAuthorityFile = certName: path: {
     name = "${certName}.crt";
-    value.file = path;
+    value.source = path;
   };
 in
 {
@@ -158,15 +161,22 @@ in
       '';
     };
 
-    pskSecretsPaths = mkOption {
+    secretsPaths = mkOption {
       type = types.attrsOf types.path;
       default = { };
-      description = "Chemin vers toutes les PSKs, non nécessaire en mode certificats.";
+      description = "Chemin vers vers les secrets (PSK, IPs, ...) transmit au profil VPN";
     };
   };
 
+  imports = [
+    (mkRenamedOptionModule
+      [ "securix" "vpn" "ipsec" "pskSecretsPaths" ]
+      [ "securix" "vpn" "ipsec" "secretsPaths" ]
+    )
+  ];
+
   config = mkIf cfg.enable {
-    age.secrets = mapAttrs (_: path: { file = path; }) cfg.pskSecretsPaths;
+    age.secrets = mapAttrs (_: path: { file = path; }) cfg.secretsPaths;
 
     # This is an extra rule to allow any user to do `sudo pkill charon-nm` to reset the VPN state.
     # Sometimes, when you suspend your system while having the VPN enabled and you get out of suspend state.
@@ -276,7 +286,7 @@ in
     networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
       name: _: config.age.secrets.${name}.path
-    ) cfg.pskSecretsPaths;
+    ) cfg.secretsPaths;
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
       listToAttrs (

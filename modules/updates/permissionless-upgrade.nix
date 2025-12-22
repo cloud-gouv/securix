@@ -63,8 +63,6 @@ let
         exit 1
       fi
 
-      # Remove all HTTP proxies
-      unset all_proxy http_proxy https_proxy no_proxy
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
 
