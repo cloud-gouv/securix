@@ -11,7 +11,7 @@ let
   disk = config.securix.self.mainDisk;
 in
 {
-  config = mkIf (cfg.enable && cfg.layout == "office_v1") {
+  config = mkIf (cfg.enable && lib.lists.elem cfg.layout ["office_v1" "securix_v2"]) {
     disko.devices = {
       disk = {
         ${disk} = {

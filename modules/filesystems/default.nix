@@ -9,6 +9,6 @@
     # Here's a list of layouts that are supported by the Securix framework.
     # Migrating between layouts is not supported, you need to reinstall.
     ./securix_v1.nix
-    ./office_v1.nix
+    ./securix_v2.nix
   ];
 }
