@@ -7,4 +7,5 @@ let
   loadRules = files: lib.mergeAttrsList (map import files);
 in
 loadRules [
+  ./preboot.nix
 ]
