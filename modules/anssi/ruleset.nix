@@ -8,4 +8,5 @@ let
 in
 loadRules [
   ./preboot.nix
+  ./kernel-options.nix
 ]
