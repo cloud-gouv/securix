@@ -1,0 +1,14 @@
+concurrency:
+  group: preview-pages-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build_and_preview_manual_docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+    - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
+    - name: Build the manual documentation
+      run: nix-shell --run 'mdbook build docs/manual'
+name: '[Sécurix] Test the docs'
+on:
+  pull_request:
