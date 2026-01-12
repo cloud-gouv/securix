@@ -44,7 +44,7 @@
     gnupg # PGP
     connect # for using ssh with a proxy
     jq # Lightweight and flexible command-line JSON processor
-    yq # Same as jq but for YAML
+    yq-go # Same as jq but for YAML
     # Git, the full tooling.
     gitFull
     git-lfs
