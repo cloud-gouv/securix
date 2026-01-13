@@ -14,7 +14,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 - [Variants](./user/variants.md)
 - [Operations]()
   - [Deployment options](./user/deployment.md)
-  - [A cache for your deployment]()
+  - [A cache for your deployment](./user/cache.md)
 
 # Developer guide
 
