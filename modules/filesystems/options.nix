@@ -17,6 +17,7 @@ in
       type = types.enum [
         "securix_v1"
         "office_v1"
+        "securix_v2"
       ];
       # This is the historical layout.
       default = "securix_v1";
