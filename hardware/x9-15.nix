@@ -22,6 +22,11 @@ in
     
     boot.kernelPackages = pkgs.linuxPackages_latest;
     
+    hardware.ipu6 = {
+      enable = true;
+      platform = "ipu6ep";
+    };
+
     boot.initrd.availableKernelModules = [
       "xhci_pci"
       "thunderbolt"
@@ -38,7 +43,6 @@ in
     hardware.firmware = [
       pkgs.linux-firmware
       pkgs.wireless-regdb
-      
       pkgs.sof-firmware 
       pkgs.alsa-firmware
     ];
@@ -52,7 +56,23 @@ in
         intel-vaapi-driver
         libva-vdpau-driver
         libvdpau-va-gl
+        libcamera
       ];
+    };
+
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      wireplumber.enable = true;
+    };
+    
+    security.rtkit.enable = true;
+
+    xdg.portal = {
+      enable = true;
+      extraPortals = [ pkgs.xdg-desktop-portal-kde ];
     };
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
