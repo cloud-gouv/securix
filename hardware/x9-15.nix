@@ -26,19 +26,33 @@ in
       "nvme"
       "usb_storage"
       "sd_mod"
-      "uvcvideo"
     ];
     boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ "kvm-intel" "uvcvideo" ];
+    boot.kernelModules = [ "kvm-intel" ];
     boot.extraModulePackages = [ ];
 
+    hardware.enableRedistributableFirmware = true;
+
     hardware.firmware = [
-      # WiFi
       pkgs.linux-firmware
       pkgs.wireless-regdb
+      
+      pkgs.sof-firmware 
+      pkgs.alsa-firmware
     ];
 
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+    hardware.graphics = {
+      enable = true;
+      extraPackages = with pkgs; [
+        intel-media-driver
+        intel-vaapi-driver
+        vaapiVdpau
+        libvdpau-va-gl
+      ];
+    };
+
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
 }
