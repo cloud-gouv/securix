@@ -72,7 +72,7 @@ in
 
     xdg.portal = {
       enable = true;
-      extraPortals = [ pkgs.xdg-desktop-portal-kde ];
+      extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
     };
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
