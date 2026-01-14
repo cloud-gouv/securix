@@ -30,6 +30,8 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 - Support avancé de TPM2 et Yubikey pour la gestion des clés d'authentification.
 - Chiffrement des données à l'aide de `age` ou d'un serveur Vault.
 - Enrôlement centralisé pour Secure Boot avec gestion PK/KEK.
+- Connexion au poste de travail en FIDO2 et le mot de passe n'est qu'un mode secours.
+- Déchiffrement du poste à l'aide d'une clé FIDO2 (une clé de secours est généré à l'installation). 
 
 ## Fonctionnalités en développement (par priorité)
 
@@ -44,12 +46,19 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
     - Ce morceau d'infrastructure pourra s'insérer dans un processus métier visant à mettre en place un nouveau Sécurix pour un agent.
 
 - **Support avancé des clés de sécurité**
-  - Connexion au poste de travail avec Yubikey et le mot de passe ne serait qu'un secours.
   - Gestion et rotation des clés Secure Boot avec TPM2 pour renforcer Secure Boot.
 
 ## Contribuer
 
 Les contributions sont les bienvenues ! Consultez les issues ouvertes et le guide de contribution pour participer.
+
+### Lancement des tests
+
+Les tests sont basés sur le framework de test NixOS. Ils permettent de
+lancer sécurix dans une VM puis exécuter des tests sur le comportement
+de cette VM.
+
+`nix-build -A tests`
 
 ## Licence
 

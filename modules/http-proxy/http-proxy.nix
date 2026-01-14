@@ -65,6 +65,35 @@ in
       ];
       description = "Liste de domaines exclus du proxy";
     };
+
+    secretsPath = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      description = "Chemin vers vers les secrets injectés dans les scripts de gestion de proxy";
+    };
+
+    noProxyAllowedHosts = mkOption {
+      type = types.attrsOf (types.listOf types.str);
+      default = { };
+      example = [
+        {
+          exact = [ "allowed-domain.example.com" ];
+          child = [ "allowed-all-subdomain.example.com" ];
+          regex = [ "allowed-*.example.com" ];
+          subnet = [ "10.0.0.0/16" ];
+        }
+      ];
+      description = ''
+        Liste des hôtes ou réseaux autorisés sans proxy distant.
+        Chaque clé représente un type de correspondance :
+        - `exact` : domaines exacts.
+        - `child` : domaines et tous leurs sous-domaines.
+        - `regex` : expressions régulières pour les domaines.
+        - `subnet` : sous-réseaux IP au format CIDR.
+
+        Exemple : { exact = [ "exemple.com" ]; subnet = [ "192.168.1.0/24" ]; }
+      '';
+    };
   };
 
   config = mkMerge [
@@ -76,10 +105,21 @@ in
 
       nixpkgs.overlays = [
         (self: super: {
+          g3proxy = super.g3proxy.overrideAttrs (old: {
+            cargoBuildFlags = (old.cargoBuildFlags or [ ]) ++ [
+              "-p"
+              "g3proxy-ctl"
+            ];
+          });
+        })
+        (self: super: {
           proxy-switcher = pkgs.writeShellApplication {
             name = "proxy-switcher";
             # disables shellcheck.
             checkPhase = "";
+            runtimeEnv = {
+              EXTRA_ENV_FILE = cfg.secretsPath;
+            };
             text =
               let
                 noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./proxy-switcher.sh)));
@@ -87,7 +127,7 @@ in
               noShebang;
             runtimeInputs = [
               # for g3proxy-ctl
-              config.services.g3proxy.package
+              pkgs.g3proxy
               pkgs.jq
               # For whiptail.
               pkgs.newt
@@ -95,6 +135,7 @@ in
               pkgs.gawk
               pkgs.libnotify
               pkgs.sudo
+              pkgs.gettext
             ];
           };
 
@@ -102,18 +143,22 @@ in
             name = "current-proxy";
             # disables shellcheck
             checkPhase = "";
+            runtimeEnv = {
+              EXTRA_ENV_FILE = cfg.secretsPath;
+            };
             text =
               let
                 noShebang = concatStringsSep "\n" (tail (splitString "\n" (builtins.readFile ./current-proxy.sh)));
               in
               noShebang;
+            runtimeInputs = [ pkgs.gettext ];
           };
         })
       ];
 
       environment.etc."proxy-switcher/proxies.json".source = proxyConfigFile;
       environment.systemPackages = [
-        config.services.g3proxy.package
+        pkgs.g3proxy
         pkgs.proxy-switcher
         pkgs.current-proxy
       ];
@@ -162,8 +207,8 @@ in
               # DNS4EU co-funded by European Union initiative.
               # https://www.joindns4.eu/learn/dns4eu-public-service-launched
               server = [
-                "86.54.11.11"
-                "86.54.11.211"
+                "86.54.11.1"
+                "86.54.11.201"
               ];
             }
           ];
@@ -197,6 +242,7 @@ in
               type = "http_proxy";
               listen.address = "127.0.0.1:8081";
               tls_client = { };
+              dst_host_filter_set = cfg.noProxyAllowedHosts;
             }
 
             # This is the entrypoint of all proxy requests.

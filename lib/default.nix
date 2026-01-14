@@ -447,7 +447,10 @@ rec {
           securix.self.machine.identifier = name;
           securix.self.edition = edition;
           _module.args.operators = mapAttrs' (
-            fileName: cfg: nameValuePair cfg.securix.self.username cfg.securix.self
+            fileName: cfg: 
+              nameValuePair 
+                (cfg.securix.self.username or cfg.securix.self.user.username) 
+                (cfg.securix.self.user or cfg.securix.self)
           ) extraOperators;
           _module.args.vpnProfiles = vpnProfiles;
 

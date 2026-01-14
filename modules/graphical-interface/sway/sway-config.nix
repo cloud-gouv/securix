@@ -201,11 +201,11 @@ in
           # You can send windows there and get them back later.
 
           # Move the currently focused window to the scratchpad
-          bindsym $mod+Shift+s move scratchpad
+          bindsym $mod+Shift+p move scratchpad
 
           # Show the next scratchpad window or hide the focused scratchpad window.
           # If there are multiple scratchpad windows, this command cycles through them.
-          bindsym $mod+s scratchpad show
+          bindsym $mod+p scratchpad show
       #
       # Resizing containers:
       #

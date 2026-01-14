@@ -17,7 +17,7 @@ in
 
     defaultLookAndFeel = mkOption {
       type = types.str;
-      default = null;
+      default = "org.kde.breeze";
       description = "Default look & feel package";
       example = "fr.dinum.bureautix";
     };

@@ -42,9 +42,7 @@ let
       };
     };
   };
-in
-{
-  lib = import ./lib {
+  lib-securix = import ./lib {
     pkgs = pkgs';
     inherit
       lib
@@ -53,8 +51,15 @@ in
       sources
       ;
   };
+in
+{
+  lib = lib-securix;
   pkgs = pkgs';
   modules = ./modules;
+  tests = import ./tests {
+    pkgs = pkgs';
+    libSecurix = lib-securix;
+  };
   shell = pkgs'.mkShell {
     packages = [
       pkgs'.npins
