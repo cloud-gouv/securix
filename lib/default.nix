@@ -169,20 +169,19 @@ rec {
       createSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
       # TODO: this is very wrong.
       # We should be migrating to /var/lib as well.
-      createSecureBootKeysScript =
-        ''
-          box_message "Provisioning Secure Boot keys..."
-        ''
-        + (
-          if lib.versionOlder pkgs.sbctl.version "0.15" then
-            ''
-              ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
-            ''
-          else
-            ''
-              ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
-            ''
-        );
+      createSecureBootKeysScript = ''
+        box_message "Provisioning Secure Boot keys..."
+      ''
+      + (
+        if lib.versionOlder pkgs.sbctl.version "0.15" then
+          ''
+            ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot --export /mnt/etc/secureboot/keys
+          ''
+        else
+          ''
+            ${pkgs.sbctl}/bin/sbctl create-keys --database-path /mnt/etc/secureboot/GUID --export /mnt/etc/secureboot/keys --disable-landlock
+          ''
+      );
       enrollSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
       secureBootEnrollmentScript = ''
         box_message "Enrolling Secure Boot keys..."
@@ -382,10 +381,11 @@ rec {
               imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-base.nix" ];
               # This is an intermediate priority override, normal override is 100, mkDefault is 1000. We take the middle here.
               networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.inventoryId}";
-              system.nixos.tags =
-                [ "m${toString targetSystem.config.securix.self.inventoryId}" ]
-                # Taint developer images.
-                ++ optional targetSystem.config.securix.self.developer "developer";
+              system.nixos.tags = [
+                "m${toString targetSystem.config.securix.self.inventoryId}"
+              ]
+              # Taint developer images.
+              ++ optional targetSystem.config.securix.self.developer "developer";
 
               isoImage.storeContents = [ targetSystemClosure ];
               isoImage.squashfsCompression = compression;
@@ -447,10 +447,10 @@ rec {
           securix.self.machine.identifier = name;
           securix.self.edition = edition;
           _module.args.operators = mapAttrs' (
-            fileName: cfg: 
-              nameValuePair 
-                (cfg.securix.self.username or cfg.securix.self.user.username) 
-                (cfg.securix.self.user or cfg.securix.self)
+            fileName: cfg:
+            nameValuePair (cfg.securix.self.username or cfg.securix.self.user.username) (
+              cfg.securix.self.user or cfg.securix.self
+            )
           ) extraOperators;
           _module.args.vpnProfiles = vpnProfiles;
 
@@ -464,7 +464,8 @@ rec {
           # Otherwise, it's too expensive in rebuilds!
           documentation.man.man-db.enable = false;
         }
-      ] ++ modules;
+      ]
+      ++ modules;
     in
     {
       modules = allModules;
