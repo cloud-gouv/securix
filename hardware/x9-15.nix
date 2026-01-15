@@ -24,7 +24,7 @@ in
     
     hardware.ipu6 = {
       enable = true;
-      platform = "ipu6ep";
+      platform = "ipu6";
     };
 
     boot.initrd.availableKernelModules = [
