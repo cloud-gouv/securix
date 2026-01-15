@@ -35,7 +35,19 @@ in
     hardware.firmware = [
       pkgs.linux-firmware
       pkgs.wireless-regdb
+      pkgs.sof-firmware
     ];
+
+
+    security.rtkit.enable = true;
+    services.pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
+      jack.enable = true;
+      wireplumber.enable = true;
+    };
 
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
