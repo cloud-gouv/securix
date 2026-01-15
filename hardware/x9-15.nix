@@ -24,7 +24,11 @@ in
     
     hardware.ipu6 = {
       enable = true;
-      platform = "ipu6";
+      platform = "ipu6ep";
+    };
+
+    services.v4l2-relayd = {
+      enable = true;
     };
 
     boot.initrd.availableKernelModules = [
@@ -35,8 +39,9 @@ in
       "sd_mod"
     ];
     boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ "kvm-intel" ];
-    boot.extraModulePackages = [ ];
+    boot.kernelModules = [ "kvm-intel" "v4l2loopback" ];
+    
+    boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
 
     hardware.enableRedistributableFirmware = true;
 
@@ -74,6 +79,14 @@ in
       enable = true;
       extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
     };
+    
+    environment.systemPackages = with pkgs; [
+      alsa-ucm-conf
+      libcamera
+      v4l-utils
+      pavucontrol
+      gst_all_1.gstreamer
+    ];
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
