@@ -18,26 +18,27 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "x9-15") {
+  config = mkIf (config.securix.self.machine.hardwareSKU == "x9-15") {
+
     boot.kernelPackages = pkgs.linuxPackages_latest;
+
     boot.initrd.availableKernelModules = [
       "xhci_pci"
       "thunderbolt"
       "nvme"
-      "usb_storage"
-      "sd_mod"
+      "usbhid"
     ];
     boot.initrd.kernelModules = [ ];
     boot.kernelModules = [ "kvm-intel" ];
     boot.extraModulePackages = [ ];
 
     hardware.firmware = [
-      # WiFi
       pkgs.linux-firmware
       pkgs.wireless-regdb
     ];
 
-    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+    nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
 }
