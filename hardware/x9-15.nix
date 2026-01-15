@@ -21,72 +21,23 @@ in
   config = mkIf (config.securix.self.machine.hardwareSKU == "x9-15") {
     
     boot.kernelPackages = pkgs.linuxPackages_latest;
-    
-    hardware.ipu6 = {
-      enable = true;
-      platform = "ipu6ep";
-    };
-
-    services.v4l2-relayd = {
-      enable = true;
-    };
 
     boot.initrd.availableKernelModules = [
       "xhci_pci"
       "thunderbolt"
       "nvme"
-      "usb_storage"
-      "sd_mod"
+      "usbhid"
     ];
     boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [ "kvm-intel" "v4l2loopback" ];
-    
-    boot.extraModulePackages = [ config.boot.kernelPackages.v4l2loopback ];
-
-    hardware.enableRedistributableFirmware = true;
+    boot.kernelModules = [ "kvm-intel" ];
+    boot.extraModulePackages = [ ];
 
     hardware.firmware = [
       pkgs.linux-firmware
       pkgs.wireless-regdb
-      pkgs.sof-firmware 
-      pkgs.alsa-firmware
     ];
 
     hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
-
-    hardware.graphics = {
-      enable = true;
-      extraPackages = with pkgs; [
-        intel-media-driver
-        intel-vaapi-driver
-        libva-vdpau-driver
-        libvdpau-va-gl
-        libcamera
-      ];
-    };
-
-    services.pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      wireplumber.enable = true;
-    };
-    
-    security.rtkit.enable = true;
-
-    xdg.portal = {
-      enable = true;
-      extraPortals = [ pkgs.kdePackages.xdg-desktop-portal-kde ];
-    };
-    
-    environment.systemPackages = with pkgs; [
-      alsa-ucm-conf
-      libcamera
-      v4l-utils
-      pavucontrol
-      gst_all_1.gstreamer
-    ];
 
     nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   };
