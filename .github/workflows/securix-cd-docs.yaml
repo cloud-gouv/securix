@@ -1,0 +1,34 @@
+permissions:
+  contents: write
+  id-token: write
+  pages: write
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  publish_docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+    - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
+    - name: Setup Pages
+      uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
+    - name: Build the manual documentation
+      run: nix-shell --run 'mdbook build docs/manual'
+    - name: Upload manual
+      uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+      with:
+        path: './docs/manual/book'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+name: '[Sécurix] Publish documentation'
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+

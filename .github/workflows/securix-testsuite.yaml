@@ -1,0 +1,20 @@
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+    - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
+    - uses: zombiezen/setup-nix-cache-action@cacc7abf0a6636b0ef45ec2ae055a9734cdd4122 # main
+      with:
+        substituters: s3://oss-securix?endpoint=https://s3.gra.io.cloud.ovh.net&region=gra&compression=xz&parallel-compression=true
+        secret_keys: ${{ secrets.NIX_SIGNING_PRIVATE_KEY }}
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
+    - name: Build tests
+      run: nix-build -A tests
+name: '[Sécurix] Test suite'
+on:
+  pull_request:
+  push:
+    branches:
+    - main

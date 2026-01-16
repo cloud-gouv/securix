@@ -63,6 +63,7 @@ in
   shell = pkgs'.mkShell {
     packages = [
       pkgs'.npins
+      pkgs'.mdbook
       (pkgs'.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
     ]
     ++ git-checks.enabledPackages;
