@@ -54,6 +54,8 @@ in
                           "compress=zstd"
                           "noatime"
                           "noexec"
+                          "nosuid"
+                          "nodev"
                         ];
                       };
                       "/nix" = {
