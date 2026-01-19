@@ -2,7 +2,12 @@
 
 let
   yubikeysManagerUI = pkgs.writeShellScriptBin "yubikeys-manager-ui" ''
-    export PATH="${pkgs.lib.makeBinPath [ pkgs.yubikey-manager pkgs.cryptsetup ]}:$PATH"
+    export PATH="${
+      pkgs.lib.makeBinPath [
+        pkgs.yubikey-manager
+        pkgs.cryptsetup
+      ]
+    }:$PATH"
 
     PYTHON_INTERP="${pkgs.python3.withPackages (ps: [ ps.tkinter ])}/bin/python3"
 

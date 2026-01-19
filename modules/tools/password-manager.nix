@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs
-, lib
-, config
-, ...
+{
+  pkgs,
+  lib,
+  config,
+  ...
 }:
 let
   cfg = config.securix.password-manager.bitwarden;
