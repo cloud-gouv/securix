@@ -6,7 +6,7 @@ let
 
     PYTHON_INTERP="${pkgs.python3.withPackages (ps: [ ps.tkinter ])}/bin/python3"
 
-    exec $PYTHON_INTERP ${./enrollement_yubi.py} "$@"
+    exec $PYTHON_INTERP ${./yubikeys-manager-ui.py} "$@"
   '';
 in
 {
