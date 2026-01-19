@@ -3,8 +3,6 @@ from tkinter import ttk, messagebox
 import subprocess
 import json
 import os
-import shutil
-import time
 
 class RootSession:
     """
@@ -82,7 +80,7 @@ class YubiKeyManager:
         self.root = root
         self.root.title("Gestionnaire YubiKeys")
         
-        self.root.geometry("800x750")
+        self.root.geometry("850x800")
 
         style = ttk.Style()
         style.theme_use('clam')
@@ -130,11 +128,49 @@ class YubiKeyManager:
 
         self.frame_admin_auth = ttk.Frame(self.tab_admin)
         self.frame_admin_auth.pack(fill="both", expand=True)
-
-        self.frame_admin_tools = ttk.Frame(self.tab_admin)
-
         self.build_admin_auth_ui()
+
+        self.frame_admin_scroll_container = ttk.Frame(self.tab_admin)
+        
+        self.init_scrollable_admin_tools()
+
+    def init_scrollable_admin_tools(self):
+        """ Crée une zone scrollable pour les outils admin """
+        self.canvas = tk.Canvas(self.frame_admin_scroll_container)
+        scrollbar = ttk.Scrollbar(self.frame_admin_scroll_container, orient="vertical", command=self.canvas.yview)
+        
+        self.frame_admin_tools = ttk.Frame(self.canvas)
+
+        self.frame_admin_tools.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+
+        self.canvas_window = self.canvas.create_window((0, 0), window=self.frame_admin_tools, anchor="nw")
+
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+
+        self.canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        self.frame_admin_scroll_container.bind("<Configure>", self.on_frame_configure)
+        
+        self.bind_mouse_scroll(self.frame_admin_tools)
+        self.bind_mouse_scroll(self.canvas)
+
         self.build_admin_tools_ui()
+
+    def on_frame_configure(self, event):
+        """Adapte la largeur du frame interne à la largeur du canvas"""
+        self.canvas.itemconfig(self.canvas_window, width=event.width)
+
+    def bind_mouse_scroll(self, widget):
+        """Active le scroll avec la molette"""
+        widget.bind("<Enter>", lambda _: self.canvas.bind_all("<MouseWheel>", self._on_mousewheel))
+        widget.bind("<Leave>", lambda _: self.canvas.unbind_all("<MouseWheel>"))
+
+    def _on_mousewheel(self, event):
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def on_tab_changed(self, event):
         selected_tab = event.widget.select()
@@ -149,7 +185,7 @@ class YubiKeyManager:
         self.root_session.stop()
         self.log("Session Root fermée.")
 
-        self.frame_admin_tools.pack_forget()
+        self.frame_admin_scroll_container.pack_forget()
         self.frame_admin_auth.pack(fill="both", expand=True)
         self.tab_control.tab(1, text='Espace Admin')
         self.combo_disk.set('')
@@ -164,7 +200,8 @@ class YubiKeyManager:
         if success and "ROOT_ACCESS_OK" in out:
             self.admin_unlocked = True
             self.frame_admin_auth.pack_forget()
-            self.frame_admin_tools.pack(fill="both", expand=True)
+            self.frame_admin_scroll_container.pack(fill="both", expand=True)
+            
             self.tab_control.tab(1, text='Espace Admin (Ouvert)')
             self.log("Accès Root.")
 
@@ -184,7 +221,7 @@ class YubiKeyManager:
 
     def build_user_tab(self):        
         container = ttk.Frame(self.tab_user)
-        container.place(relx=0.5, rely=0.4, anchor="center") 
+        container.place(relx=0.5, rely=0.5, anchor="center") 
 
         lbl_title = ttk.Label(container, text="Modification PIN Standard", font=("Segoe UI", 16, "bold"))
         lbl_title.pack(pady=(0, 20))
@@ -209,7 +246,7 @@ class YubiKeyManager:
         ttk.Label(c, text="Zone Admin sécurisée.\nAuthentification requise.", justify="center").pack(pady=10)
         ttk.Button(c, text="Déverrouiller", command=self.unlock_admin).pack(ipadx=20, ipady=10)
 
-    def build_admin_tools_ui(self):
+    def build_admin_tools_ui(self):        
         # --- Section 1: Enrôlement ---
         f1 = ttk.LabelFrame(self.frame_admin_tools, text="1. Disques & Chiffrement", padding=10)
         f1.pack(fill="x", padx=10, pady=5)
