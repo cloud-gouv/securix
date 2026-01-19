@@ -252,10 +252,10 @@ class YubiKeyManager:
         f1.pack(fill="x", padx=10, pady=5)
 
         # Sélection du disque
-        d_frame = ttk.Frame(f1); d_frame.pack(fill="x", pady=(0, 10))
-        self.combo_disk = ttk.Combobox(d_frame, state="readonly", width=80); self.combo_disk.pack(side="left")
+        self.combo_disk = ttk.Combobox(d_frame, state="readonly", width=50)
+        self.combo_disk.pack(side="left", fill="x", expand=True) 
         ttk.Button(d_frame, text="rafraichir", width=9, command=self.refresh_disks).pack(side="left", padx=5)
-
+        
         # Choix Méthode d'autorisation
         auth_frame = ttk.LabelFrame(f1, text="Autorisation pour l'ajout", padding=5)
         auth_frame.pack(fill="x", pady=5)
