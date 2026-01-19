@@ -53,6 +53,7 @@ in
                         mountOptions = [
                           "compress=zstd"
                           "noatime"
+                          "noexec"
                         ];
                       };
                       "/nix" = {
