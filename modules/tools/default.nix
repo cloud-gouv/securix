@@ -4,7 +4,10 @@
 
 { pkgs, ... }:
 {
-  imports = [ ./firefox.nix ];
+  imports = [ 
+    ./firefox.nix
+    ./yubikeys-manager-ui.nix
+  ];
 
   programs.mtr.enable = true;
 
