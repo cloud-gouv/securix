@@ -80,8 +80,8 @@ class RootSession:
 class YubiKeyManager:
     def __init__(self, root):
         self.root = root
-        self.root.title("Gestionnaire YubiKey - Bureautix")
-        self.root.geometry("950x900")
+        self.root.title("Gestionnaire YubiKeys")
+        self.root.geometry("1050x900")
 
         style = ttk.Style()
         style.theme_use('clam')
@@ -174,7 +174,7 @@ class YubiKeyManager:
         return e
 
     def build_user_tab(self):
-        frame = ttk.LabelFrame(self.tab_user, text="Modification Standard (FIDO + PIV)", padding=20)
+        frame = ttk.LabelFrame(self.tab_user, text="Modification du code PIN Standard (FIDO + PIV)", padding=20)
         frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         self.u_old = self.create_pwd_entry(frame, "Ancien PIN :", 1)
@@ -197,7 +197,7 @@ class YubiKeyManager:
         # Sélection du disque
         d_frame = ttk.Frame(f1); d_frame.pack(fill="x", pady=(0, 10))
         self.combo_disk = ttk.Combobox(d_frame, state="readonly", width=80); self.combo_disk.pack(side="left")
-        ttk.Button(d_frame, text="rafraichir", width=7, command=self.refresh_disks).pack(side="left", padx=5)
+        ttk.Button(d_frame, text="refresh", width=7, command=self.refresh_disks).pack(side="left", padx=5)
 
         # Choix Méthode d'autorisation
         auth_frame = ttk.LabelFrame(f1, text="Autorisation pour l'ajout", padding=5)
@@ -222,8 +222,8 @@ class YubiKeyManager:
 
         ttk.Button(f1, text="Enroller NOUVELLE YubiKey", command=self.admin_enroll).pack(pady=10)
 
-        # --- Section 2: PIN Expert ---
-        f2 = ttk.LabelFrame(self.frame_admin_tools, text="2. Expert PIN", padding=10)
+        # --- Section 2: PIN ---
+        f2 = ttk.LabelFrame(self.frame_admin_tools, text="2. PIN", padding=10)
         f2.pack(fill="x", padx=10, pady=5)
 
         c_frame = ttk.Frame(f2); c_frame.grid(row=0, columnspan=2, sticky="w")
@@ -362,7 +362,7 @@ class YubiKeyManager:
     def admin_change_pin(self):
         if not (self.var_do_fido.get() or self.var_do_piv.get()): return
         old, new, conf = self.adm_old.get(), self.adm_new.get(), self.adm_conf.get()
-        ok, msg = self.check_pin(new, conf);
+        ok, msg = self.check_pin(new, conf)
         if not ok: return messagebox.showerror("Erreur", msg)
 
         if self.var_do_fido.get():
