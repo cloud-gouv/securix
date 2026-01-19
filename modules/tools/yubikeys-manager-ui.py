@@ -81,7 +81,8 @@ class YubiKeyManager:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestionnaire YubiKeys")
-        self.root.geometry("1050x1000")
+        
+        self.root.geometry("800x750")
 
         style = ttk.Style()
         style.theme_use('clam')
@@ -104,14 +105,26 @@ class YubiKeyManager:
         self.root.destroy()
 
     def setup_ui(self):
+
+        bottom_frame = ttk.Frame(self.root)
+        bottom_frame.pack(side="bottom", fill="x", padx=10, pady=5)
+
+        ttk.Separator(bottom_frame, orient='horizontal').pack(fill='x', pady=5)
+        
+        lbl_log = ttk.Label(bottom_frame, text="Journal d'événements :", font=("Arial", 8, "bold"))
+        lbl_log.pack(anchor="w")
+
+        self.log_text = tk.Text(bottom_frame, height=7, state="disabled", bg="#f0f0f0", font=("Consolas", 9))
+        self.log_text.pack(fill="x")
+
         self.tab_control = ttk.Notebook(self.root)
+        self.tab_control.pack(side="top", expand=True, fill="both", padx=10, pady=5)
 
         self.tab_user = ttk.Frame(self.tab_control)
         self.tab_admin = ttk.Frame(self.tab_control)
 
-        self.tab_control.add(self.tab_user, text='Espace Utilisateur')
-        self.tab_control.add(self.tab_admin, text='Espace Admin')
-        self.tab_control.pack(expand=1, fill="both")
+        self.tab_control.add(self.tab_user, text=' Espace Utilisateur ')
+        self.tab_control.add(self.tab_admin, text=' Espace Admin ')
 
         self.build_user_tab()
 
@@ -122,10 +135,6 @@ class YubiKeyManager:
 
         self.build_admin_auth_ui()
         self.build_admin_tools_ui()
-
-        ttk.Separator(self.root, orient='horizontal').pack(fill='x', pady=5)
-        self.log_text = tk.Text(self.root, height=7, state="disabled", bg="#f0f0f0", font=("Consolas", 9))
-        self.log_text.pack(fill="x", padx=10, pady=(0, 10))
 
     def on_tab_changed(self, event):
         selected_tab = event.widget.select()
@@ -165,22 +174,33 @@ class YubiKeyManager:
             messagebox.showerror("Erreur", "Mot de passe incorrect ou annulé.")
 
     def create_pwd_entry(self, parent, label, row, col=1):
-        ttk.Label(parent, text=label).grid(row=row, column=0, sticky="e", padx=5, pady=5)
+        ttk.Label(parent, text=label).grid(row=row, column=0, sticky="e", padx=5, pady=8)
         f = ttk.Frame(parent)
-        f.grid(row=row, column=col, sticky="w", padx=5)
+        f.grid(row=row, column=col, sticky="w", padx=5, pady=8)
         e = ttk.Entry(f, show="*", width=22)
         e.pack(side="left")
-        ttk.Button(f, text="voir", width=5, command=lambda: e.config(show="" if e['show']=="*" else "*")).pack(side="left")
+        ttk.Button(f, text="voir", width=5, command=lambda: e.config(show="" if e['show']=="*" else "*")).pack(side="left", padx=(2,0))
         return e
 
-    def build_user_tab(self):
-        frame = ttk.LabelFrame(self.tab_user, text="Modification du code PIN Standard (FIDO + PIV)", padding=20)
-        frame.pack(fill="both", expand=True, padx=20, pady=20)
+    def build_user_tab(self):        
+        container = ttk.Frame(self.tab_user)
+        container.place(relx=0.5, rely=0.4, anchor="center") 
+
+        lbl_title = ttk.Label(container, text="Modification PIN Standard", font=("Segoe UI", 16, "bold"))
+        lbl_title.pack(pady=(0, 20))
+
+        frame = ttk.LabelFrame(container, text="FIDO2 + PIV", padding=25)
+        frame.pack(ipadx=10, ipady=10)
 
         self.u_old = self.create_pwd_entry(frame, "Ancien PIN :", 1)
-        self.u_new = self.create_pwd_entry(frame, "Nouveau PIN :", 2)
-        self.u_conf = self.create_pwd_entry(frame, "Confirmer PIN :", 3)
-        ttk.Button(frame, text="Valider", command=self.user_change_pin).grid(row=4, columnspan=2, pady=20)
+        
+        ttk.Separator(frame, orient='horizontal').grid(row=2, column=0, columnspan=3, sticky="ew", pady=15)
+        
+        self.u_new = self.create_pwd_entry(frame, "Nouveau PIN :", 3)
+        self.u_conf = self.create_pwd_entry(frame, "Confirmer PIN :", 4)
+
+        btn = ttk.Button(frame, text="Valider le changement", command=self.user_change_pin)
+        btn.grid(row=5, columnspan=3, pady=(20, 0), sticky="ew")
 
     def build_admin_auth_ui(self):
         c = ttk.Frame(self.frame_admin_auth)
