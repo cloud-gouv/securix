@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Pauline Legrand <pauline.legrand@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
 { pkgs, ... }:
 
 let
