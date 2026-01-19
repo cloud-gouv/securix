@@ -81,7 +81,7 @@ class YubiKeyManager:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestionnaire YubiKeys")
-        self.root.geometry("1050x900")
+        self.root.geometry("1050x1000")
 
         style = ttk.Style()
         style.theme_use('clam')
@@ -197,7 +197,7 @@ class YubiKeyManager:
         # Sélection du disque
         d_frame = ttk.Frame(f1); d_frame.pack(fill="x", pady=(0, 10))
         self.combo_disk = ttk.Combobox(d_frame, state="readonly", width=80); self.combo_disk.pack(side="left")
-        ttk.Button(d_frame, text="refresh", width=7, command=self.refresh_disks).pack(side="left", padx=5)
+        ttk.Button(d_frame, text="rafraichir", width=9, command=self.refresh_disks).pack(side="left", padx=5)
 
         # Choix Méthode d'autorisation
         auth_frame = ttk.LabelFrame(f1, text="Autorisation pour l'ajout", padding=5)
