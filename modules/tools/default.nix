@@ -4,7 +4,7 @@
 
 { pkgs, ... }:
 {
-  imports = [ 
+  imports = [
     ./firefox.nix
     ./yubikeys-manager-ui.nix
   ];
