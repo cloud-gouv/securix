@@ -18,7 +18,7 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "e14g7") {
+  config = mkIf (config.securix.self.hardwareSKU == "e14-g7") {
     boot.kernelPackages = pkgs.linuxPackages_latest;
     boot.initrd.availableKernelModules = [
       "xhci_pci"
