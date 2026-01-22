@@ -9,5 +9,6 @@
     ./latitude5340.nix
     ./t14g6.nix
     ./x9-15.nix
+    ./e14-g7.nix
   ];
 }

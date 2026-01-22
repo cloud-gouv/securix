@@ -176,6 +176,7 @@ in
           "latitude5340"
           "t14g6"
           "x9-15"
+          "e14-g7"
         ];
         description = "Identifiant de configuration du matériel";
         example = "x280";
