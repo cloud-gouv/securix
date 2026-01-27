@@ -181,7 +181,7 @@ in
           fi
         '';
       in
-      pkgs.writeShellScript "anssi-nixos-compliance-check" ''
+      pkgs.writeShellScriptBin "anssi-nixos-compliance-check" ''
         declare -A results
 
         ${lib.concatStringsSep "\n" (
