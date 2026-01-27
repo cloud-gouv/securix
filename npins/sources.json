@@ -59,17 +59,10 @@
       "hash": "0xc1wawnb0297h5khxblmf9pd1fry950xkcm7mwlck19s2906h80"
     },
     "nixpkgs": {
-      "type": "Git",
-      "repository": {
-        "type": "GitHub",
-        "owner": "nixos",
-        "repo": "nixpkgs"
-      },
-      "branch": "main",
-      "submodules": false,
-      "revision": "710c7c3c6fc54971f360c04dedeefeac1b97c73a",
-      "url": "https://github.com/nixos/nixpkgs/archive/710c7c3c6fc54971f360c04dedeefeac1b97c73a.tar.gz",
-      "hash": "1h7f32wcg2a49p3rssjf13mlmy6pvcyhhizp8npiljfmcr82dzjx"
+      "type": "Channel",
+      "name": "nixos-25.11",
+      "url": "https://releases.nixos.org/nixos/25.11/nixos-25.11.1056.d9bc5c7dceb3/nixexprs.tar.xz",
+      "hash": "148dkksh8z1amk7jvp0a79k19aydxbzvhbhicbs41wwhkqk9yb57"
     }
   },
   "version": 5
