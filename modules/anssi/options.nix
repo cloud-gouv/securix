@@ -205,8 +205,6 @@ in
       '';
 
     # TODO: enable the compliance script when needed.
-    environment.systemPackages = [
-      config.system.build.complianceCheckScript
-    ];
+    environment.systemPackages = [ config.system.build.complianceCheckScript ];
   };
 }
