@@ -153,6 +153,17 @@ in
           avec parcimonie.
         '';
       };
+
+      experimental = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          Mode expérimental pour cet opérateur.
+
+          Le mode expérimental permet de tester de nouvelles fonctionnalités.
+          Il n'est pas conçu pour *développer* d'autres choses en meme temps.
+        '';
+      };
     };
 
     machine = {
