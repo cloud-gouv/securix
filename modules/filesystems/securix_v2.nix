@@ -9,6 +9,7 @@ let
   cfg = config.securix.filesystems;
   inherit (lib) mkIf;
   disk = config.securix.self.mainDisk;
+  noExecHome = config.securix.filesystems.noExecHome;
 in
 {
   config =
@@ -66,10 +67,9 @@ in
                             mountOptions = [
                               "compress=zstd"
                               "noatime"
-                              "noexec"
                               "nosuid"
                               "nodev"
-                            ];
+                            ] ++ (if noExecHome then [ "noexec" ] else []);
                           };
                           "/var" = {
                             mountpoint = "/var";

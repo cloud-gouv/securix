@@ -31,5 +31,9 @@ in
         your own custom layout and use it on your systems.
       '';
     };
+
+    noExecHome = mkEnableOption "disable exec on Home" // {
+      default = true;
+    };
   };
 }
