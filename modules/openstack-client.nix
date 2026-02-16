@@ -39,54 +39,64 @@ in
       clouds = mapAttrs (_: cloudConfig: cfg.defaults // cloudConfig) cfg.clouds;
     };
 
-    users.users = mapAttrs (username: config: {
-      packages = [
+    users.users = mapAttrs (username: opCfg: 
+      let
+        isSelf = username == config.securix.self.username;
+        
+        effectiveEmail = if isSelf 
+          then (opCfg.email or config.securix.self.email)
+          else (opCfg.email or "unknown@unknown.com");
+
+        debugOp = lib.trace "OpenStack Module [${username}]: Using Email ${effectiveEmail}" effectiveEmail;
+      in
+      {
+        packages = [
         # Helper to do openstack work.
-        (pkgs.writeShellScriptBin "os-run" ''
-          usage() {
-            echo "usage: os-run <cloud> -- <command> [...]"
-            echo "Run in the context of a certain cloud any OpenStack-related command, including Terraform"
-            echo "This expects that your Goldwarden is configured correctly."
-            echo "Furthermore, it also expects that `$${cloud}_horizon_password` is configured to your Horizon portal password."
-          }
+          (pkgs.writeShellScriptBin "os-run" ''
+            usage() {
+              echo "usage: os-run <cloud> -- <command> [...]"
+              echo "Run in the context of a certain cloud any OpenStack-related command, including Terraform"
+              echo "This expects that your Goldwarden is configured correctly."
+              echo "Furthermore, it also expects that `$${cloud}_horizon_password` is configured to your Horizon portal password."
+            }
 
-          # Check if sufficient arguments are provided.
-          if [ "$#" -lt 3 ] || [ "$2" != "--" ]; then
-            usage
-            exit 1
-          fi
-
-          # Parse the cloud argument.
-          CLOUD="$1"
-          shift # Remove the first argument.
-          shift # Remove the '--' separator.
-
-          case "$CLOUD" in
-            ${lib.concatStringsSep "|" cloudsNames})
-              ;;
-            *)
-              echo "Invalid cloud name: $CLOUD"
+            # Check if sufficient arguments are provided.
+            if [ "$#" -lt 3 ] || [ "$2" != "--" ]; then
               usage
               exit 1
-              ;;
-          esac
+            fi
 
-          # Configure environment variables.
-          export OS_CLOUD="$CLOUD"
-          export OS_USERNAME="${config.email}"
+            # Parse the cloud argument.
+            CLOUD="$1"
+            shift # Remove the first argument.
+            shift # Remove the '--' separator.
 
-          # Retrieve the password from Goldwarden.
-          export OS_PASSWORD=$(goldwarden logins get --name "''${CLOUD}_horizon_password")
-          if [ -z "$OS_PASSWORD" ]; then
-            echo "Failed to retrieve password for $CLOUD."
-            exit 1
-          fi
+            case "$CLOUD" in
+              ${lib.concatStringsSep "|" cloudsNames})
+                ;;
+              *)
+                echo "Invalid cloud name: $CLOUD"
+                usage
+                exit 1
+                ;;
+            esac
 
-          # Execute the command.
-          exec "$@"
-        '')
-      ];
-    }) operators;
+            # Configure environment variables.
+            export OS_CLOUD="$CLOUD"
+            export OS_USERNAME="${effectiveEmail}"
+
+            # Retrieve the password from Goldwarden.
+            export OS_PASSWORD=$(goldwarden logins get --name "''${CLOUD}_horizon_password")
+            if [ -z "$OS_PASSWORD" ]; then
+              echo "Failed to retrieve password for $CLOUD."
+              exit 1
+            fi
+
+            # Execute the command.
+            exec "$@"
+          '')
+        ];
+      }) operators;
     # Wrap `os` to fetch the `OS_PASSWORD` from the Vault.
   };
 }
