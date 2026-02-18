@@ -31,7 +31,7 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 - Chiffrement des données à l'aide de `age` ou d'un serveur Vault.
 - Enrôlement centralisé pour Secure Boot avec gestion PK/KEK.
 - Connexion au poste de travail en FIDO2 et le mot de passe n'est qu'un mode secours.
-- Déchiffrement du poste à l'aide d'une clé FIDO2 (une clé de secours est généré à l'installation). 
+- Déchiffrement du poste à l'aide d'une clé FIDO2 (une clé de secours est générée à l'installation). 
 
 ## Fonctionnalités en développement (par priorité)
 
@@ -50,7 +50,7 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 
 ## Contribuer
 
-Les contributions sont les bienvenues ! Consultez les issues ouvertes et le guide de contribution pour participer.
+Les contributions sont les bienvenues ! Consultez les tickets ouverts et le guide de contribution pour participer.
 
 ### Lancement des tests
 
