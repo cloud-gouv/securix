@@ -1,16 +1,16 @@
 { config, lib, pkgs, ... }:
 
 let
-  cfg = config.services.grist-registration;
+  cfg = config.securix.grist-registration;
 in
 {
-  options.services.grist-registration = {
+  options.securix.grist-registration = {
     enable = lib.mkEnableOption "Grist registration service";
     gristUrl = lib.mkOption { type = lib.types.str; default = "https://grist.numerique.gouv.fr"; };
-    docId = lib.mkOption { type = lib.types.str };
-    tableId = lib.mkOption { type = lib.types.str };
-    useProxy = lib.mkOption { type = lib.types.bool };
-    proxyUrl = lib.mkOption { type = lib.types.nullOr lib.types.str };
+    docId = lib.mkOption { type = lib.types.str; };
+    tableId = lib.mkOption { type = lib.types.str; };
+    useProxy = lib.mkOption { type = lib.types.bool; };
+    proxyUrl = lib.mkOption { type = lib.types.nullOr lib.types.str; };
   };
 
   config = lib.mkIf cfg.enable {
