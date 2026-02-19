@@ -146,38 +146,20 @@ in
       pkgs.age-plugin-yubikey
     ];
 
-    users.users = mapAttrs (username: operatorConfig: 
-      let 
-        isSelf = username == config.securix.self.username;
-
-        effectiveConfig = if isSelf then (operatorConfig // {
-          allowedVPNs = operatorConfig.allowedVPNs or config.securix.self.allowedVPNs;
-          bit = operatorConfig.bit or config.securix.self.bit;
-        }) else operatorConfig;
-
-        debugOperator = lib.trace "Debugging Merged Operator ${username}: ${lib.generators.toPretty {} effectiveConfig}" effectiveConfig;
-        
-        targetVPNs = debugOperator.allowedVPNs or [];
-      in {
-        packages = concatMap (
-          wireguardName:
-          attrValues (mkWireGuardScripts {
-            inherit wireguardName username;
-            inherit (debugOperator) bit;
-          })
-        ) (selectWireguardVpns targetVPNs);
-      }) operators;
+    users.users = mapAttrs (username: config: {
+      packages = concatMap (
+        wireguardName:
+        attrValues (mkWireGuardScripts {
+          inherit wireguardName username;
+          inherit (config) bit;
+        })
+      ) (selectWireguardVpns config.allowedVPNs);
+    }) operators;
 
     security.sudo = {
       enable = true;
       extraRules = concatMap (
         username:
-        let 
-          isSelf = username == config.securix.self.username;
-          userAllowedVPNs = if isSelf 
-            then (operators.${username}.allowedVPNs or config.securix.self.allowedVPNs)
-            else (operators.${username}.allowedVPNs or []);
-        in
         map (wg: {
           users = [ username ];
           commands = [
@@ -187,7 +169,7 @@ in
               options = [ "NOPASSWD" ];
             }
           ];
-        }) (selectWireguardVpns userAllowedVPNs)
+        }) (selectWireguardVpns operators.${username}.allowedVPNs)
       ) (builtins.attrNames operators);
     };
   };

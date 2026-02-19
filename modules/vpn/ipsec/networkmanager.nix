@@ -38,12 +38,6 @@ let
     map (profileName: f profileName vpnProfiles.${profileName}) (filter isValidIpsecProfile profiles);
   ipsecProxies = concatMapAttrs (
     op: opCfg:
-    let
-      isSelf = op == config.securix.self.username;
-      actualAllowedVPNs = if isSelf 
-        then (opCfg.allowedVPNs or config.securix.self.allowedVPNs) 
-        else (opCfg.allowedVPNs or []);
-    in
     # We merge all the available HTTP proxies together.
     mergeAttrsList (
       mapValidIpsecProfiles
@@ -58,7 +52,7 @@ let
           filter (
             profileName:
             hasAttr profileName vpnProfiles && (vpnProfiles.${profileName}.availableHttpProxies or { }) != { }
-          ) actualAllowedVPNs # Use the fallback list here
+          ) opCfg.allowedVPNs
         )
     )
   ) operators;
@@ -290,25 +284,16 @@ in
       ];
 
     networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
+    networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
+      name: _: config.age.secrets.${name}.path
+    ) cfg.secretsPaths;
     networking.networkmanager.ensureProfiles.profiles = concatMapAttrs (
       op: opCfg:
-      let
-        isSelf = op == config.securix.self.username;
-        
-        effectiveOpCfg = if isSelf then (opCfg // {
-          allowedVPNs = opCfg.allowedVPNs or config.securix.self.allowedVPNs;
-          bit = opCfg.bit or config.securix.self.bit;
-          username = opCfg.username or config.securix.self.username;
-          email = opCfg.email or config.securix.self.email;
-        }) else opCfg;
-
-        debugOp = lib.trace "IPsec Debug [${op}]: user=${effectiveOpCfg.username or "unknown"} email=${effectiveOpCfg.email or "unknown"}" effectiveOpCfg;
-      in
       listToAttrs (
         mapValidIpsecProfiles (
           profileName: profile:
-          nameValuePair "${op}-${profileName}" (mkIPsecConnectionProfile op debugOp profileName profile)
-        ) (debugOp.allowedVPNs or [])
+          nameValuePair "${op}-${profileName}" (mkIPsecConnectionProfile op opCfg profileName profile)
+        ) opCfg.allowedVPNs
       )
     ) operators;
   };

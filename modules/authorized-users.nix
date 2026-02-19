@@ -55,13 +55,13 @@ in
   };
 
   config = mkMerge [
-    (mkIf (self.username != null) {
+    (mkIf (self.user.username != null) {
       users.mutableUsers = cfg.enableMutableUsers;
       users.groups.operator = { };
       security.tpm2.enable = true;
-      users.users.${self.username} = mkOperator {
-        developerMode = self.developer or false;
-        hashedPassword = self.hashedPassword;
+      users.users.${self.user.username} = mkOperator {
+        developerMode = self.user.developer or false;
+        inherit (self.user) hashedPassword;
       };
     })
     # We need to add all the other users then
@@ -70,23 +70,10 @@ in
       users.users =
         mapAttrs
           (
-            username: opCfg:
-            let
-              isSelf = username == self.username;
-              
-              effectiveOpCfg = if isSelf then (opCfg // {
-                hashedPassword = opCfg.hashedPassword or self.hashedPassword;
-                developer = opCfg.developer or self.developer or false;
-              }) else (opCfg // {
-                hashedPassword = opCfg.hashedPassword or "!";
-                developer = opCfg.developer or false;
-              });
-
-              debugOp = lib.trace "User Module [${username}]: Using Password? ${if (effectiveOpCfg.hashedPassword != "!") then "YES" else "NO"}" effectiveOpCfg;
-            in
+            username: config:
             mkOperator {
-              developerMode = debugOp.developer;
-              inherit (debugOp) hashedPassword;
+              developerMode = config.developer or false;
+              inherit (config) hashedPassword;
             }
           )
           # We need to filter out ourselves.
