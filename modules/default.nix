@@ -52,5 +52,6 @@
     ./o11y
     # All the (default) filesystem definitions
     ./filesystems
+    #../community/grist-registration
   ];
 }
