@@ -2,4 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-super: self: (import ./default.nix { inherit (super) callPackage; })
+final: prev:
+  let
+    defaults = import ./default.nix { inherit (final) callPackage; };
+    openbaoPatch = import ./openbao-patch.nix final prev;
+  in
+  defaults // openbaoPatch
