@@ -105,14 +105,6 @@ in
 
       nixpkgs.overlays = [
         (self: super: {
-          g3proxy = super.g3proxy.overrideAttrs (old: {
-            cargoBuildFlags = (old.cargoBuildFlags or [ ]) ++ [
-              "-p"
-              "g3proxy-ctl"
-            ];
-          });
-        })
-        (self: super: {
           proxy-switcher = pkgs.writeShellApplication {
             name = "proxy-switcher";
             # disables shellcheck.
