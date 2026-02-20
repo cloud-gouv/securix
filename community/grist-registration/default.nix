@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.securix.grist-registration;
@@ -6,7 +11,10 @@ in
 {
   options.securix.grist-registration = {
     enable = lib.mkEnableOption "Grist registration service";
-    gristUrl = lib.mkOption { type = lib.types.str; default = "https://grist.numerique.gouv.fr"; };
+    gristUrl = lib.mkOption {
+      type = lib.types.str;
+      default = "https://grist.numerique.gouv.fr";
+    };
     docId = lib.mkOption { type = lib.types.str; };
     tableId = lib.mkOption { type = lib.types.str; };
     useProxy = lib.mkOption { type = lib.types.bool; };
@@ -17,9 +25,9 @@ in
     environment.systemPackages = [
       (pkgs.writeShellScriptBin "grist-register" ''
         set -euo pipefail
-        
+
         DETECTED_PROXY="''${http_proxy:-''${https_proxy:-}}"
-        
+
         if [ "${toString cfg.useProxy}" = "0" ]; then
           DETECTED_PROXY=""
         fi
@@ -44,9 +52,16 @@ in
           "${cfg.gristUrl}/api/docs/${cfg.docId}/tables/${cfg.tableId}/records" 
       '')
     ];
-    security.sudo.extraRules = [{
-      groups = [ "operator" ];
-      commands = [{ command = "/run/current-system/sw/bin/grist-register"; options = [ "NOPASSWD" ]; }];
-    }];
+    security.sudo.extraRules = [
+      {
+        groups = [ "operator" ];
+        commands = [
+          {
+            command = "/run/current-system/sw/bin/grist-register";
+            options = [ "NOPASSWD" ];
+          }
+        ];
+      }
+    ];
   };
 }
