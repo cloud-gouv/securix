@@ -56,7 +56,6 @@ in
   lib = lib-securix;
   pkgs = pkgs';
   modules = ./modules;
-  community = ./community;
   tests = import ./tests {
     pkgs = pkgs';
     libSecurix = lib-securix;

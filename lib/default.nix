@@ -357,7 +357,6 @@ rec {
   buildUSBInstaller =
     {
       modules,
-      community,
       extraInstallerModules ? [ ],
       consoleKeymap ? "fr",
       installScript ? null,
@@ -366,7 +365,7 @@ rec {
       compression ? "zstd -Xcompression-level 6",
     }@args:
     let
-      targetSystem = pkgs.nixos modules community;
+      targetSystem = pkgs.nixos modules;
       targetSystemClosure = targetSystem.config.system.build.toplevel;
     in
     buildInstallerSystem (
@@ -440,7 +439,6 @@ rec {
         userSpecificModule
         ../modules
         ../hardware
-        ../community
         # For Secure Boot.
         (import sources.lanzaboote).nixosModules.lanzaboote
         "${sources.disko}/module.nix"
