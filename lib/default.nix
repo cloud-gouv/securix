@@ -26,6 +26,8 @@ let
     concatMap
     mapAttrsToList
     any
+    isList
+    hasAttr
     optionalAttrs
     ;
   autoImport =
@@ -114,6 +116,7 @@ rec {
     {
       dir,
       layout ? "v1",
+      teams ? { },
     }:
     let
       readFilesFromSubDir =
@@ -129,12 +132,26 @@ rec {
         machineModule = autoImport "${dir}/machines/${name}";
         # NOTE: this is an abuse of the module system, we should not perform a direct access here...
         # We should rather aim to make the machine module autonomous and perform an evaluation at the right moment.
-        userModules = map (
+        userModules = concatMap (
           username:
-          if !builtins.pathExists "${dir}/users/${username}.nix" then
-            throw "User '${username}' does not exist in the inventory but is referenced by machine '${name}'!"
-          else
-            autoImport "${dir}/users/${username}.nix"
+          let
+            userModule =
+              if !builtins.pathExists "${dir}/users/${username}.nix" then
+                throw "User '${username}' does not exist in the inventory but is referenced by machine '${name}'!"
+              else
+                autoImport "${dir}/users/${username}.nix";
+          in
+          [ userModule ]
+          ++ concatMap (
+            teamName:
+            if !(hasAttr teamName teams) then
+              throw "User '${username}' declares team '${teamName}' but is not listed in the `readInventory2` call"
+            else
+              let
+                teamS = teams.${teamName};
+              in
+              if isList teamS then teamS else [ teamS ]
+          ) userModule.securix.self.user.teams
         ) machineModule.securix.self.machine.users;
       }
     ) machines;
