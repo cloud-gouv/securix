@@ -459,10 +459,6 @@ rec {
             # utiliser https://github.com/Foxboron/age-plugin-tpm dans le futur.
             "/etc/ssh/ssh_host_ed25519_key"
           ];
-
-          # TODO: when we will have build capacity, we can re-enable it.
-          # Otherwise, it's too expensive in rebuilds!
-          documentation.man.man-db.enable = false;
         }
       ]
       ++ modules;
