@@ -15,9 +15,7 @@ in
 {
   options.securix.grist-registration = {
     enable = lib.mkEnableOption "Grist registration service";
-    gristUrl = lib.mkOption {
-      type = lib.types.str;
-    };
+    gristUrl = lib.mkOption { type = lib.types.str; };
     docId = lib.mkOption { type = lib.types.str; };
     tableId = lib.mkOption { type = lib.types.str; };
     useProxy = lib.mkOption { type = lib.types.bool; };
