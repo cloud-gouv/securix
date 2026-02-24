@@ -77,7 +77,7 @@
     # D-Bus debugging
     d-spy
     # Offline documentation
-    linux-manual
+    #linux-manual
     glibcInfo
     man-pages
     man-pages-posix
