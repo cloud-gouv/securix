@@ -17,7 +17,6 @@ in
     enable = lib.mkEnableOption "Grist registration service";
     gristUrl = lib.mkOption {
       type = lib.types.str;
-      default = "https://grist.numerique.gouv.fr";
     };
     docId = lib.mkOption { type = lib.types.str; };
     tableId = lib.mkOption { type = lib.types.str; };
