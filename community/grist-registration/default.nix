@@ -28,7 +28,8 @@ in
         set -euo pipefail
 
         log_journal() {
-          ${pkgs.util-linux}/bin/logger -s -t grist-registration -p "user.$1" "$2"
+          echo "[$(date -Iseconds)] [$1] $2"
+          ${pkgs.util-linux}/bin/logger -t grist-registration -p "user.$1" "$2" 2>/dev/null || true
         }
 
         log_journal "info" "Lancement de l'enregistrement Grist..."
