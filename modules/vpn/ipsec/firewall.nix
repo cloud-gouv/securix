@@ -48,8 +48,8 @@ in
       checkRuleset = false;
     };
 
-    # This is a developer-only feature.
-    environment.systemPackages = mkIf config.securix.self.developer [
+    # This is a admin-only feature.
+    environment.systemPackages = mkIf config.securix.admins.enable [
       # Dynamic firewall control tool.
       (pkgs.writeShellApplication {
         name = "firewall";

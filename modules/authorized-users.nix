@@ -23,12 +23,16 @@ let
   ];
   mkOperator =
     { developerMode, hashedPassword }:
+    let
+      _ = lib.warnIf developerMode ''
+        DÉPRÉCIÉ: `developerMode` (securix.self.user.developer) n'accorde plus `wheel`.
+        Utilisez `securix.admins` pour les comptes d'administration.
+      '' null;
+    in
     {
       isNormalUser = true;
       inherit hashedPassword;
-      extraGroups =
-        # In developer mode, you are allowed to use `sudo`.
-        optional developerMode "wheel" ++ operatorGroups;
+      extraGroups = operatorGroups;
     };
   mkAdmin =
     { hashedPassword }:

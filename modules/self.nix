@@ -143,14 +143,13 @@ in
         type = types.bool;
         default = false;
         description = ''
-          Mode développeur pour cet opérateur.
+          **DÉPRÉCIÉ** — Utilisez `securix.admins` à la place.
 
-          Le mode développeur permet de développer l'OS sécurisé sans les bridages.
-          Il n'est pas conçu pour *développer* d'autres choses en meme temps.
+          Mode développeur pour cet opérateur.
+          Sera supprimé dans une prochaine version de Sécurix.
 
           ATTENTION: Le mode développeur N'EST PAS CONFORME aux règles de sécurité
-          de l'ANSSI en matière de poste d'administration. Celui-ci doit etre utilisé
-          avec parcimonie.
+          de l'ANSSI en matière de poste d'administration.
         '';
       };
     };
@@ -258,7 +257,9 @@ in
   config = mkMerge [
     {
       warnings = optional (isUserConfig && cfg.user.developer) ''
-        Le mode développeur est activé pour ${cfg.user.email}, cette image n'est pas conforme aux règles de l'ANSSI.
+        DÉPRÉCIÉ: Le mode développeur est activé pour ${cfg.user.email}.
+        Cette option sera supprimée dans une prochaine version. Migrez vers `securix.admins`.
+        Cette image n'est pas conforme aux règles de l'ANSSI.
       '';
       services.getty.helpLine = optionalString isMachineConfig ''
         Bienvenue sur Sécurix (identifiant ${toString machineIdentifier}).
@@ -268,8 +269,10 @@ in
     }
     (mkIf isUserConfig {
       warnings = optional cfg.user.developer ''
-        Le mode développeur est activé pour ${cfg.user.email}, cette image n'est pas conforme aux règles de l'ANSSI.
-      '';
+      DÉPRÉCIÉ: Le mode développeur est activé pour ${cfg.user.email}.
+      Cette option sera supprimée dans une prochaine version. Migrez vers `securix.admins`.
+      Cette image n'est pas conforme aux règles de l'ANSSI.
+    '';
       users.users.${cfg.user.username}.shell = cfg.user.defaultLoginShell;
       securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
     })
