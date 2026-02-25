@@ -269,10 +269,10 @@ in
     }
     (mkIf isUserConfig {
       warnings = optional cfg.user.developer ''
-      DÉPRÉCIÉ: Le mode développeur est activé pour ${cfg.user.email}.
-      Cette option sera supprimée dans une prochaine version. Migrez vers `securix.admins`.
-      Cette image n'est pas conforme aux règles de l'ANSSI.
-    '';
+        DÉPRÉCIÉ: Le mode développeur est activé pour ${cfg.user.email}.
+        Cette option sera supprimée dans une prochaine version. Migrez vers `securix.admins`.
+        Cette image n'est pas conforme aux règles de l'ANSSI.
+      '';
       users.users.${cfg.user.username}.shell = cfg.user.defaultLoginShell;
       securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
     })
