@@ -402,9 +402,10 @@ rec {
                 "m${toString targetSystem.config.securix.self.inventoryId}"
               ]
               # Taint developer images.
-              ++ lib.warnIf targetSystem.config.securix.self.developer
-                "DÉPRÉCIÉ: `securix.self.developer` est activé. Migrez vers `securix.admins`."
-                (optional targetSystem.config.securix.self.developer "developer");
+              ++
+                lib.warnIf targetSystem.config.securix.self.developer
+                  "DÉPRÉCIÉ: `securix.self.developer` est activé. Migrez vers `securix.admins`."
+                  (optional targetSystem.config.securix.self.developer "developer");
 
               isoImage.storeContents = [ targetSystemClosure ];
               isoImage.squashfsCompression = compression;
