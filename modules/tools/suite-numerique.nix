@@ -104,7 +104,7 @@ in
       ou le menu des applications, dans Chromium en mode application.
 
       Les bookmarks Firefox sont ajoutés dans la barre de favoris via le module
-      `securix.firefox`.
+      securix.firefox.
     '';
 
     addFirefoxBookmarks = mkOption {
@@ -112,7 +112,7 @@ in
       default = true;
       description = ''
         Ajouter les services de LaSuite dans la barre de favoris Firefox,
-        via le module `securix.firefox.bookmarks`.
+        via le module securix.firefox.bookmarks.
       '';
     };
 
@@ -125,18 +125,29 @@ in
         être épinglés sur le bureau ou dans la barre des tâches.
       '';
     };
-  };
 
-  environment.etc."chromium/policies/recommended/lasuite.json".text = builtins.toJSON {
-    BookmarkBarEnabled = true;
-    ManagedBookmarks = map (app: {
-      name = app.name;
-      url = app.url;
-    }) apps;
+    addChromiumBookmarks = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Ajouter les services de LaSuite dans la barre de favoris Chromium,
+        via une politique d'entreprise recommandée.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
     environment.systemPackages = optionals cfg.addDesktopShortcuts desktopItems;
+
+    environment.etc."chromium/policies/recommended/lasuite.json" = mkIf cfg.addChromiumBookmarks {
+      text = builtins.toJSON {
+        BookmarkBarEnabled = true;
+        ManagedBookmarks = map (app: {
+          name = app.name;
+          url = app.url;
+        }) apps;
+      };
+    };
 
     securix.firefox.bookmarks = optionalAttrs cfg.addFirefoxBookmarks {
       "LaSuite" = listToAttrs (
