@@ -4,8 +4,8 @@
 
 { pkgs, ... }:
 {
-  imports = [ 
-    ./firefox.nix 
+  imports = [
+    ./firefox.nix
     ./suite-numerique.nix
   ];
 
