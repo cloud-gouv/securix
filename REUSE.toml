@@ -5,3 +5,7 @@ SPDX-FileCopyrightText = "NONE"
 SPDX-License-Identifier = "MIT"
 path = [".github/workflows/*", ".gitignore", "REUSE.toml"]
 
+[[annotations]]
+path = "modules/tools/suite-numerique-icons/lasuite-*.svg"
+SPDX-FileCopyrightText = "Direction Interministérielle du Numérique (DINUM)"
+SPDX-License-Identifier = "MIT"
