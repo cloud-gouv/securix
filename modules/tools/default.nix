@@ -4,7 +4,10 @@
 
 { pkgs, ... }:
 {
-  imports = [ ./firefox.nix ];
+  imports = [ 
+    ./firefox.nix 
+    ./suite-numerique.nix
+  ];
 
   programs.mtr.enable = true;
 
