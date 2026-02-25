@@ -79,7 +79,6 @@ let
 
   iconsDir = ./suite-numerique-icons;
 
-
   makeDesktopItem =
     app:
     pkgs.makeDesktopItem {
