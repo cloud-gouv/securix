@@ -83,5 +83,6 @@
     man-pages-posix
     # Browser
     firefox
+    qrencode
   ];
 }
