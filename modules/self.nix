@@ -216,7 +216,9 @@ in
     (mkRenamedOptionModule [ "securix" "self" "bit" ] [ "securix" "self" "user" "bit" ])
     (mkRenamedOptionModule [ "securix" "self" "allowedVPNs" ] [ "securix" "self" "user" "allowedVPNs" ])
     (mkRenamedOptionModule [ "securix" "self" "teams" ] [ "securix" "self" "user" "teams" ])
-    (lib.mkRemovedOptionModule [ "securix" "self" "developer" ] "Le mode développeur est supprimé. Utilisez `securix.admins` pour les comptes d'administration avec sudo et U2F.")
+    (lib.mkRemovedOptionModule [ "securix" "self" "developer" ]
+      "Le mode développeur est supprimé. Utilisez `securix.admins` pour les comptes d'administration avec sudo et U2F."
+    )
 
     # Machine part migration
     (mkRenamedOptionModule
