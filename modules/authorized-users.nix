@@ -57,21 +57,13 @@ in
       users.mutableUsers = cfg.enableMutableUsers;
       users.groups.operator = { };
       security.tpm2.enable = true;
-      users.users.${self.user.username} = mkOperator {
-        inherit (self.user) hashedPassword;
-      };
+      users.users.${self.user.username} = mkOperator { inherit (self.user) hashedPassword; };
     })
     # We need to add all the other users then
     # and enable a user to decrypt the partition.
     (mkIf cfg.allowAnyOperator {
       users.users =
-        mapAttrs
-          (
-            username: config:
-            mkOperator {
-              inherit (config) hashedPassword;
-            }
-          )
+        mapAttrs (username: config: mkOperator { inherit (config) hashedPassword; })
           # We need to filter out ourselves.
           (filterAttrs (username: _: username != self.username) operators);
     })
