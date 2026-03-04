@@ -27,7 +27,7 @@ let
       isNormalUser = true;
       inherit hashedPassword;
       extraGroups = operatorGroups;
-  };
+    };
   mkAdmin =
     { hashedPassword }:
     {
