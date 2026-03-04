@@ -22,18 +22,12 @@ let
     "operator" # can upgrade the system permissionlessly
   ];
   mkOperator =
-    { developerMode, hashedPassword }:
-    let
-      _ = lib.warnIf developerMode ''
-        DÉPRÉCIÉ: `developerMode` (securix.self.user.developer) n'accorde plus `wheel`.
-        Utilisez `securix.admins` pour les comptes d'administration.
-      '' null;
-    in
+    { hashedPassword }:
     {
       isNormalUser = true;
       inherit hashedPassword;
       extraGroups = operatorGroups;
-    };
+  };
   mkAdmin =
     { hashedPassword }:
     {

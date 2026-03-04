@@ -400,12 +400,7 @@ rec {
               networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.inventoryId}";
               system.nixos.tags = [
                 "m${toString targetSystem.config.securix.self.inventoryId}"
-              ]
-              # Taint developer images.
-              ++
-                lib.warnIf targetSystem.config.securix.self.developer
-                  "DÉPRÉCIÉ: `securix.self.developer` est activé. Migrez vers `securix.admins`."
-                  (optional targetSystem.config.securix.self.developer "developer");
+              ];
 
               isoImage.storeContents = [ targetSystemClosure ];
               isoImage.squashfsCompression = compression;

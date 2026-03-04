@@ -139,19 +139,6 @@ in
         ];
       };
 
-      developer = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          **DÉPRÉCIÉ** — Utilisez `securix.admins` à la place.
-
-          Mode développeur pour cet opérateur.
-          Sera supprimé dans une prochaine version de Sécurix.
-
-          ATTENTION: Le mode développeur N'EST PAS CONFORME aux règles de sécurité
-          de l'ANSSI en matière de poste d'administration.
-        '';
-      };
     };
 
     machine = {
@@ -229,7 +216,7 @@ in
     (mkRenamedOptionModule [ "securix" "self" "bit" ] [ "securix" "self" "user" "bit" ])
     (mkRenamedOptionModule [ "securix" "self" "allowedVPNs" ] [ "securix" "self" "user" "allowedVPNs" ])
     (mkRenamedOptionModule [ "securix" "self" "teams" ] [ "securix" "self" "user" "teams" ])
-    (mkRenamedOptionModule [ "securix" "self" "developer" ] [ "securix" "self" "user" "developer" ])
+    (lib.mkRemovedOptionModule [ "securix" "self" "developer" ] "Le mode développeur est supprimé. Utilisez `securix.admins` pour les comptes d'administration avec sudo et U2F.")
 
     # Machine part migration
     (mkRenamedOptionModule
@@ -256,11 +243,6 @@ in
 
   config = mkMerge [
     {
-      warnings = optional (isUserConfig && cfg.user.developer) ''
-        DÉPRÉCIÉ: Le mode développeur est activé pour ${cfg.user.email}.
-        Cette option sera supprimée dans une prochaine version. Migrez vers `securix.admins`.
-        Cette image n'est pas conforme aux règles de l'ANSSI.
-      '';
       services.getty.helpLine = optionalString isMachineConfig ''
         Bienvenue sur Sécurix (identifiant ${toString machineIdentifier}).
         ${optionalString isUserConfig "Utilisateur principal: ${toString cfg.user.email}."}
@@ -268,11 +250,6 @@ in
       networking.hostName = mkDefault "securix-${cfg.edition}-${toString machineIdentifier}";
     }
     (mkIf isUserConfig {
-      warnings = optional cfg.user.developer ''
-        DÉPRÉCIÉ: Le mode développeur est activé pour ${cfg.user.email}.
-        Cette option sera supprimée dans une prochaine version. Migrez vers `securix.admins`.
-        Cette image n'est pas conforme aux règles de l'ANSSI.
-      '';
       users.users.${cfg.user.username}.shell = cfg.user.defaultLoginShell;
       securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
     })
