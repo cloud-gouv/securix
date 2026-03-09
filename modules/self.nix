@@ -245,6 +245,12 @@ in
 
   config = mkMerge [
     {
+      assertions = [
+        {
+          assertion = cfg.user.hashedPassword != "";
+          message = "securix.self.user.hashedPassword ne peut pas être une chaîne vide.";
+        }
+      ];
       services.getty.helpLine = optionalString isMachineConfig ''
         Bienvenue sur Sécurix (identifiant ${toString machineIdentifier}).
         ${optionalString isUserConfig "Utilisateur principal: ${toString cfg.user.email}."}
