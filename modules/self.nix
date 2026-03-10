@@ -93,7 +93,7 @@ in
 
       hashedPassword = mkOption {
         type = types.nullOr types.str;
-          default = "!";
+        default = "!";
         description = "Mot de passe hachée en ycrypt pour la session utilisateur.";
       };
 
