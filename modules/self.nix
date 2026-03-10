@@ -93,7 +93,7 @@ in
 
       hashedPassword = mkOption {
         type = types.nullOr types.str;
-        default = null;
+          default = "!";
         description = "Mot de passe hachée en ycrypt pour la session utilisateur.";
       };
 
@@ -109,7 +109,7 @@ in
 
       defaultLoginShell = mkOption {
         type = types.package;
-        default = pkgs.bashInteractive;
+        default = pkgs.zsh;
         description = "Shell par défaut de connexion pour la session utilisateur.";
       };
 
