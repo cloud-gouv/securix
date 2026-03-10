@@ -73,7 +73,7 @@ in
 
           # Configure environment variables.
           export OS_CLOUD="$CLOUD"
-          export OS_USERNAME="${config.email}"
+          export OS_USERNAME="${config.user.email}"
 
           # Retrieve the password from Goldwarden.
           export OS_PASSWORD=$(goldwarden logins get --name "''${CLOUD}_horizon_password")

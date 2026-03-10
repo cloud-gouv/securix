@@ -18,7 +18,7 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "latitude5340") {
+  config = mkIf (config.securix.self.machine.hardwareSKU == "latitude5340") {
     boot.initrd.availableKernelModules = [
       "xhci_pci"
       "thunderbolt"

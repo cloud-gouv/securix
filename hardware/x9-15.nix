@@ -18,7 +18,7 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "x9-15") {
+  config = mkIf (config.securix.self.machine.hardwareSKU == "x9-15") {
     boot.kernelPackages = pkgs.linuxPackages_latest; # work only with 6.19.0-rc5
     boot.initrd.availableKernelModules = [
       "xhci_pci"

@@ -568,8 +568,8 @@ rec {
           mkUserReport = user: config: ''
             ## Inventaire de `${user}`
 
-            Email: ${config.securix.self.email}
-            Machine: ${config.securix.self.hardwareSKU}
+            Email: ${config.securix.self.user.email}
+            Machine: ${config.securix.self.machine.hardwareSKU}
             Numéro: ${toString config.securix.self.inventoryId}
           '';
         in
