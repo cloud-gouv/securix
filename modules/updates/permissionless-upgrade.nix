@@ -82,17 +82,14 @@ let
       .TP
       .BI \-\-branch " NOM"
       Branche Git à utiliser pour la reconstruction.
-      Par défaut, la branche principale configurée dans
-      .IR securix.auto-updates.branch .
-      .br
+      Par défaut : ${config.securix.auto-updates.branch}.
       Les branches autres que la branche principale nécessitent que l'option
       .I securix.manual-upgrades.enableAnyBranch
       soit activée dans la configuration Securix, sans quoi la commande échoue.
       .TP
       .BI \-\-subdir " CHEMIN"
       Sous-répertoire du dépôt contenant la configuration NixOS à utiliser.
-      Par défaut :
-      .IR securix.self.infraRepositorySubdir .
+      Par défaut : ${if self.infraRepositorySubdir == "" then "<à la racine>" else self.infraRepositorySubdir}.
       .TP
       .B \-\-do-not-pull
       Ne pas récupérer les changements depuis le dépôt distant avant la
