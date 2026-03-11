@@ -13,6 +13,187 @@ let
   inherit (lib) mkIf mkEnableOption optionalString;
   self = config.securix.self;
   cfg = config.securix.manual-upgrades;
+
+  manPage = pkgs.writeTextFile {
+    name = "upgrade-man";
+    destination = "/share/man/man1/upgrade.1";
+    text = ''
+      .\" SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+      .\" SPDX-License-Identifier: MIT
+      .\"
+      .TH UPGRADE 1 "2025" "Securix" "Commandes utilisateur"
+      .
+      .SH NOM
+      upgrade \- mettre à jour le système NixOS depuis le dépôt d'infrastructure Securix
+      .
+      .SH SYNOPSIS
+      .B upgrade
+      .RI [\fIOPTIONS\fR]
+      .I VERBE
+      .
+      .SH DESCRIPTION
+      .B upgrade
+      reconstruit et active la configuration NixOS de la machine courante à partir du
+      dépôt Git d'infrastructure Securix.
+      Il clone automatiquement le dépôt si celui-ci est absent, met à jour la branche
+      demandée, puis délègue la reconstruction à
+      .BR nixos-rebuild (8).
+      .PP
+      La commande doit être exécutée en tant que
+      .B root
+      ou via
+      .BR sudo (8)
+      par un membre du groupe
+      .IR operator .
+      Elle utilise l'agent SSH TPM2
+      .RI ( /var/tmp/ssh-tpm-agent.sock )
+      pour authentifier les accès au dépôt distant.
+      .
+      .SH VERBES
+      .TP
+      .B switch
+      Active le nouveau système immédiatement et fait pointer le profil courant vers
+      la nouvelle génération.
+      .br
+      .B Attention :
+      cette action peut interrompre la session en cours (redémarrages de services,
+      changements de PAM, etc.).
+      .TP
+      .B boot
+      Enregistre le nouveau système dans le chargeur d'amorçage sans l'activer
+      immédiatement. La nouvelle configuration sera active au prochain redémarrage.
+      .TP
+      .B test
+      Active le nouveau système immédiatement
+      .I sans
+      l'ajouter au chargeur d'amorçage. Un redémarrage ultérieur restaure
+      automatiquement la génération précédente. Utile pour valider une configuration
+      avant de la rendre permanente.
+      .TP
+      .B dry-activate
+      Construit le système et affiche les actions qui seraient réalisées lors d'une
+      activation (redémarrages de services systemd, etc.) sans rien modifier.
+      Permet de décider en connaissance de cause entre
+      .B switch
+      et
+      .BR boot .
+      .
+      .SH OPTIONS
+      .TP
+      .BI \-\-branch " NOM"
+      Branche Git à utiliser pour la reconstruction.
+      Par défaut : ${config.securix.auto-updates.branch}.
+      Les branches autres que la branche principale nécessitent que l'option
+      .I securix.manual-upgrades.enableAnyBranch
+      soit activée dans la configuration Securix, sans quoi la commande échoue.
+      .TP
+      .BI \-\-subdir " CHEMIN"
+      Sous-répertoire du dépôt contenant la configuration NixOS à utiliser.
+      Par défaut : ${
+        if self.infraRepositorySubdir == "" then "<à la racine>" else self.infraRepositorySubdir
+      }.
+      .TP
+      .B \-\-do-not-pull
+      Ne pas récupérer les changements depuis le dépôt distant avant la
+      reconstruction. La commande utilise l'état local du dépôt tel quel.
+      Utile pour tester une branche locale non encore poussée, en combinaison
+      avec
+      .BR \-\-branch .
+      .
+      .SH COMPORTEMENT DE MISE À JOUR
+      .SS Branche principale
+      Sur la branche principale, seul un
+      .B fast-forward
+      est autorisé
+      .RI ( git\ pull\ \-\-ff\-only ).
+      Si le fast-forward est impossible (divergence de l'historique), la commande
+      échoue.
+      .SS Autres branches
+      Pour toute autre branche (uniquement si
+      .I enableAnyBranch
+      est activé), un
+      .B worktree
+      Git temporaire est créé dans un répertoire sécurisé, mis à jour via
+      .IR "git pull \-\-rebase" ,
+      puis supprimé automatiquement à la fin de l'exécution.
+      .
+      .SH CODES DE RETOUR
+      .TP
+      .B 0
+      Succès.
+      .TP
+      .B 1
+      Erreur : argument manquant ou invalide, branche non autorisée, échec Git ou
+      échec de nixos-rebuild.
+      .
+      .SH EXEMPLES
+      Activer immédiatement la dernière version de la branche principale :
+      .PP
+      .RS 4
+      .B sudo upgrade switch
+      .RE
+      .PP
+      Préparer la mise à jour pour le prochain redémarrage :
+      .PP
+      .RS 4
+      .B sudo upgrade boot
+      .RE
+      .PP
+      Tester une branche de développement sans modifier le chargeur d'amorçage :
+      .PP
+      .RS 4
+      .B sudo upgrade \-\-branch ma-branche test
+      .RE
+      .PP
+      Simuler l'activation sans rien appliquer :
+      .PP
+      .RS 4
+      .B sudo upgrade dry-activate
+      .RE
+      .PP
+      Reconstruire sans accès réseau (état local uniquement) :
+      .PP
+      .RS 4
+      .B sudo upgrade \-\-do-not-pull switch
+      .RE
+      .
+      .SH FICHIERS
+      .TP
+      .I /var/tmp/ssh-tpm-agent.sock
+      Socket de l'agent SSH TPM2 utilisé pour l'authentification Git.
+      .
+      .SH CONFIGURATION NIX
+      Les paramètres suivants dans la configuration NixOS contrôlent le comportement
+      de cette commande :
+      .TP
+      .I securix.manual-upgrades.enable
+      Active la commande
+      .B upgrade
+      et les règles sudo associées.
+      .TP
+      .I securix.manual-upgrades.enableAnyBranch
+      Autorise l'utilisation de branches autres que la branche principale via
+      .BR \-\-branch .
+      Désactivé par défaut.
+      .TP
+      .I securix.auto-updates.branch
+      Branche principale de référence.
+      .TP
+      .I securix.auto-updates.repoUrl
+      URL du dépôt Git distant.
+      .
+      .SH VOIR AUSSI
+      .BR nixos-rebuild (8),
+      .BR git (1),
+      .BR sudo (8),
+      .BR systemd (1)
+      .
+      .SH AUTEURS
+      Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>,
+      Elias Coppens <elias.coppens@numerique.gouv.fr>
+    '';
+  };
+
   upgradeScript = pkgs.writeShellApplication {
     name = "upgrade";
 
@@ -23,6 +204,39 @@ let
         exit 1
       fi
 
+      usage() {
+        cat <<EOF
+      Usage: upgrade [OPTIONS] VERBE
+
+      Met à jour le système NixOS depuis le dépôt d'infrastructure Securix.
+      Doit être exécuté en tant que root (ou via sudo pour le groupe operator).
+
+      VERBES
+        switch        Active le nouveau système immédiatement.
+                      Attention : peut interrompre la session en cours.
+        boot          Active le nouveau système au prochain redémarrage.
+        test          Active le nouveau système maintenant sans l'ajouter au
+                      chargeur d'amorçage. Un redémarrage annule les changements.
+        dry-activate  Construit le système et affiche les actions qui seraient
+                      réalisées sans rien appliquer.
+
+      OPTIONS
+        --branch NOM        Branche Git à utiliser
+                            (défaut : ${config.securix.auto-updates.branch})
+        --subdir CHEMIN     Sous-répertoire du dépôt contenant la config NixOS
+                            (défaut : ${self.infraRepositorySubdir})
+        --do-not-pull       Ne pas récupérer les changements distants avant de
+                            reconstruire
+        --help, -h          Affiche cette aide et quitte
+
+      EXEMPLES
+        sudo upgrade switch
+        sudo upgrade boot
+        sudo upgrade --branch mon-correctif test
+        sudo upgrade --do-not-pull dry-activate
+      EOF
+      }
+
       # Default values
       BRANCH="${config.securix.auto-updates.branch}"
       SUBDIR="${self.infraRepositorySubdir}"
@@ -31,6 +245,10 @@ let
       # Parse arguments
       while [[ "$#" -gt 0 ]]; do
         case "$1" in
+          --help|-h)
+            usage
+            exit 0
+            ;;
           --branch)
             BRANCH="$2"
             shift 2
@@ -116,7 +334,10 @@ in
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = [ upgradeScript ];
+    environment.systemPackages = [
+      upgradeScript
+      manPage
+    ];
     security.sudo = {
       enable = true;
       extraRules = [
