@@ -6,5 +6,9 @@
   imports = [
     # Grist registration
     ./grist-registration
+
+    ./yubikey-reset
+
+    ./inventory-generator
   ];
 }
