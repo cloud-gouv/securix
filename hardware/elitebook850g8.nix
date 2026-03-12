@@ -18,7 +18,7 @@ in
 {
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
-  config = mkIf (config.securix.self.hardwareSKU == "elitebook850g8") {
+  config = mkIf (config.securix.self.machine.hardwareSKU == "elitebook850g8") {
     boot.initrd.availableKernelModules = [
       "nvme"
       "xhci_pci"

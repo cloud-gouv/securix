@@ -79,7 +79,7 @@ in
 
       username = mkOption {
         type = types.nullOr types.str;
-        default = if cfg.email != null then deriveUsernameFromEmail cfg.email else null;
+        default = if cfg.user.email != null then deriveUsernameFromEmail cfg.user.email else null;
         defaultText = ''<première lettre de prénom><nom de famille> tronqué à 32 caractères'';
         description = ''
           Nom d'utilisateur de la session PAM, dérivé par l'email en calculant:
