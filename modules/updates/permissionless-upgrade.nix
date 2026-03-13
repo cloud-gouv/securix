@@ -227,6 +227,8 @@ let
                             (défaut : ${self.infraRepositorySubdir})
         --do-not-pull       Ne pas récupérer les changements distants avant de
                             reconstruire
+        --use-sn            Utilise le serial number pour installer la mise à
+                            jour
         --help, -h          Affiche cette aide et quitte
 
       EXEMPLES
@@ -241,6 +243,7 @@ let
       BRANCH="${config.securix.auto-updates.branch}"
       SUBDIR="${self.infraRepositorySubdir}"
       REMOTE_PULL=true
+      USE_SN=false
 
       # Parse arguments
       while [[ "$#" -gt 0 ]]; do
@@ -261,6 +264,10 @@ let
             REMOTE_PULL=false
             shift 1
             ;;
+          --use-sn)
+            USE_SN=true
+            shift 1
+            ;; 
           --)
             shift
             break
@@ -322,8 +329,18 @@ let
         fi
       fi
 
+      TERMINAL="${self.machine.identifier}"
       # Run nixos-rebuild with the given verb
-      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."${self.machine.identifier}".system
+      if [ "$USE_SN" = true ]; then
+          TERMINAL=$(${pkgs.dmidecode}/bin/dmidecode -s system-serial-number 2>/dev/null || echo "unknown")
+
+          if [ "$TERMINAL" = "unknown" ]; then
+            echo "No serial number found for this system, aborting upgrade." 
+            exit 1
+          fi
+      fi
+
+      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."$TERMINAL".system
     '';
   };
 in
