@@ -15,8 +15,6 @@
     ./power-saving.nix
     ./authorized-users.nix
     ./package-manager.nix
-    # Autoconfiguration of OpenStack
-    ./openstack-client.nix
     # The management of our entrypoints for our static bastions.
     ./bastion
     # Known hosts for our clouds.
