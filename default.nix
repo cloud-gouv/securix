@@ -7,7 +7,7 @@
 {
   sourcesOverrides ? sources: sources,
   sources ? sourcesOverrides (import ./npins),
-  pkgs ? import sources.nixpkgs { },
+  pkgs ? import sources.nixpkgs { overlays = [ (import "${sources.portail}/nix/overlay.nix") ]; },
   defaultTags ? [ ],
   edition ? "unbranded",
 }:

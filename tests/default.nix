@@ -6,4 +6,5 @@
 {
   minimal = import ./minimal.nix { inherit pkgs libSecurix; };
   anssi-minimal = import ./anssi-minimal.nix { inherit pkgs libSecurix; };
+  portail = import ./portail.nix { inherit pkgs libSecurix; };
 }
