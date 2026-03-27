@@ -63,6 +63,19 @@
       "name": "nixos-25.11",
       "url": "https://releases.nixos.org/nixos/25.11/nixos-25.11.1056.d9bc5c7dceb3/nixexprs.tar.xz",
       "hash": "148dkksh8z1amk7jvp0a79k19aydxbzvhbhicbs41wwhkqk9yb57"
+    },
+    "portail": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "cloud-gouv",
+        "repo": "portail"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "7a19e782a73c3db24522ccbfeaaa5e042aa514d1",
+      "url": "https://github.com/cloud-gouv/portail/archive/7a19e782a73c3db24522ccbfeaaa5e042aa514d1.tar.gz",
+      "hash": "0rdsxrxgqp66inwcyc1dc4g29z2q77a67bbdl1xykxmk95bkwn9n"
     }
   },
   "version": 5

@@ -13,7 +13,9 @@
 }:
 let
   # Import our own overlays.
-  pkgs' = pkgs.extend (import ./pkgs/overlay.nix);
+  pkgs' = (pkgs.extend (import ./pkgs/overlay.nix)).extend (
+    import "${sources.portail}/nix/overlay.nix"
+  );
   git-hooks = import sources.git-hooks;
 
   inherit (pkgs') lib;
