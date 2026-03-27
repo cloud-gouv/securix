@@ -4,7 +4,7 @@
 
 { pkgs, lib, ... }:
 {
-  boot.initrd.systemd.enable = lib.mkForce true;
+  boot.initrd.systemd.enable = lib.mkDefault true;
 
   boot.loader.systemd-boot.enable = lib.mkForce false;
 
