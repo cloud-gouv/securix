@@ -37,7 +37,7 @@ in
 
         # 1. Identify Device
         echo -e "\n''${YELLOW}[STEP] Identifying Device...''${NC}"
-        if ! ${pkgs.yubikey-manager}/bin/ykman info; then
+        if ! ${lib.getExe pkgs.yubikey-manager} info; then
           echo -e "''${RED}Error: No YubiKey detected. Please plug in your device.''${NC}"
           exit 1
         fi
