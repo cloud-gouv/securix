@@ -6,7 +6,7 @@
   imports = [
     # Grist registration
     ./grist-registration
-    
+
     ./inventory-generator
   ];
 }
