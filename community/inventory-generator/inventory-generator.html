@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Securix · Inventory Generator</title>
+<title>Inventory Generator</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 
@@ -32,7 +32,7 @@ SPDX-License-Identifier: MIT
     background: var(--bg);
     color: var(--text);
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 14px;
+    font-size: 16px;
     min-height: 100vh;
     padding: 0;
   }
@@ -49,14 +49,14 @@ SPDX-License-Identifier: MIT
   .logo {
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 17px;
     color: var(--accent);
     letter-spacing: 0.02em;
   }
   .logo span { color: var(--muted); }
 
   .header-sub {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--muted);
     margin-left: auto;
     font-family: 'IBM Plex Mono', monospace;
@@ -97,7 +97,7 @@ SPDX-License-Identifier: MIT
 
   .panel-title {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--label);
     letter-spacing: 0.08em;
@@ -105,7 +105,7 @@ SPDX-License-Identifier: MIT
   }
   .panel-path {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: #a0a8b8;
     margin-left: auto;
   }
@@ -126,7 +126,7 @@ SPDX-License-Identifier: MIT
   .field-group { display: flex; flex-direction: column; gap: 6px; }
 
   label {
-    font-size: 12px;
+    font-size: 14px;
     font-family: 'IBM Plex Mono', monospace;
     color: var(--label);
     letter-spacing: 0.06em;
@@ -140,7 +140,7 @@ SPDX-License-Identifier: MIT
     border: 1px solid var(--border);
     color: var(--text);
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
+    font-size: 15px;
     padding: 9px 12px;
     border-radius: 4px;
     outline: none;
@@ -190,13 +190,13 @@ SPDX-License-Identifier: MIT
 
   .toggle-label {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
+    font-size: 15px;
     color: var(--text);
     flex: 1;
   }
   .toggle-value {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
   }
   .toggle-row.active .toggle-value { color: var(--accent); }
@@ -222,7 +222,7 @@ SPDX-License-Identifier: MIT
     border-radius: 3px;
     padding: 3px 8px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     color: #f0f4ff;
     display: flex;
     align-items: center;
@@ -233,14 +233,14 @@ SPDX-License-Identifier: MIT
   .tag-remove {
     color: var(--muted);
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1;
     flex-shrink: 0;
   }
   .tag-remove:hover { color: var(--danger); }
 
   .tag-hint {
-    font-size: 11px;
+    font-size: 13px;
     color: #7c8799;
     font-family: 'IBM Plex Mono', monospace;
     padding: 2px 4px;
@@ -256,7 +256,7 @@ SPDX-License-Identifier: MIT
   .section-label {
     color: #a0a8b8 !important;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 2px 0;
@@ -274,7 +274,7 @@ SPDX-License-Identifier: MIT
 
   .btn {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.05em;
     padding: 9px 18px;
@@ -293,7 +293,7 @@ SPDX-License-Identifier: MIT
   .status {
     margin-left: auto;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
   }
   .status.ok { color: var(--accent2); }
@@ -328,7 +328,7 @@ SPDX-License-Identifier: MIT
   }
   .modal-title {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     color: #ffffff;
     text-transform: uppercase;
@@ -337,7 +337,7 @@ SPDX-License-Identifier: MIT
   }
   .modal-close {
     background: none; border: none;
-    color: var(--muted); font-size: 18px;
+    color: var(--muted); font-size: 20px;
     cursor: pointer; padding: 0; line-height: 1;
   }
   .modal-close:hover { color: var(--text); }
@@ -349,7 +349,7 @@ SPDX-License-Identifier: MIT
   }
   pre {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.7;
     color: #f0f4ff;
     white-space: pre-wrap;
@@ -369,7 +369,7 @@ SPDX-License-Identifier: MIT
   }
 
   .info-row {
-    font-size: 11px;
+    font-size: 13px;
     color: #7c8799;
     font-family: 'IBM Plex Mono', monospace;
     padding: 4px 0;
@@ -383,7 +383,7 @@ SPDX-License-Identifier: MIT
     padding: 40px;
     color: var(--muted);
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
   }
   .loading-dot {
     width: 6px; height: 6px;
@@ -406,7 +406,7 @@ SPDX-License-Identifier: MIT
     width: 14px; height: 14px;
     background: var(--border);
     border-radius: 50%;
-    font-size: 9px;
+    font-size: 11px;
     color: var(--muted);
     cursor: help;
     margin-left: 6px;
@@ -422,7 +422,7 @@ SPDX-License-Identifier: MIT
     border: 1px solid var(--border);
     border-radius: 4px;
     padding: 8px 10px;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
     font-family: 'IBM Plex Sans', sans-serif;
     font-weight: 300;
@@ -460,7 +460,7 @@ SPDX-License-Identifier: MIT
     border-radius: 3px;
     flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
+    font-size: 14px;
     transition: all 0.15s;
   }
   .adv-option.enabled .adv-checkbox {
@@ -471,7 +471,7 @@ SPDX-License-Identifier: MIT
 
   .adv-option-path {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
+    font-size: 15px;
     color: var(--muted);
     flex: 1;
     overflow: hidden;
@@ -489,7 +489,7 @@ SPDX-License-Identifier: MIT
   }
   .adv-target-btn {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
+    font-size: 14px;
     padding: 3px 7px;
     cursor: pointer;
     color: var(--muted);
@@ -509,20 +509,59 @@ SPDX-License-Identifier: MIT
 
   .adv-section-title {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
+    font-size: 14px;
     color: #c792ea;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 8px 0 4px 0;
   }
+
+  .adv-group {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.15s;
+    margin-bottom: 4px;
+  }
+  .adv-group.enabled { border-color: #c792ea; }
+  .adv-group-header {
+    display: flex; align-items: center; gap: 8px; padding: 9px 12px;
+    cursor: pointer; user-select: none; background: var(--surface); border-radius: 4px;
+  }
+  .adv-group.enabled .adv-group-header { border-radius: 4px 4px 0 0; }
+  .adv-group-header:hover { background: #3a3f4a; }
+  .adv-group-name {
+    font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #c792ea;
+    text-transform: uppercase; letter-spacing: 0.08em; flex: 1;
+  }
+  .adv-group-body {
+    display: none; padding: 4px 0;
+    border-top: 1px solid var(--border);
+    background: var(--input-bg); border-radius: 0 0 4px 4px;
+  }
+  .adv-group.enabled .adv-group-body { display: block; }
+  .adv-suboption {
+    display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+    cursor: pointer; user-select: none;
+  }
+  .adv-suboption:hover { background: rgba(255,255,255,0.02); }
+  .adv-sub-checkbox {
+    width: 12px; height: 12px; border: 1px solid var(--border); border-radius: 2px;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; transition: all 0.15s;
+  }
+  .adv-suboption.checked .adv-sub-checkbox { background: #c792ea; border-color: #c792ea; color: #1a0a2e; }
+  .adv-sub-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); flex: 1;
+  }
+  .adv-suboption.checked .adv-sub-label { color: var(--label); }
+  .adv-sub-field { display: none; padding: 2px 12px 8px 32px; }
+  .adv-sub-field.visible { display: block; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Bureautix<span></span></div>
-  <div style="width:1px;height:16px;background:var(--border);margin:0 8px;"></div>
-  <span style="font-size:12px;color:var(--muted);">Inventory Generator</span>
+  <div class="logo">Inventory Generator</div>
   <div class="header-sub">inventory/{users,machines}/</div>
 </header>
 
@@ -732,7 +771,7 @@ function renderField(panelKey, opt) {
       type: 'text',
       id: `taginput-${fieldId}`,
       placeholder: 'Entrée pour valider',
-      style: 'font-size:12px;margin-top:4px;'
+      style: 'font-size: 14px;margin-top:4px;'
     });
     inputEl.onkeydown = (e) => {
       if (e.key === 'Enter' || e.key === ',') {
@@ -828,21 +867,26 @@ function buildUserPanel(options) {
   const SKIP = new Set(['securix.self.user.username', 'securix.self.user.email']);
   const SKIP_INTERNAL = new Set(['securix.self.selfDescriptionType', 'securix.self.machine.identifier']);
 
-  const USER_OPTS_PATHS = new Set([
-    'securix.self.hashedPassword',
+  const USER_REQUIRED_PATHS = new Set([
     'securix.self.u2f_keys',
-    'securix.self.defaultLoginShell',
-    'securix.self.bit',
     'securix.self.allowedVPNs',
     'securix.self.teams',
   ]);
-  const userOpts = options.filter(o => USER_OPTS_PATHS.has(o.path) && !o.internal);
-
-  if (userOpts.length) {
-    body.appendChild(renderSection('user', 'Sécurité & Accès', userOpts.map(o => ({
-      ...o,
-      id: o.path,
-      label: o.path.split('.').pop(),
+  const USER_OPTIONAL_PATHS = new Set([
+    'securix.self.hashedPassword',
+    'securix.self.defaultLoginShell',
+    'securix.self.bit',
+  ]);
+  const userRequired = options.filter(o => USER_REQUIRED_PATHS.has(o.path) && !o.internal);
+  const userOptional = options.filter(o => USER_OPTIONAL_PATHS.has(o.path) && !o.internal);
+  if (userRequired.length) {
+    body.appendChild(renderSection('user', 'Sécurité & Accès', userRequired.map(o => ({
+      ...o, id: o.path, label: o.path.split('.').pop(),
+    }))));
+  }
+  if (userOptional.length) {
+    body.appendChild(renderSection('user', 'Optionnel', userOptional.map(o => ({
+      ...o, id: o.path, label: o.path.split('.').pop(), required: false, hasDefault: true,
     }))));
   }
 }
@@ -858,13 +902,16 @@ function buildMachinePanel(options) {
   const SKIP = new Set(['securix.self.machine.serialNumber', 'securix.self.machine.identifier']);
   const SKIP_INTERNAL = new Set(['securix.self.selfDescriptionType', 'securix.self.edition', 'securix.self.mainDisk']);
 
-  const MACHINE_OPTS_PATHS = new Set([
+  const MACHINE_REQUIRED_PATHS = new Set([
     'securix.self.hardwareSKU',
     'securix.self.inventoryId',
+  ]);
+  const MACHINE_OPTIONAL_PATHS = new Set([
     'securix.self.infraRepositoryPath',
     'securix.self.infraRepositorySubdir',
   ]);
-  const machineOpts = options.filter(o => MACHINE_OPTS_PATHS.has(o.path) && !o.internal);
+  const machineRequired = options.filter(o => MACHINE_REQUIRED_PATHS.has(o.path) && !o.internal);
+  const machineOptional = options.filter(o => MACHINE_OPTIONAL_PATHS.has(o.path) && !o.internal);
 
   const mainDiskOpt = options.find(o => o.path === 'securix.self.mainDisk');
   const diskField = mainDiskOpt ? [{
@@ -874,13 +921,19 @@ function buildMachinePanel(options) {
     type: { kind: 'enum', values: ['/dev/nvme0n1', '/dev/sda', '/dev/vda'] },
     default: '/dev/nvme0n1',
     hasDefault: true,
+    required: true,
   }] : [];
 
-  if (machineOpts.length || diskField.length) {
+  if (machineRequired.length || diskField.length) {
     body.appendChild(renderSection('machine', 'Configuration', [
       ...diskField,
-      ...machineOpts.map(o => ({ ...o, id: o.path, label: o.path.split('.').pop() }))
+      ...machineRequired.map(o => ({ ...o, id: o.path, label: o.path.split('.').pop(), required: !o.hasDefault }))
     ]));
+  }
+  if (machineOptional.length) {
+    body.appendChild(renderSection('machine', 'Optionnel', machineOptional.map(o => ({
+      ...o, id: o.path, label: o.path.split('.').pop(), required: false, hasDefault: true,
+    }))));
   }
 
   body.appendChild(renderSection('machine', 'Utilisateurs assignés', [{
@@ -926,76 +979,162 @@ function buildAdvPanel(options) {
 
   const advOpts = getAdvOpts(options);
   if (!advOpts.length) {
-    body.innerHTML = '<div class="info-row" style="padding:20px">Aucune option avancée disponible.</div>';
+    body.innerHTML = '<div class="info-row" style="padding:20px">Aucune option de module disponible.</div>';
+    updateAdvCount();
     return;
   }
 
   const groups = groupByPrefix(advOpts);
-
   for (const [groupName, opts] of Object.entries(groups)) {
-    const title = el('div', { class: 'adv-section-title' });
-    title.textContent = groupName;
-    body.appendChild(title);
-
-    for (const opt of opts) {
-      body.appendChild(buildAdvOption(opt));
-    }
+    body.appendChild(buildAdvGroup(groupName, opts));
   }
-
   updateAdvCount();
 }
 
-function buildAdvOption(opt) {
-  if (!advState[opt.path]) {
-    advState[opt.path] = { enabled: false, target: 'user', value: null };
+const advGroupState = {};
+
+function buildAdvGroup(groupName, opts) {
+  if (!advGroupState[groupName]) {
+    advGroupState[groupName] = { enabled: false, target: 'user' };
   }
-  const s = advState[opt.path];
+  const gs = advGroupState[groupName];
 
-  const wrap = el('div', { class: 'adv-option', id: `adv-opt-${opt.path}` });
+  const wrap = el('div', { class: 'adv-group', id: 'adv-group-' + groupName });
+  if (gs.enabled) wrap.classList.add('enabled');
 
-  const header = el('div', { class: 'adv-option-header' });
+  const header = el('div', { class: 'adv-group-header' });
 
-  const checkbox = el('div', { class: 'adv-checkbox', id: `adv-cb-${opt.path}` });
-  if (s.enabled) checkbox.textContent = '✓';
+  const checkbox = el('div', { class: 'adv-checkbox', id: 'adv-gcb-' + groupName });
+  checkbox.textContent = gs.enabled ? '\u2713' : '';
 
-  const pathEl = el('div', { class: 'adv-option-path' });
-  pathEl.title = opt.description || opt.path;
-  pathEl.textContent = opt.path;
+  const nameEl = el('div', { class: 'adv-group-name' });
+  nameEl.textContent = groupName;
 
   const targetToggle = el('div', { class: 'adv-target-toggle' });
-  const btnUser = el('button', { class: 'adv-target-btn' + (s.target === 'user' ? ' active-user' : '') });
+  const btnUser = el('button', { class: 'adv-target-btn' + (gs.target === 'user' ? ' active-user' : '') });
   btnUser.textContent = 'user';
-  const btnMachine = el('button', { class: 'adv-target-btn' + (s.target === 'machine' ? ' active-machine' : '') });
+  const btnMachine = el('button', { class: 'adv-target-btn' + (gs.target === 'machine' ? ' active-machine' : '') });
   btnMachine.textContent = 'machine';
 
-  btnUser.onclick = (e) => { e.stopPropagation(); setAdvTarget(opt.path, 'user'); };
-  btnMachine.onclick = (e) => { e.stopPropagation(); setAdvTarget(opt.path, 'machine'); };
-
+  btnUser.onclick = (e) => { e.stopPropagation(); setAdvGroupTarget(groupName, 'user'); };
+  btnMachine.onclick = (e) => { e.stopPropagation(); setAdvGroupTarget(groupName, 'machine'); };
   targetToggle.appendChild(btnUser);
   targetToggle.appendChild(btnMachine);
 
   header.appendChild(checkbox);
-  header.appendChild(pathEl);
+  header.appendChild(nameEl);
   header.appendChild(targetToggle);
-
   header.onclick = (e) => {
     if (e.target === btnUser || e.target === btnMachine) return;
-    toggleAdvOpt(opt.path);
+    toggleAdvGroup(groupName);
   };
-
   wrap.appendChild(header);
 
-  const body = el('div', { class: 'adv-option-body', id: `adv-body-${opt.path}` });
-  body.appendChild(renderAdvField(opt));
-  wrap.appendChild(body);
+  const groupBody = el('div', { class: 'adv-group-body', id: 'adv-gbody-' + groupName });
 
+  const subOpts = opts.filter(o => !o.path.endsWith('.enable'));
+
+  if (subOpts.length === 0) {
+    const info = el('div', { style: 'padding:8px 12px;font-size: 13px;color:var(--muted);font-family:IBM Plex Mono,monospace;' });
+    info.textContent = 'Aucune sous-option configurable.';
+    groupBody.appendChild(info);
+  }
+
+  for (const opt of subOpts) {
+    if (!advState[opt.path]) {
+      advState[opt.path] = { enabled: false, value: null };
+    }
+
+    const subRow = el('div', {
+      class: 'adv-suboption' + (advState[opt.path].enabled ? ' checked' : ''),
+      id: 'adv-sub-' + opt.path
+    });
+    const subCb = el('div', { class: 'adv-sub-checkbox', id: 'adv-scb-' + opt.path });
+    subCb.textContent = advState[opt.path].enabled ? '\u2713' : '';
+
+    const subLabel = el('div', { class: 'adv-sub-label' });
+    subLabel.textContent = opt.path.split('.').pop();
+    subLabel.title = opt.description || opt.path;
+
+    subRow.appendChild(subCb);
+    subRow.appendChild(subLabel);
+    subRow.onclick = () => toggleAdvSub(opt.path);
+    groupBody.appendChild(subRow);
+
+    const subField = el('div', {
+      class: 'adv-sub-field' + (advState[opt.path].enabled ? ' visible' : ''),
+      id: 'adv-sf-' + opt.path
+    });
+    subField.appendChild(renderAdvField(opt));
+    groupBody.appendChild(subField);
+  }
+
+  wrap.appendChild(groupBody);
   return wrap;
+}
+
+function toggleAdvGroup(groupName) {
+  advGroupState[groupName].enabled = !advGroupState[groupName].enabled;
+  const wrap = document.getElementById('adv-group-' + groupName);
+  const cb = document.getElementById('adv-gcb-' + groupName);
+  const enabled = advGroupState[groupName].enabled;
+  wrap.classList.toggle('enabled', enabled);
+  cb.textContent = enabled ? '\u2713' : '';
+  updateAdvCount();
+}
+
+function setAdvGroupTarget(groupName, target) {
+  advGroupState[groupName].target = target;
+  const wrap = document.getElementById('adv-group-' + groupName);
+  wrap.querySelectorAll('.adv-target-btn').forEach(b => {
+    b.className = 'adv-target-btn';
+    if (b.textContent === 'user' && target === 'user') b.classList.add('active-user');
+    if (b.textContent === 'machine' && target === 'machine') b.classList.add('active-machine');
+  });
+}
+
+function toggleAdvSub(path) {
+  advState[path].enabled = !advState[path].enabled;
+  const row = document.getElementById('adv-sub-' + path);
+  const cb = document.getElementById('adv-scb-' + path);
+  const field = document.getElementById('adv-sf-' + path);
+  const enabled = advState[path].enabled;
+  row.classList.toggle('checked', enabled);
+  cb.textContent = enabled ? '\u2713' : '';
+  if (field) field.classList.toggle('visible', enabled);
+}
+
+function updateAdvCount() {
+  const count = Object.values(advGroupState).filter(s => s.enabled).length;
+  document.getElementById('adv-count').textContent = count + ' module(s) activé(s)';
+}
+
+function generateAdvNixLines(target) {
+  const lines = [];
+  for (const [groupName, gs] of Object.entries(advGroupState)) {
+    if (!gs.enabled || gs.target !== target) continue;
+    const hasEnable = securixOptions.some(o => o.path === groupName + '.enable');
+    if (hasEnable) lines.push('  ' + groupName + '.enable = true;');
+    for (const [path, s] of Object.entries(advState)) {
+      if (!s.enabled || !path.startsWith(groupName + '.')) continue;
+      const opt = securixOptions.find(o => o.path === path);
+      if (!opt) continue;
+      const val = s.value;
+      if (val === null || val === '' || val === undefined) continue;
+      const type = opt.type || { kind: 'str' };
+      if (type.kind === 'bool') lines.push('  ' + path + ' = ' + val + ';');
+      else if (type.kind === 'list') lines.push('  ' + path + ' = ' + nixList(Array.isArray(val) ? val : []) + ';');
+      else if (type.kind === 'package') lines.push('  ' + path + ' = ' + val + ';');
+      else if (type.kind === 'enum') { if (val) lines.push('  ' + path + ' = ' + nixStr(val) + ';'); }
+      else lines.push('  ' + path + ' = ' + nixStr(val) + ';');
+    }
+  }
+  return lines;
 }
 
 function renderAdvField(opt) {
   const type = opt.type || { kind: 'str' };
-  const fieldId = `adv-field-${opt.path}`;
-
+  const fieldId = 'adv-field-' + opt.path;
   if (type.kind === 'bool') {
     const row = el('div', { class: 'toggle-row' });
     const toggle = el('div', { class: 'toggle' });
@@ -1007,17 +1146,13 @@ function renderAdvField(opt) {
     row.onclick = () => {
       advState[opt.path].value = !advState[opt.path].value;
       const v = advState[opt.path].value;
-      toggle.classList.toggle('on', v);
-      row.classList.toggle('active', v);
-      valEl.textContent = String(v);
+      toggle.classList.toggle('on', v); row.classList.toggle('active', v); valEl.textContent = String(v);
     };
     row.appendChild(toggle); row.appendChild(label); row.appendChild(valEl);
     return row;
-
   } else if (type.kind === 'enum') {
     const sel = el('select', { id: fieldId });
-    const emptyOpt = el('option', { value: '' }, '— non spécifié');
-    sel.appendChild(emptyOpt);
+    sel.appendChild(el('option', { value: '' }, '— non spécifié'));
     for (const v of (type.values || [])) {
       const o = el('option', { value: v }, v);
       if (v === opt.default) o.selected = true;
@@ -1026,30 +1161,20 @@ function renderAdvField(opt) {
     advState[opt.path].value = sel.value;
     sel.onchange = () => { advState[opt.path].value = sel.value; };
     return sel;
-
   } else if (type.kind === 'list') {
-    const wrapId = `adv-wrap-${opt.path}`;
+    const wrapId = 'adv-wrap-' + opt.path;
     tagState[wrapId] = advState[opt.path].value || [];
     advState[opt.path].value = tagState[wrapId];
     const wrap = el('div', { class: 'tag-input-wrap', id: wrapId });
-    const hint = el('div', { class: 'tag-hint' }, 'Entrée pour valider');
-    wrap.appendChild(hint);
-    const inputEl = el('input', { type: 'text', placeholder: 'Entrée pour valider', style: 'font-size:12px;margin-top:4px;' });
+    wrap.appendChild(el('div', { class: 'tag-hint' }, 'Entrée pour valider'));
+    const inputEl = el('input', { type: 'text', placeholder: 'Entrée pour valider', style: 'font-size: 14px;margin-top:4px;' });
     inputEl.onkeydown = (e) => {
-      if (e.key === 'Enter' || e.key === ',') {
-        e.preventDefault();
-        const v = inputEl.value.trim().replace(/,$/, '');
-        if (v) addTag(wrapId, inputEl, v);
-      } else if (e.key === 'Backspace' && inputEl.value === '' && tagState[wrapId].length > 0) {
-        removeTag(wrapId, tagState[wrapId].length - 1);
-      }
+      if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); const v = inputEl.value.trim().replace(/,$/, ''); if (v) addTag(wrapId, inputEl, v); }
+      else if (e.key === 'Backspace' && inputEl.value === '' && tagState[wrapId].length > 0) removeTag(wrapId, tagState[wrapId].length - 1);
     };
     wrap.onclick = () => inputEl.focus();
-    const group = el('div');
-    group.appendChild(wrap);
-    group.appendChild(inputEl);
-    return group;
-
+    const grp = el('div'); grp.appendChild(wrap); grp.appendChild(inputEl);
+    return grp;
   } else if (type.kind === 'package') {
     const sel = el('select', { id: fieldId });
     for (const s of [{value:'pkgs.bash',label:'bash'},{value:'pkgs.zsh',label:'zsh'},{value:'pkgs.fish',label:'fish'}]) {
@@ -1060,13 +1185,8 @@ function renderAdvField(opt) {
     advState[opt.path].value = sel.value;
     sel.onchange = () => { advState[opt.path].value = sel.value; };
     return sel;
-
   } else {
-    const inp = el('input', {
-      type: 'text',
-      id: fieldId,
-      placeholder: opt.example ? String(opt.example) : '',
-    });
+    const inp = el('input', { type: 'text', id: fieldId, placeholder: opt.example ? String(opt.example) : '' });
     const def = opt.hasDefault && opt.default !== null ? String(opt.default) : '';
     inp.value = advState[opt.path].value ?? def;
     advState[opt.path].value = inp.value;
@@ -1075,78 +1195,6 @@ function renderAdvField(opt) {
   }
 }
 
-function toggleAdvOpt(path) {
-  advState[path].enabled = !advState[path].enabled;
-  const wrap = document.getElementById(`adv-opt-${path}`);
-  const cb = document.getElementById(`adv-cb-${path}`);
-  if (advState[path].enabled) {
-    wrap.classList.add('enabled');
-    cb.textContent = '✓';
-  } else {
-    wrap.classList.remove('enabled');
-    cb.textContent = '';
-  }
-  updateAdvCount();
-}
-
-function setAdvTarget(path, target) {
-  advState[path].target = target;
-  const wrap = document.getElementById(`adv-opt-${path}`);
-  wrap.querySelectorAll('.adv-target-btn').forEach(b => {
-    b.className = 'adv-target-btn';
-    if (b.textContent === 'user' && target === 'user') b.classList.add('active-user');
-    if (b.textContent === 'machine' && target === 'machine') b.classList.add('active-machine');
-  });
-}
-
-function updateAdvCount() {
-  const count = Object.values(advState).filter(s => s.enabled).length;
-  document.getElementById('adv-count').textContent = `${count} option(s) activée(s)`;
-}
-
-function generateAdvNixLines(target) {
-  const lines = [];
-  const enabledGroups = new Set();
-
-  for (const [path, s] of Object.entries(advState)) {
-    if (!s.enabled || s.target !== target) continue;
-    const opt = securixOptions.find(o => o.path === path);
-    if (!opt) continue;
-    if (opt.enableGroup && !opt.isEnable) {
-      enabledGroups.add(opt.enableGroup);
-    }
-  }
-
-  for (const group of enabledGroups) {
-    lines.push(`  ${group}.enable = true;`);
-  }
-
-  for (const [path, s] of Object.entries(advState)) {
-    if (!s.enabled || s.target !== target) continue;
-    const opt = securixOptions.find(o => o.path === path);
-    if (!opt) continue;
-    if (opt.isEnable && enabledGroups.has(opt.enableGroup || path.replace(/\.enable$/, ''))) continue;
-
-    const val = s.value;
-    if (val === null || val === '' || val === undefined) continue;
-
-    const type = opt.type || { kind: 'str' };
-
-    if (type.kind === 'bool') {
-      lines.push(`  ${path} = ${val};`);
-    } else if (type.kind === 'list') {
-      const arr = Array.isArray(val) ? val : [];
-      lines.push(`  ${path} = ${nixList(arr)};`);
-    } else if (type.kind === 'package') {
-      lines.push(`  ${path} = ${val};`);
-    } else if (type.kind === 'enum') {
-      if (val) lines.push(`  ${path} = ${nixStr(val)};`);
-    } else {
-      lines.push(`  ${path} = ${nixStr(val)};`);
-    }
-  }
-  return lines;
-}
 
 function addTag(wrapId, inputEl, val) {
   tagState[wrapId].push(val);
@@ -1222,9 +1270,10 @@ function generateUserNix() {
   lines.push('  securix.self.user = {');
   lines.push(`    email = ${nixStr(email)};`);
   lines.push(`    username = ${nixStr(username)};`);
-  lines.push(`    hashedPassword = "!";`);
+  const hpVal = getValue('user', 'securix.self.hashedPassword');
+  lines.push(`    hashedPassword = ${nixStr(hpVal && hpVal !== '!' ? hpVal : '!')};`);
 
-  const USER_GEN_OPTS = new Set(['securix.self.hashedPassword','securix.self.u2f_keys','securix.self.defaultLoginShell','securix.self.bit','securix.self.allowedVPNs','securix.self.teams']);
+  const USER_GEN_OPTS = new Set(['securix.self.u2f_keys','securix.self.allowedVPNs','securix.self.teams','securix.self.defaultLoginShell','securix.self.bit']);
   for (const opt of securixOptions) {
     if (!USER_GEN_OPTS.has(opt.path)) continue;
     if (opt.internal) continue;
