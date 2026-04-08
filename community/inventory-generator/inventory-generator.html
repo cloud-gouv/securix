@@ -11,8 +11,6 @@ SPDX-License-Identifier: MIT
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory Generator</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-
   :root {
     --bg: #282c35;
     --surface: #32363f;
@@ -24,6 +22,8 @@ SPDX-License-Identifier: MIT
     --muted: #a0a8b8;
     --label: #d0d8e8;
     --input-bg: #23262e;
+    --font-mono: 'IBM Plex Mono', 'Cascadia Code', 'Fira Mono', 'Consolas', 'Menlo', 'Liberation Mono', monospace;
+    --font-sans: 'IBM Plex Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,7 +31,7 @@ SPDX-License-Identifier: MIT
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: var(--font-sans);
     font-size: 16px;
     min-height: 100vh;
     padding: 0;
@@ -47,7 +47,7 @@ SPDX-License-Identifier: MIT
   }
 
   .logo {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-weight: 600;
     font-size: 17px;
     color: var(--accent);
@@ -59,7 +59,7 @@ SPDX-License-Identifier: MIT
     font-size: 14px;
     color: var(--muted);
     margin-left: auto;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
   }
 
   main {
@@ -96,7 +96,7 @@ SPDX-License-Identifier: MIT
   .machine-icon { background: var(--accent2); }
 
   .panel-title {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     font-weight: 500;
     color: var(--label);
@@ -104,7 +104,7 @@ SPDX-License-Identifier: MIT
     text-transform: uppercase;
   }
   .panel-path {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
     color: #a0a8b8;
     margin-left: auto;
@@ -127,7 +127,7 @@ SPDX-License-Identifier: MIT
 
   label {
     font-size: 14px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     color: var(--label);
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -139,7 +139,7 @@ SPDX-License-Identifier: MIT
     background: var(--input-bg);
     border: 1px solid var(--border);
     color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 15px;
     padding: 9px 12px;
     border-radius: 4px;
@@ -189,13 +189,13 @@ SPDX-License-Identifier: MIT
   .toggle.on::after { left: 17px; }
 
   .toggle-label {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 15px;
     color: var(--text);
     flex: 1;
   }
   .toggle-value {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
     color: var(--muted);
   }
@@ -221,7 +221,7 @@ SPDX-License-Identifier: MIT
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 3px 8px;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     color: #f0f4ff;
     display: flex;
@@ -242,7 +242,7 @@ SPDX-License-Identifier: MIT
   .tag-hint {
     font-size: 13px;
     color: #7c8799;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     padding: 2px 4px;
     width: 100%;
   }
@@ -255,7 +255,7 @@ SPDX-License-Identifier: MIT
 
   .section-label {
     color: #a0a8b8 !important;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.1em;
@@ -273,7 +273,7 @@ SPDX-License-Identifier: MIT
   }
 
   .btn {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     font-weight: 500;
     letter-spacing: 0.05em;
@@ -292,7 +292,7 @@ SPDX-License-Identifier: MIT
 
   .status {
     margin-left: auto;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 13px;
     color: var(--muted);
   }
@@ -327,7 +327,7 @@ SPDX-License-Identifier: MIT
     gap: 10px;
   }
   .modal-title {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     font-weight: 600;
     color: #ffffff;
@@ -348,7 +348,7 @@ SPDX-License-Identifier: MIT
     background: #1e2028;
   }
   pre {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     line-height: 1.7;
     color: #f0f4ff;
@@ -371,7 +371,7 @@ SPDX-License-Identifier: MIT
   .info-row {
     font-size: 13px;
     color: #7c8799;
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     padding: 4px 0;
   }
 
@@ -382,7 +382,7 @@ SPDX-License-Identifier: MIT
     gap: 10px;
     padding: 40px;
     color: var(--muted);
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
   }
   .loading-dot {
@@ -424,7 +424,7 @@ SPDX-License-Identifier: MIT
     padding: 8px 10px;
     font-size: 13px;
     color: var(--muted);
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: var(--font-sans);
     font-weight: 300;
     text-transform: none;
     letter-spacing: 0;
@@ -470,7 +470,7 @@ SPDX-License-Identifier: MIT
   }
 
   .adv-option-path {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 15px;
     color: var(--muted);
     flex: 1;
@@ -488,7 +488,7 @@ SPDX-License-Identifier: MIT
     flex-shrink: 0;
   }
   .adv-target-btn {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     padding: 3px 7px;
     cursor: pointer;
@@ -508,7 +508,7 @@ SPDX-License-Identifier: MIT
   .adv-option.enabled .adv-option-body { display: block; }
 
   .adv-section-title {
-    font-family: 'IBM Plex Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     color: #c792ea;
     text-transform: uppercase;
@@ -530,7 +530,7 @@ SPDX-License-Identifier: MIT
   .adv-group.enabled .adv-group-header { border-radius: 4px 4px 0 0; }
   .adv-group-header:hover { background: #3a3f4a; }
   .adv-group-name {
-    font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #c792ea;
+    font-family: var(--font-mono); font-size: 14px; color: #c792ea;
     text-transform: uppercase; letter-spacing: 0.08em; flex: 1;
   }
   .adv-group-body {
@@ -551,7 +551,7 @@ SPDX-License-Identifier: MIT
   }
   .adv-suboption.checked .adv-sub-checkbox { background: #c792ea; border-color: #c792ea; color: #1a0a2e; }
   .adv-sub-label {
-    font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); flex: 1;
+    font-family: var(--font-mono); font-size: 13px; color: var(--muted); flex: 1;
   }
   .adv-suboption.checked .adv-sub-label { color: var(--label); }
   .adv-sub-field { display: none; padding: 2px 12px 8px 32px; }
@@ -1035,7 +1035,7 @@ function buildAdvGroup(groupName, opts) {
   const subOpts = opts.filter(o => !o.path.endsWith('.enable'));
 
   if (subOpts.length === 0) {
-    const info = el('div', { style: 'padding:8px 12px;font-size: 13px;color:var(--muted);font-family:IBM Plex Mono,monospace;' });
+    const info = el('div', { style: 'padding:8px 12px;font-size: 13px;color:var(--muted);font-family:var(--font-mono);' });
     info.textContent = 'Aucune sous-option configurable.';
     groupBody.appendChild(info);
   }
