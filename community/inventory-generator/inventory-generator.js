@@ -31,7 +31,6 @@ const FIXED_USER_FIELDS = [
         id: 'securix.self.user.email',
         label: 'email',
         type: 'email',
-        required: true,
         placeholder: 'dupont.tintin@email.fr'
       }
     ]
@@ -163,12 +162,42 @@ function renderInputFor(opt, stateTarget, stateKey) {
       style: 'font-size:14px;margin-top:4px;'
     });
 
+    let isPasting = false;
+
+    inp.addEventListener('paste', function (e) {
+      e.preventDefault();
+      isPasting = true;
+
+      const raw = (e.clipboardData || window.clipboardData).getData('text');
+      const parts = raw.split(/[\n\r,]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+
+      if (parts.length === 0) {
+        isPasting = false;
+        return;
+      }
+
+      if (parts.length === 1) {
+        inp.value = parts[0];
+        isPasting = false;
+        return;
+      }
+
+      for (const part of parts) {
+        addTag(wrapId, part);
+      }
+      inp.value = '';
+      isPasting = false;
+    });
+
     inp.onkeydown = function (e) {
+      if (isPasting) {
+        return;
+      }
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
         const v = inp.value.trim().replace(/,$/, '');
         if (v) {
-          addTag(wrapId, inp, v);
+          addTag(wrapId, v, inp);
         }
       } else if (e.key === 'Backspace' && !inp.value && tagState[wrapId].length) {
         removeTag(wrapId, tagState[wrapId].length - 1);
@@ -179,7 +208,7 @@ function renderInputFor(opt, stateTarget, stateKey) {
       inp.oninput = function () {
         const v = inp.value.trim();
         if (v.endsWith('+presence+pin') || v.endsWith('+presence') || v.endsWith('+pin')) {
-          addTag(wrapId, inp, v);
+          addTag(wrapId, v, inp);
         }
       };
     }
@@ -320,11 +349,19 @@ function buildUserPanel(options) {
     return Object.assign({}, o, { id: o.path, label: o.path.split('.').pop() });
   };
 
-  const reqPaths = new Set(['securix.self.u2f_keys', 'securix.self.allowedVPNs', 'securix.self.teams']);
+  const u2fPaths = new Set(['securix.self.u2f_keys']);
+  const reqPaths = new Set(['securix.self.allowedVPNs', 'securix.self.teams']);
   const optPaths = new Set(['securix.self.hashedPassword', 'securix.self.defaultLoginShell', 'securix.self.bit']);
 
-  const req = options.filter(function (o) { return reqPaths.has(o.path) && !o.internal; });
-  const opt = options.filter(function (o) { return optPaths.has(o.path) && !o.internal; });
+  const u2f = options.filter(function (o) { return u2fPaths.has(o.path) && !o.internal; });
+  const req  = options.filter(function (o) { return reqPaths.has(o.path) && !o.internal; });
+  const opt  = options.filter(function (o) { return optPaths.has(o.path) && !o.internal; });
+
+  if (u2f.length) {
+    body.appendChild(renderSection('user', 'Clés U2F', u2f.map(function (o) {
+      return Object.assign(toRow(o));
+    })));
+  }
 
   if (req.length) {
     body.appendChild(renderSection('user', 'Sécurité & Accès', req.map(toRow)));
@@ -362,8 +399,12 @@ function buildMachinePanel(options) {
       })]
     : [];
 
-  const reqPaths = new Set(['securix.self.hardwareSKU', 'securix.self.inventoryId']);
-  const optPaths = new Set(['securix.self.infraRepositoryPath', 'securix.self.infraRepositorySubdir']);
+  const reqPaths = new Set(['securix.self.hardwareSKU']);
+  const optPaths = new Set([
+    'securix.self.inventoryId',
+    'securix.self.infraRepositoryPath',
+    'securix.self.infraRepositorySubdir'
+  ]);
 
   const req = options.filter(function (o) { return reqPaths.has(o.path) && !o.internal; });
   const opt = options.filter(function (o) { return optPaths.has(o.path) && !o.internal; });
@@ -714,9 +755,11 @@ function highlight(code) {
 }
 
 
-function addTag(wrapId, inp, val) {
+function addTag(wrapId, val, inp) {
   tagState[wrapId].push(val);
-  inp.value = '';
+  if (inp) {
+    inp.value = '';
+  }
   renderTags(wrapId);
 }
 
@@ -785,10 +828,9 @@ function resetPanel(panelKey) {
 
 function previewUser() {
   const username = (getValue('user', 'securix.self.user.username') || '').trim();
-  const email    = (getValue('user', 'securix.self.user.email') || '').trim();
 
-  if (!username || !email) {
-    setStatus('u-status', '× username et email requis', true);
+  if (!username) {
+    setStatus('u-status', '× username requis', true);
     return;
   }
 
@@ -857,9 +899,9 @@ function setStatus(id, msg, err) {
 
 const FALLBACK_OPTIONS = [
   { path: 'securix.self.mainDisk', type: { kind: 'str' }, description: 'Disque du système', example: '/dev/nvme0n1', hasDefault: false, internal: false },
-  { path: 'securix.self.user.u2f_keys', type: { kind: 'list' }, description: 'Clés U2F', default: [], hasDefault: true, internal: false },
-  { path: 'securix.self.user.allowedVPNs', type: { kind: 'list' }, description: 'VPNs autorisés', default: [], hasDefault: true, internal: false },
-  { path: 'securix.self.user.teams', type: { kind: 'list' }, description: 'Équipes', default: [], hasDefault: true, internal: false },
+  { path: 'securix.self.u2f_keys', type: { kind: 'list' }, description: 'Clés U2F', default: [], hasDefault: true, internal: false },
+  { path: 'securix.self.allowedVPNs', type: { kind: 'list' }, description: 'VPNs autorisés', default: [], hasDefault: true, internal: false },
+  { path: 'securix.self.teams', type: { kind: 'list' }, description: 'Équipes', default: [], hasDefault: true, internal: false },
   { path: 'securix.self.machine.hardwareSKU', type: { kind: 'enum', values: ['x280', 'elitebook645g11', 'latitude5340', 't14g6', 'x9-15', 'e14-g7'] }, description: 'Identifiant matériel', hasDefault: false, internal: false },
   { path: 'securix.self.machine.inventoryId', type: { kind: 'int' }, description: "Numéro d'inventaire", hasDefault: false, internal: false },
   { path: 'securix.self.machine.users', type: { kind: 'list' }, description: 'Utilisateurs assignés', default: [], hasDefault: true, internal: false }
