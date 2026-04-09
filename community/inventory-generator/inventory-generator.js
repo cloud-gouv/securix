@@ -31,6 +31,7 @@ const FIXED_USER_FIELDS = [
         id: 'securix.self.user.email',
         label: 'email',
         type: 'email',
+        hasDefault: true,
         placeholder: 'dupont.tintin@email.fr'
       }
     ]
@@ -162,39 +163,21 @@ function renderInputFor(opt, stateTarget, stateKey) {
       style: 'font-size:14px;margin-top:4px;'
     });
 
-    let isPasting = false;
+    let justPasted = false;
 
-    inp.addEventListener('paste', function (e) {
-      e.preventDefault();
-      isPasting = true;
-
-      const raw = (e.clipboardData || window.clipboardData).getData('text');
-      const parts = raw.split(/[\n\r,]+/).map(function (s) { return s.trim(); }).filter(Boolean);
-
-      if (parts.length === 0) {
-        isPasting = false;
-        return;
-      }
-
-      if (parts.length === 1) {
-        inp.value = parts[0];
-        isPasting = false;
-        return;
-      }
-
-      for (const part of parts) {
-        addTag(wrapId, part);
-      }
-      inp.value = '';
-      isPasting = false;
+    inp.addEventListener('paste', function () {
+      justPasted = true;
+      setTimeout(function () {
+        justPasted = false;
+      }, 0);
     });
 
     inp.onkeydown = function (e) {
-      if (isPasting) {
-        return;
-      }
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
+        if (justPasted) {
+          return;
+        }
         const v = inp.value.trim().replace(/,$/, '');
         if (v) {
           addTag(wrapId, v, inp);
