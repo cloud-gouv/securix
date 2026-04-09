@@ -17,11 +17,9 @@ let
   # Chemin vers le repo (optionnel)
   repoArg = if repoSrc != null then "${repoSrc}" else "";
 
-  optionsJson = pkgs.runCommand "securix-options-json"
-    { nativeBuildInputs = [ pkgs.python3 ]; }
-    ''
-      python3 ${./parse-options.py} ${securixSrc} ${repoArg} > $out
-    '';
+  optionsJson = pkgs.runCommand "securix-options-json" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+    python3 ${./parse-options.py} ${securixSrc} ${repoArg} > $out
+  '';
 
   inlineScript = pkgs.writeText "inline-options.py" ''
     import sys
@@ -31,19 +29,17 @@ let
     open(sys.argv[3], 'w').write(result)
   '';
 
-  pkg = pkgs.runCommand "inventory-generator"
-    { nativeBuildInputs = [ pkgs.python3 ]; }
-    ''
-      mkdir -p $out/share/inventory-generator
+  pkg = pkgs.runCommand "inventory-generator" { nativeBuildInputs = [ pkgs.python3 ]; } ''
+    mkdir -p $out/share/inventory-generator
 
-      cp ${./inventory-generator.html} $out/share/inventory-generator/inventory-generator.html
-      cp ${./inventory-generator.css}  $out/share/inventory-generator/inventory-generator.css
+    cp ${./inventory-generator.html} $out/share/inventory-generator/inventory-generator.html
+    cp ${./inventory-generator.css}  $out/share/inventory-generator/inventory-generator.css
 
-      python3 ${inlineScript} \
-        ${./inventory-generator.js} \
-        ${optionsJson} \
-        $out/share/inventory-generator/inventory-generator.js
-    '';
+    python3 ${inlineScript} \
+      ${./inventory-generator.js} \
+      ${optionsJson} \
+      $out/share/inventory-generator/inventory-generator.js
+  '';
 in
 {
   options.securix.inventory-generator = {
