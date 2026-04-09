@@ -167,15 +167,19 @@ function renderInputFor(opt, stateTarget, stateKey) {
 
     inp.addEventListener('paste', function () {
       justPasted = true;
-      setTimeout(function () {
+    });
+
+    inp.addEventListener('keyup', function (e) {
+      if (e.key === 'Enter') {
         justPasted = false;
-      }, 0);
+      }
     });
 
     inp.onkeydown = function (e) {
       if (e.key === 'Enter' || e.key === ',') {
         e.preventDefault();
         if (justPasted) {
+          justPasted = false;
           return;
         }
         const v = inp.value.trim().replace(/,$/, '');
@@ -245,7 +249,7 @@ function renderInputFor(opt, stateTarget, stateKey) {
       inp.style.textTransform = 'uppercase';
     }
 
-    const def = (opt.hasDefault && opt.default !== null) ? String(opt.default) : '';
+    const def = (opt.hasDefault && opt.default !== null && opt.default !== undefined) ? String(opt.default) : '';
     const currentVal = (stateTarget && stateTarget[key] != null) ? stateTarget[key] : def;
     inp.value = currentVal;
 
