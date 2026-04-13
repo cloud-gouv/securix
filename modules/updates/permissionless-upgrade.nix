@@ -99,6 +99,10 @@ let
       Utile pour tester une branche locale non encore poussée, en combinaison
       avec
       .BR \-\-branch .
+      .TP
+      .BI \-\-securix\-branch " NOM"
+      Branche du dépôt Securix à utiliser à la place du pin npins
+      .RI ( NPINS_OVERRIDE_securix ).
       .
       .SH COMPORTEMENT DE MISE À JOUR
       .SS Branche principale
@@ -143,6 +147,12 @@ let
       .PP
       .RS 4
       .B sudo upgrade \-\-branch ma-branche test
+      .RE
+      .PP
+      Tester une branche du dépôt securix :
+      .PP
+      .RS 4
+      .B sudo upgrade \-\-securix\-branch ma\-branche\-securix test
       .RE
       .PP
       Simuler l'activation sans rien appliquer :
@@ -221,20 +231,22 @@ let
                       réalisées sans rien appliquer.
 
       OPTIONS
-        --branch NOM        Branche Git à utiliser
-                            (défaut : ${config.securix.auto-updates.branch})
-        --subdir CHEMIN     Sous-répertoire du dépôt contenant la config NixOS
-                            (défaut : ${self.infraRepositorySubdir})
-        --do-not-pull       Ne pas récupérer les changements distants avant de
-                            reconstruire
-        --use-sn            Utilise le serial number pour installer la mise à
-                            jour
-        --help, -h          Affiche cette aide et quitte
+        --branch NOM          Branche Git à utiliser
+                              (défaut : ${config.securix.auto-updates.branch})
+        --subdir CHEMIN       Sous-répertoire du dépôt contenant la config NixOS
+                              (défaut : ${self.infraRepositorySubdir})
+        --do-not-pull         Ne pas récupérer les changements distants avant de
+                              reconstruire
+        --securix-branch NOM  Branche du dépôt securix (surcharge du npins)
+        --use-sn              Utilise le serial number pour installer la mise à
+                              jour
+        --help, -h            Affiche cette aide et quitte
 
       EXEMPLES
         sudo upgrade switch
         sudo upgrade boot
         sudo upgrade --branch mon-correctif test
+        sudo upgrade --securix-branch ma-branche-securix test
         sudo upgrade --do-not-pull dry-activate
       EOF
       }
@@ -244,6 +256,9 @@ let
       SUBDIR="${self.infraRepositorySubdir}"
       REMOTE_PULL=true
       USE_SN=false
+      SECURIX_BRANCH=""
+      INFRA_TEMP_DIR=""
+      SECURIX_OVERRIDE_TEMP_DIR=""
 
       # Parse arguments
       while [[ "$#" -gt 0 ]]; do
@@ -263,6 +278,10 @@ let
           --do-not-pull)
             REMOTE_PULL=false
             shift 1
+            ;;
+          --securix-branch)
+            SECURIX_BRANCH="$2"
+            shift 2
             ;;
           --use-sn)
             USE_SN=true
@@ -291,6 +310,19 @@ let
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
 
+      upgrade_cleanup() {
+        local exit_code=$?
+        if [ -n "$INFRA_TEMP_DIR" ]; then
+          git -C "${self.infraRepositoryPath}" worktree remove "$INFRA_TEMP_DIR" || true
+          rm -rf "$INFRA_TEMP_DIR"
+        fi
+        if [ -n "$SECURIX_OVERRIDE_TEMP_DIR" ]; then
+          rm -rf "$SECURIX_OVERRIDE_TEMP_DIR"
+        fi
+        exit "$exit_code"
+      }
+      trap upgrade_cleanup EXIT
+
       # Check if ${self.infraRepositoryPath} exist
       if [ ! -d "${self.infraRepositoryPath}/.git" ]; then
             echo "Repository does not exist, cloning..."
@@ -316,17 +348,25 @@ let
             !cfg.enableAnyBranch
           ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''}
           # Create a secure temporary directory
-          TEMP_DIR=$(mktemp -d)
-          trap 'git -C "${self.infraRepositoryPath}" worktree remove "$TEMP_DIR"; rm -rf "$TEMP_DIR"' EXIT
-          
+          INFRA_TEMP_DIR=$(mktemp -d)
+
           # Extract a worktree for the specified branch in the temporary directory
-          git -C "${self.infraRepositoryPath}" worktree add "$TEMP_DIR" "$BRANCH" || exit 1
-          REPO_PATH="$TEMP_DIR"
+          git -C "${self.infraRepositoryPath}" worktree add "$INFRA_TEMP_DIR" "$BRANCH" || exit 1
+          REPO_PATH="$INFRA_TEMP_DIR"
 
           # Update the worktree.
           # When it's not main, accept force pushes.
           git -C "$REPO_PATH" pull --rebase || exit 1
         fi
+      fi
+
+      # Important note: nixos-rebuild does not support passing --arg to nix-build
+      # https://github.com/NixOS/nixpkgs/blob/nixos-25.11/pkgs/by-name/ni/nixos-rebuild-ng/src/nixos_rebuild/__init__.py
+      if [ -n "$SECURIX_BRANCH" ]; then
+        SECURIX_OVERRIDE_TEMP_DIR=$(mktemp -d)
+        SECURIX_REPO_URL=https://github.com/cloud-gouv/securix.git
+        git clone --branch "$SECURIX_BRANCH" "$SECURIX_REPO_URL" "$SECURIX_OVERRIDE_TEMP_DIR" || exit 1
+        export NPINS_OVERRIDE_securix="$SECURIX_OVERRIDE_TEMP_DIR"
       fi
 
       TERMINAL="${self.machine.identifier}"
