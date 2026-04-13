@@ -14,11 +14,12 @@ let
 in
 {
   config = {
+    environment.etc.nixpkgs.source = builtins.storePath pkgs.path;
     nix = {
       package = pkgs.lix;
       nixPath = [
         # Always point to the authorized sources.
-        "nixpkgs=${pkgs.path}"
+        "nixpkgs=/etc/nixpkgs"
       ];
     }
     // (lib.optionalAttrs proxyCfg.enable {
