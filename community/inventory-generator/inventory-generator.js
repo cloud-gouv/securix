@@ -336,9 +336,9 @@ function buildUserPanel(options) {
     return Object.assign({}, o, { id: o.path, label: o.path.split('.').pop() });
   };
 
-  const u2fPaths = new Set(['securix.self.u2f_keys']);
-  const reqPaths = new Set(['securix.self.allowedVPNs', 'securix.self.teams']);
-  const optPaths = new Set(['securix.self.hashedPassword', 'securix.self.defaultLoginShell', 'securix.self.bit']);
+  const u2fPaths = new Set(['securix.self.user.u2f_keys']);
+  const reqPaths = new Set(['securix.self.user.allowedVPNs', 'securix.self.user.teams']);
+  const optPaths = new Set(['securix.self.user.hashedPassword', 'securix.self.user.defaultLoginShell', 'securix.self.user.bit']);
 
   const u2f = options.filter(function (o) { return u2fPaths.has(o.path) && !o.internal; });
   const req  = options.filter(function (o) { return reqPaths.has(o.path) && !o.internal; });
@@ -386,11 +386,11 @@ function buildMachinePanel(options) {
       })]
     : [];
 
-  const reqPaths = new Set(['securix.self.hardwareSKU']);
+  const reqPaths = new Set(['securix.self.machine.hardwareSKU']);
   const optPaths = new Set([
-    'securix.self.inventoryId',
-    'securix.self.infraRepositoryPath',
-    'securix.self.infraRepositorySubdir'
+    'securix.self.machine.inventoryId',
+    'securix.self.machine.infraRepositoryPath',
+    'securix.self.machine.infraRepositorySubdir'
   ]);
 
   const req = options.filter(function (o) { return reqPaths.has(o.path) && !o.internal; });
@@ -622,7 +622,7 @@ function generateAdvNixLines(target) {
 function generateUserNix() {
   const username = (getValue('user', 'securix.self.user.username') || '').trim();
   const email    = (getValue('user', 'securix.self.user.email') || '').trim();
-  const hpVal    = getValue('user', 'securix.self.hashedPassword');
+  const hpVal = getValue('user', 'securix.self.user.hashedPassword');
 
   const lines = [
     '{ pkgs, ... }:',
@@ -634,11 +634,11 @@ function generateUserNix() {
   ];
 
   const OPTS = new Set([
-    'securix.self.u2f_keys',
-    'securix.self.allowedVPNs',
-    'securix.self.teams',
-    'securix.self.defaultLoginShell',
-    'securix.self.bit'
+    'securix.self.user.u2f_keys',
+    'securix.self.user.allowedVPNs',
+    'securix.self.user.teams',
+    'securix.self.user.defaultLoginShell',
+    'securix.self.user.bit'
   ]);
 
   for (const opt of securixOptions) {
@@ -646,7 +646,7 @@ function generateUserNix() {
       continue;
     }
 
-    const key = opt.path.replace('securix.self.', '');
+    const key = opt.path.replace('securix.self.user.', '');
     const val = getValue('user', opt.path);
     const k = opt.type && opt.type.kind;
 
@@ -692,10 +692,10 @@ function generateMachineNix() {
   ];
 
   const OPTS = new Set([
-    'securix.self.hardwareSKU',
-    'securix.self.inventoryId',
-    'securix.self.infraRepositoryPath',
-    'securix.self.infraRepositorySubdir'
+    'securix.self.machine.hardwareSKU',
+    'securix.self.machine.inventoryId',
+    'securix.self.machine.infraRepositoryPath',
+    'securix.self.machine.infraRepositorySubdir'
   ]);
 
   for (const opt of securixOptions) {
@@ -703,7 +703,7 @@ function generateMachineNix() {
       continue;
     }
 
-    const key = opt.path.replace('securix.self.', '');
+    const key = opt.path.replace('securix.self.machine.', '');
     const val = getValue('machine', opt.path);
     const k = opt.type && opt.type.kind;
 
@@ -886,9 +886,9 @@ function setStatus(id, msg, err) {
 
 const FALLBACK_OPTIONS = [
   { path: 'securix.self.mainDisk', type: { kind: 'str' }, description: 'Disque du système', example: '/dev/nvme0n1', hasDefault: false, internal: false },
-  { path: 'securix.self.u2f_keys', type: { kind: 'list' }, description: 'Clés U2F', default: [], hasDefault: true, internal: false },
-  { path: 'securix.self.allowedVPNs', type: { kind: 'list' }, description: 'VPNs autorisés', default: [], hasDefault: true, internal: false },
-  { path: 'securix.self.teams', type: { kind: 'list' }, description: 'Équipes', default: [], hasDefault: true, internal: false },
+  { path: 'securix.self.user.u2f_keys', type: { kind: 'list' }, description: 'Clés U2F', default: [], hasDefault: true, internal: false },
+  { path: 'securix.self.user.allowedVPNs', type: { kind: 'list' }, description: 'VPNs autorisés', default: [], hasDefault: true, internal: false },
+  { path: 'securix.self.user.teams', type: { kind: 'list' }, description: 'Équipes', default: [], hasDefault: true, internal: false },
   { path: 'securix.self.machine.hardwareSKU', type: { kind: 'enum', values: ['x280', 'elitebook645g11', 'latitude5340', 't14g6', 'x9-15', 'e14-g7'] }, description: 'Identifiant matériel', hasDefault: false, internal: false },
   { path: 'securix.self.machine.inventoryId', type: { kind: 'int' }, description: "Numéro d'inventaire", hasDefault: false, internal: false },
   { path: 'securix.self.machine.users', type: { kind: 'list' }, description: 'Utilisateurs assignés', default: [], hasDefault: true, internal: false }
