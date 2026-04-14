@@ -429,6 +429,7 @@ rec {
       modules,
       edition ? args.edition,
       compression ? "zstd -Xcompression-level 6",
+      postInstallScript ? "",
     }:
     let
       allModules = [
@@ -469,7 +470,7 @@ rec {
       ];
       installer = buildUSBInstallerISO {
         modules = allModules;
-        inherit compression;
+        inherit compression postInstallScript;
       };
       system = pkgs.nixos allModules;
     };
