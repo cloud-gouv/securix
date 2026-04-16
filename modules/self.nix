@@ -163,6 +163,7 @@ in
           "t14g6"
           "x9-15"
           "e14-g7"
+          "x13-20ug"
         ];
         description = "Identifiant de configuration du matériel";
         example = "x280";
