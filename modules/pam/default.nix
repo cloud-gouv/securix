@@ -2,4 +2,9 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ imports = [ ./u2f.nix ]; }
+{
+  imports = [
+    ./u2f.nix
+    ./tty-audit.nix
+  ];
+}
