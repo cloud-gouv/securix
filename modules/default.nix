@@ -28,6 +28,8 @@
     ./ssh-tpm-agent.nix
     # Audit logs
     ./auditd.nix
+    # Shell inactivity auto-logout (ANSSI R36 / CIS 5.7)
+    ./shell-timeout.nix
     # Data-only pertaining to the system
     ./self.nix
     # All the VPN code
