@@ -6,5 +6,6 @@
   imports = [
     ./logs.nix
     ./metrics.nix
+    ./tetragon.nix
   ];
 }
