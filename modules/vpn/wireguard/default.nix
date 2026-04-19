@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Elias Coppens <elias.coppens@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Aurélien Ambert <aurelien.ambert@proton.me>
 #
 # SPDX-License-Identifier: MIT
 
@@ -26,10 +27,13 @@ let
     map
     mkIf
     mkEnableOption
+    mkOption
+    types
     nameValuePair
     unique
     mapAttrs
     splitString
+    optional
     ;
 
   selectWireguardVpns =
@@ -137,6 +141,26 @@ in
 {
   options.securix.vpn.wireguard = {
     enable = mkEnableOption "the Wireguard VPN subsystem";
+
+    rosenpass = {
+      enable = mkOption {
+        type = types.bool;
+        default = cfg.enable;
+        defaultText = lib.literalExpression "config.securix.vpn.wireguard.enable";
+        description = ''
+          Livre l'outillage d'échange de clés post-quantique `rosenpass`
+          dans le PATH système. Rosenpass superpose un KEM post-quantique
+          standardisé NIST au-dessus du handshake Noise de WireGuard,
+          neutralisant le risque « harvest now, decrypt later » contre
+          le handshake Curve25519 de WG.
+
+          Cette option n'installe que les binaires ; l'activation par
+          profil est opt-in (voir `docs/rosenpass.md` ou le README
+          WireGuard Sécurix). Désactiver cette option masque simplement
+          les binaires — cela ne casse pas les connexions WG existantes.
+        '';
+      };
+    };
   };
 
   config = mkIf cfg.enable {
@@ -144,7 +168,8 @@ in
       pkgs.wireguard-tools
       pkgs.age
       pkgs.age-plugin-yubikey
-    ];
+    ]
+    ++ optional cfg.rosenpass.enable pkgs.rosenpass;
 
     users.users = mapAttrs (username: config: {
       packages = concatMap (
