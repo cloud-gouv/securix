@@ -28,6 +28,8 @@
     ./ssh-tpm-agent.nix
     # Audit logs
     ./auditd.nix
+    # Post-quantum TLS outbound (oqs-provider)
+    ./pqc-tls.nix
     # Data-only pertaining to the system
     ./self.nix
     # All the VPN code
