@@ -21,6 +21,7 @@ let
         type = str;
         default = "";
         description = ''
+
           Name of the icon of the bookmark.
         '';
       };
@@ -28,6 +29,7 @@ let
       href = mkOption {
         type = str;
         description = ''
+
           URL of the website that the bookmark points to.
         '';
       };
@@ -36,6 +38,7 @@ let
         type = str;
         default = "";
         description = ''
+
           Description of the website that the bookmark points to.
         '';
       };
@@ -47,6 +50,7 @@ in
     type = attrsOf (attrsOf bookmarkType);
     default = { };
     example = ''
+
       {
         Productivity = {
           Github = {
@@ -64,6 +68,7 @@ in
       }
     '';
     description = ''
+
       Bookmarks to show to homepage and firefox bookmarks.
     '';
   };
@@ -88,6 +93,12 @@ in
 
     programs.firefox = {
       enable = true;
+      # Pin to Firefox ESR (security-only update channel, Mozilla-supported).
+      # Rationale: admin workstation posture favours a predictable release
+      # cadence with security-only patches over the rolling branch's feature
+      # churn. Upstream ESR ships ~1 major/year with ~1 year overlap; see
+      # `docs/manual/src/user/browser-baseline.md` for the update policy.
+      package = pkgs.firefox-esr;
       languagePacks = [
         "fr"
         "en-US"
