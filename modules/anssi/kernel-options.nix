@@ -237,6 +237,24 @@ in
 
         # Enable SYN cookies (prevents SYN flood attacks)
         "net.ipv4.tcp_syncookies" = "1";
+
+        # Log packets with impossible / spoofed source addresses.
+        # Already dropped by rp_filter above; logging them here gives
+        # forensic visibility on active probing / spoofing attempts.
+        # Not formally part of ANSSI R12 in the v2.0 guide; added as
+        # a Sécurix-local complement. See RFC 3704 for the concept.
+        "net.ipv4.conf.all.log_martians" = "1";
+        "net.ipv4.conf.default.log_martians" = "1";
+
+        # Disable TCP timestamps (RFC 1323). The option supports PAWS on
+        # connections transferring more than 2^31 bytes in a single TCP
+        # flow — a scenario that does not happen on a workstation. What
+        # it does leak reliably is the system uptime to any remote peer
+        # that captures a SYN-ACK, usable for OS fingerprinting and
+        # attack timing. Not part of R12 in the ANSSI v2.0 guide;
+        # included as a Sécurix-local complement. See RFC 1323 §4,
+        # and https://lwn.net/Articles/581578/ for the uptime-leak.
+        "net.ipv4.tcp_timestamps" = "0";
       };
     in
     {
