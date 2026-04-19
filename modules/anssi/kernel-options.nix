@@ -175,12 +175,25 @@ in
     severity = "intermediary";
     category = "base";
 
-    config = _: { boot.kernel.sysctl."kernel.yama.ptrace_scope" = "1"; };
+    # ptrace_scope values:
+    #   0 — classic permissions (any process can attach to its children)
+    #   1 — only ancestor processes can attach (Linux default, ANSSI R11 minimum)
+    #   2 — only CAP_SYS_PTRACE can attach (admin-only)
+    #   3 — ptrace disabled entirely (breaks debuggers / crash tools)
+    # ANSSI R11 requires ≥ 1. Sécurix picks 2 as a stricter default suited to
+    # an admin workstation: scope=1 still lets an unprivileged user dump
+    # secrets from their own agent processes (ssh-agent, gpg-agent,
+    # yubikey-agent, charon-nm), which defeats the point of hardware-backed
+    # keys. scope=2 preserves debugger workflows for admins (who can acquire
+    # CAP_SYS_PTRACE via sudo) while closing that gap. scope=3 is rejected
+    # because it breaks `strace`, `gdb` and `coredumpctl` entirely with no
+    # material security gain over scope=2.
+    config = _: { boot.kernel.sysctl."kernel.yama.ptrace_scope" = "2"; };
 
     checkScript =
       pkgs:
       pkgs.writeShellScript "check-R11" ''
-        ${mkSysctlChecker pkgs.lib { "kernel.yama.ptrace_scope" = 1; }}
+        ${mkSysctlChecker pkgs.lib { "kernel.yama.ptrace_scope" = 2; }}
       '';
   };
 
