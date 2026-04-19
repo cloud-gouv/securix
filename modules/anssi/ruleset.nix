@@ -14,7 +14,7 @@ loadRules [
   # ./users.nix
   # ./apparmor.nix
   # ./selinux.nix
-  # ./journaling.nix
+  ./journaling.nix
   # ./runtime-minimization.nix
   # ./hardening.nix
   # ./nss-hardening.nix
