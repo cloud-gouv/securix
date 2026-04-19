@@ -12,6 +12,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 - [Quick start](./user/quick_start.md)
 - [Variants](./user/variants.md)
+- [SSH post-quantum posture](./user/ssh-pqc-posture.md)
 - [Operations]()
   - [Deployment options](./user/deployment.md)
   - [A cache for your deployment](./user/cache.md)

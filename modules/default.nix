@@ -28,6 +28,8 @@
     ./ssh-tpm-agent.nix
     # Audit logs
     ./auditd.nix
+    # Post-quantum SSH posture (strict KEX)
+    ./ssh-pqc.nix
     # Data-only pertaining to the system
     ./self.nix
     # All the VPN code
