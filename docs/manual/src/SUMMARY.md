@@ -13,6 +13,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 - [Quick start](./user/quick_start.md)
 - [Variants](./user/variants.md)
 - [Browser baseline](./user/browser-baseline.md)
+- [Browser hardening](./user/browser-hardening.md)
 - [Operations]()
   - [Deployment options](./user/deployment.md)
   - [A cache for your deployment](./user/cache.md)
