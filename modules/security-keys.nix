@@ -8,6 +8,10 @@
   environment.systemPackages = [
     pkgs.yubikey-personalization
     pkgs.yubikey-manager
+    # Ships `pamu2fcfg` so operators can enrol their FIDO2 key on
+    # the workstation without an ad-hoc `nix-shell -p pam_u2f`.
+    # See `docs/manual/src/user/enroll-security-key.md`.
+    pkgs.pam_u2f
   ];
   services.udev.packages = [
     pkgs.yubikey-personalization
