@@ -88,6 +88,12 @@ in
 
     programs.firefox = {
       enable = true;
+      # Pin to Firefox ESR (security-only update channel, Mozilla-supported).
+      # Rationale: admin workstation posture favours a predictable release
+      # cadence with security-only patches over the rolling branch's feature
+      # churn. Upstream ESR ships ~1 major/year with ~1 year overlap; see
+      # `docs/manual/src/user/browser-baseline.md` for the update policy.
+      package = pkgs.firefox-esr;
       languagePacks = [
         "fr"
         "en-US"

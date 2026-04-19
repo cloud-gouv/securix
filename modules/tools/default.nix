@@ -81,8 +81,9 @@
     glibcInfo
     man-pages
     man-pages-posix
-    # Browser
-    firefox
+    # Browser is installed via `programs.firefox` (pinned to firefox-esr
+    # in modules/tools/firefox.nix) — not via systemPackages, which would
+    # pull in the rolling release in parallel.
     qrencode
   ];
 }
