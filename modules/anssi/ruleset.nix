@@ -17,7 +17,7 @@ loadRules [
   # ./journaling.nix
   # ./runtime-minimization.nix
   # ./hardening.nix
-  # ./nss-hardening.nix
+  ./nss-hardening.nix
   # ./integrity.nix
   # ./mta.nix
 ]
