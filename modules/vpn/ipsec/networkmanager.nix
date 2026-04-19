@@ -31,6 +31,24 @@ let
     mkDefault
     mkRenamedOptionModule
     ;
+  # See modules/vpn/ipsec/post-quantum.nix for the options declaration.
+  pqCfg = config.securix.vpn.ipsec.postQuantum;
+  # Append the post-quantum additional KE round to an IKE proposal
+  # string unless the operator already put one there. Matches ke1_*,
+  # mlkem*, kyber* to avoid double-appending when the proposal was
+  # written PQ-aware in the inventory.
+  wrapIkePq =
+    ike:
+    if
+      pqCfg.enable
+      && !(lib.hasInfix "ke1_" ike)
+      && !(lib.hasInfix "ke2_" ike)
+      && !(lib.hasInfix "mlkem" ike)
+      && !(lib.hasInfix "kyber" ike)
+    then
+      "${ike}-${pqCfg.additionalKe}"
+    else
+      ike;
   isValidIpsecProfile =
     profileName: hasAttr profileName vpnProfiles && vpnProfiles.${profileName}.type == "ipsec";
   mapValidIpsecProfiles =
@@ -104,7 +122,8 @@ let
         # It's automatically derived when the cert is on the smartcard.
         local-identity = mkIf (method != "cert-on-security-token") email;
         proposal = "yes";
-        inherit ike esp;
+        ike = wrapIkePq ike;
+        inherit esp;
         remote-ts = concatStringsSep ";" remoteSubnets;
         local-ts = mkIf (mkAddress != null) (mkAddress bit);
         virtual = if (localSubnet == "%any") then "yes" else "no";

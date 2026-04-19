@@ -9,5 +9,7 @@
     ./networkmanager.nix
     # Firewall rules to go always to the IPsec tunnel
     ./firewall.nix
+    # Post-quantum hybrid KEX for IKEv2 (RFC 9370)
+    ./post-quantum.nix
   ];
 }
