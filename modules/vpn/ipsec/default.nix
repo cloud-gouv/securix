@@ -9,5 +9,7 @@
     ./networkmanager.nix
     # Firewall rules to go always to the IPsec tunnel
     ./firewall.nix
+    # Automated recovery from the charon-nm suspend/resume bug
+    ./post-resume.nix
   ];
 }
