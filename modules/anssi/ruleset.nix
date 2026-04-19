@@ -16,6 +16,7 @@ loadRules [
   # ./selinux.nix
   # ./journaling.nix
   # ./runtime-minimization.nix
+  ./no-bluetooth.nix
   # ./hardening.nix
   # ./nss-hardening.nix
   # ./integrity.nix
