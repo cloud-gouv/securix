@@ -28,6 +28,8 @@
     ./ssh-tpm-agent.nix
     # Audit logs
     ./auditd.nix
+    # /tmp, /var/tmp, /dev/shm hardening (ANSSI R19)
+    ./vfs.nix
     # Data-only pertaining to the system
     ./self.nix
     # All the VPN code
