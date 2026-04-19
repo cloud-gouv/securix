@@ -9,6 +9,7 @@ in
 loadRules [
   ./preboot.nix
   ./kernel-options.nix
+  ./password-aging.nix
   # ./kernel.nix
   # ./vfs.nix
   # ./users.nix
