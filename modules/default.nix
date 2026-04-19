@@ -28,6 +28,8 @@
     ./ssh-tpm-agent.nix
     # Audit logs
     ./auditd.nix
+    # Outgoing MTA (relay system notifications)
+    ./mta.nix
     # Data-only pertaining to the system
     ./self.nix
     # All the VPN code
