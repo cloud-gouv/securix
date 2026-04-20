@@ -1,10 +1,11 @@
 <!--
 SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+SPDX-FileCopyrightText: 2026 Julien Dauphant <julien.dauphant@numerique.gouv.fr>
 
 SPDX-License-Identifier: MIT
 -->
 
-# Sécurix: Base OS sécurisé pour poste d'administration
+# Sécurix: Base OS pour poste sécurisé
 
 Ce projet est en **alpha**, aucun support n'est proposé pour l'heure.
 
@@ -51,6 +52,11 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 ## Contribuer
 
 Les contributions sont les bienvenues ! Consultez les tickets ouverts et le guide de contribution pour participer.
+Vous pouvez ouvrir des tickets pour proposer des fonctionnalités et discuter de l'architecture.
+Les PR générées par IA sans relecture ni test seront fermées, les contributions par le même auteur pourront être bloquées par la suite.
+
+Ce README est en français mais le reste du code est en anglais.
+
 
 ### Lancement des tests
 
