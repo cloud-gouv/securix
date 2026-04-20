@@ -14,7 +14,8 @@
 let
   # Import our own overlays.
   pkgs' = pkgs.extend (import ./pkgs/overlay.nix);
-  git-hooks = import sources.git-hooks;
+  git-hooks =
+    if sources.git-hooks ? lib then sources.git-hooks.lib.${pkgs'.system} else import sources.git-hooks;
 
   inherit (pkgs') lib;
 

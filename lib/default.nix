@@ -436,7 +436,11 @@ rec {
         ../modules
         ../hardware
         # For Secure Boot.
-        (import sources.lanzaboote).nixosModules.lanzaboote
+        # When sources.lanzaboote is a flake input it already exposes nixosModules directly;
+        # importing it would trigger the flake machinery and builtins.storePath in pure mode.
+        (
+          if sources.lanzaboote ? nixosModules then sources.lanzaboote else import sources.lanzaboote
+        ).nixosModules.lanzaboote
         "${sources.disko}/module.nix"
         "${sources.agenix}/modules/age.nix"
         {
