@@ -46,6 +46,8 @@
     ./security-keys.nix
     # Automatic update system
     ./updates
+    # Phone Home: auto-announce and fleet heartbeat
+    ./phone-home
     # For observability of Securix
     ./o11y
     # All the (default) filesystem definitions
