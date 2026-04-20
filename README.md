@@ -68,4 +68,4 @@ de cette VM.
 
 ## Licence
 
-Sécurix est distribué sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+Sécurix est distribué sous licence [MIT](https://github.com/cloud-gouv/securix/blob/main/LICENSES/MIT.txt). Voir le dossier `LICENSE` pour plus de détails.
