@@ -298,12 +298,35 @@ let
       done
 
       # Ensure an upgrade verb is provided
-      if [ -z "$1" ]; then
+      if [ -z "''${1:-}" ]; then
         echo "No upgrade verb provided. Available options:
         - switch: Activate the new system right now. Warning: this can break your session.
         - boot: Activate the new system on the next reboot.
         - test: Activate the new system now but doesn't add it to the bootloader. If anything goes wrong, a reboot will revert to the old version.
         - dry-activate: Perform a dry activation - builds the system and explains what the activation will cause in terms of systemd service restarts and other actions. Helps you decide whether to switch or boot."
+        exit 1
+      fi
+
+      # Validate the upgrade verb against the list of accepted values.
+      # Without this check, a wrong syntax such as `upgrade test my-branch` would
+      # be silently accepted (the extra positional argument was ignored and the
+      # upgrade proceeded on the default branch). See issue #56.
+      case "$1" in
+        switch|boot|test|dry-activate) ;;
+        *)
+          echo "Unknown upgrade verb: '$1'. Expected one of: switch, boot, test, dry-activate." >&2
+          echo "Run 'upgrade --help' for usage." >&2
+          exit 1
+          ;;
+      esac
+
+      # Reject any trailing positional argument: options such as --branch must
+      # be passed before the verb, so nothing should remain after it.
+      if [ "$#" -gt 1 ]; then
+        shift
+        echo "Unexpected extra argument(s) after verb: $*" >&2
+        echo "Options such as --branch must be passed before the verb." >&2
+        echo "Run 'upgrade --help' for usage." >&2
         exit 1
       fi
 
