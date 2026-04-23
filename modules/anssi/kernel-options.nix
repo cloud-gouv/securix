@@ -6,11 +6,18 @@ let
   mkSysctlChecker =
     lib: attrs:
     let
+      # Normalize whitespace (tabs to spaces, collapse runs, trim edges)
+      # so that sysctl output like "32768\t65535" matches Nix value "32768 65535".
+      normalizeWhitespace = ''tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//' '';
       mkCheckSingularSysctl = attr: expectedValue: ''
         # Check for sysctl '${attr}'
-        actual_value=$(sysctl -n "${attr}")
-        if [[ "$actual_value" -ne "${toString expectedValue}" ]]; then
-          echo "Check failed for ${attr}: expected ${toString expectedValue}, got $actual_value"
+        actual_value=$(sysctl -n "${attr}" | ${normalizeWhitespace}) || {
+          echo "Check failed for ${attr}: unable to read sysctl value"
+          exit 1
+        }
+        expected_value=$(echo "${toString expectedValue}" | ${normalizeWhitespace})
+        if [[ "$actual_value" != "$expected_value" ]]; then
+          echo "Check failed for ${attr}: expected $expected_value, got $actual_value"
           exit 1
         else
           echo "Check passed for ${attr}"
