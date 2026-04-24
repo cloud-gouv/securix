@@ -569,7 +569,17 @@ function updateAdvCount() {
 
 
 function nixStr(s) {
-  return '"' + s + '"';
+  return (
+    '"' +
+    s
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/\$\{/g, '\\${') 
+      .replace(/\r/g, '\\r')
+      .replace(/\n/g, '\\n')
+      .replace(/\t/g, '\\t') +
+    '"'
+  );
 }
 
 function nixList(arr) {
