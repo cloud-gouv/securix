@@ -253,6 +253,7 @@ let
 
       # Default values
       BRANCH="${config.securix.auto-updates.branch}"
+      REPO_PATH="${self.infraRepositoryPath}"
       SUBDIR="${self.infraRepositorySubdir}"
       REMOTE_PULL=true
       USE_SN=false
