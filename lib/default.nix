@@ -315,6 +315,15 @@ rec {
 
                 umount -R /mnt || true
 
+        	for dm in /dev/mapper/*; do
+        	  [ "$dm" = "/dev/mapper/control" ] && continue
+        	  ${pkgs.cryptsetup}/bin/cryptsetup close "$dm" 2>/dev/null \
+        	    || ${pkgs.lvm2}/bin/dmsetup remove -f "$dm" 2>/dev/null \
+        	    || true
+        	done
+        	${pkgs.lvm2}/bin/vgchange -an 2>/dev/null || true
+        	${pkgs.systemd}/bin/udevadm settle
+
                 box_message "Welcome in the Securix automatic installer."
                 log_info "Here is the list of current block devices."
                 lsblk
