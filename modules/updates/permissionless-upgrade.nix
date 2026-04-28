@@ -361,8 +361,6 @@ let
       if [ "$REMOTE_PULL" = true ]; then
         git -C "${self.infraRepositoryPath}" fetch origin
         if [ "$BRANCH" == "${config.securix.auto-updates.branch}" ]; then
-          REPO_PATH="${self.infraRepositoryPath}"
-
           # Update the repo.
           # On main branch, it's ABSOLUTELY forbidden to do anything else than --ff-only.
           git -C "${self.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
