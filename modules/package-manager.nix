@@ -14,7 +14,7 @@ let
 in
 {
   config = {
-    environment.etc.nixpkgs.source = builtins.storePath pkgs.path;
+    environment.etc.nixpkgs.source = pkgs.path;
     nix = {
       package = pkgs.lix;
       nixPath = [
