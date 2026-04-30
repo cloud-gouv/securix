@@ -10,7 +10,12 @@
   ...
 }:
 let
-  inherit (lib) listToAttrs mkOption;
+  inherit (lib)
+    listToAttrs
+    mkOption
+    mkEnableOption
+    mkIf
+    ;
   inherit (lib.types) attrsOf submodule str;
 
   cfg = config.securix.firefox;
@@ -43,32 +48,37 @@ let
   };
 in
 {
-  options.securix.firefox.bookmarks = mkOption {
-    type = attrsOf (attrsOf bookmarkType);
-    default = { };
-    example = ''
-      {
-        Productivity = {
-          Github = {
-            href = "https://github.com";
-            icon = "github.png";
+  options.securix.firefox = {
+    enable = mkEnableOption "Securix firefox distribution" // {
+      default = true;
+    };
+    bookmarks = mkOption {
+      type = attrsOf (attrsOf bookmarkType);
+      default = { };
+      example = ''
+        {
+          Productivity = {
+            Github = {
+              href = "https://github.com";
+              icon = "github.png";
+            };
           };
-        };
 
-        Entertainment = {
-          Youtube = {
-            href = "https://youtube.com";
-            icon = "si-youtube";
+          Entertainment = {
+            Youtube = {
+              href = "https://youtube.com";
+              icon = "si-youtube";
+            };
           };
-        };
-      }
-    '';
-    description = ''
-      Bookmarks to show to homepage and firefox bookmarks.
-    '';
+        }
+      '';
+      description = ''
+        Bookmarks to show to homepage and firefox bookmarks.
+      '';
+    };
   };
 
-  config = {
+  config = mkIf cfg.enable {
     # This spawns the dashboard on 127.0.0.1:8082.
     services.homepage-dashboard = {
       enable = true;
