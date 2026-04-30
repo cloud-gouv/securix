@@ -438,6 +438,7 @@ rec {
         ../hardware
         # For Secure Boot.
         (import sources.lanzaboote).nixosModules.lanzaboote
+        "${sources.portail}/nix/module.nix"
         "${sources.disko}/module.nix"
         "${sources.agenix}/modules/age.nix"
         {
