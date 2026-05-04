@@ -10,7 +10,12 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Pilotes virtio pour disques et réseau
-  boot.initrd.kernelModules = [ "virtio" "virtio_pci" "virtio_blk" "virtio_net" ];
+  boot.initrd.kernelModules = [
+    "virtio"
+    "virtio_pci"
+    "virtio_blk"
+    "virtio_net"
+  ];
 
   # Pas de microcode AMD/Intel nécessaire
   hardware.cpu.amd.updateMicrocode = false;
@@ -20,7 +25,10 @@
   hardware.firmware = lib.mkForce [ ];
 
   # Support de base pour l'interface graphique QEMU
-  services.xserver.videoDrivers = [ "virtio" "fbdev" ];
+  services.xserver.videoDrivers = [
+    "virtio"
+    "fbdev"
+  ];
 
   # Optimisations VM
   services.qemuGuest.enable = true;
