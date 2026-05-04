@@ -164,6 +164,7 @@ in
           "x9-15"
           "e14-g7"
           "x13-20ug"
+          "qemu-vm"
         ];
         description = "Identifiant de configuration du matériel";
         example = "x280";
