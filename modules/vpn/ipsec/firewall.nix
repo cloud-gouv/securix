@@ -31,11 +31,11 @@ in
   config = mkIf cfg.enable {
     services.resolved = {
       enable = true;
-      dnssec = "false";
-      llmnr = "false";
-      extraConfig = ''
-        MulticastDNS=false
-      '';
+      settings.Resolve = {
+        DNSSEC = false;
+        LLMNR = false;
+        MulticastDNS = false;
+      };
     };
     networking.firewall.enable = false;
     networking.nftables = {
