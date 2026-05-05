@@ -380,8 +380,8 @@ rec {
             {
               imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-base.nix" ];
               # This is an intermediate priority override, normal override is 100, mkDefault is 1000. We take the middle here.
-              networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.inventoryId}";
-              system.nixos.tags = [ "m${toString targetSystem.config.securix.self.inventoryId}" ];
+              networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.machine.inventoryId}";
+              system.nixos.tags = [ "m${toString targetSystem.config.securix.self.machine.inventoryId}" ];
 
               isoImage.storeContents = [ targetSystemClosure ];
               isoImage.squashfsCompression = compression;
@@ -554,7 +554,7 @@ rec {
 
             Email: ${config.securix.self.user.email}
             Machine: ${config.securix.self.machine.hardwareSKU}
-            Numéro: ${toString config.securix.self.inventoryId}
+            Numéro: ${toString config.securix.self.machine.inventoryId}
           '';
         in
         pkgs.writeText "inventory.md" ''
