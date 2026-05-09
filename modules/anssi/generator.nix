@@ -53,7 +53,7 @@
           exceptionRationale = lib.mkOption {
             type = lib.types.nullOr lib.types.str;
             default =
-              if config.security.anssi.exceptions ? ${rule.name} then
+              if config.security.anssi.exceptions ? ${ruleId} then
                 config.security.anssi.exceptions.${ruleId}.rationale
               else
                 null;
