@@ -9,7 +9,7 @@ let
       mkCheckSingularSysctl = attr: expectedValue: ''
         # Check for sysctl '${attr}'
         actual_value=$(sysctl -n "${attr}")
-        if [[ "$actual_value" -ne "${toString expectedValue}" ]]; then
+        if [[ "$actual_value" != "${toString expectedValue}" ]]; then
           echo "Check failed for ${attr}: expected ${toString expectedValue}, got $actual_value"
           exit 1
         else
