@@ -98,12 +98,22 @@ in
   options.securix.automatic-http-proxy = {
     enable = mkEnableOption "configure des proxies HTTP automatiquement";
 
+    implementation = mkOption {
+      type = types.enum [
+        "g3proxy"
+        "portail"
+      ];
+      default = "g3proxy";
+    };
+
     proxies = mkOption { type = types.attrsOf (types.submodule httpProxyOpts); };
   };
 
   config = mkIf cfg.enable {
     securix.http-proxy = {
       enable = true;
+
+      inherit (cfg) implementation;
 
       downstreams = mapAttrs (
         _: { remote, ... }: "${remote.address}:${toString remote.port}"
