@@ -1,0 +1,102 @@
+<!--
+SPDX-FileCopyrightText: 2026 Pauline Legrand <pauline.legrand@numerique.gouv.fr>
+
+SPDX-License-Identifier: MIT
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventory Generator</title>
+  <link rel="stylesheet" href="inventory-generator.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">Inventory Generator</div>
+  <div class="header-sub">inventory/{users,machines}/</div>
+</header>
+
+<main>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-icon user-icon"></div>
+      <div class="panel-title">Utilisateur</div>
+      <div class="panel-path">inventory/users/<span id="u-filename-preview">username</span>.nix</div>
+    </div>
+    <div class="panel-body" id="user-panel-body">
+      <div class="loading">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        chargement des options…
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary" onclick="previewUser()">Prévisualiser</button>
+      <button class="btn btn-secondary" onclick="resetPanel('user')">Réinitialiser</button>
+      <div class="status" id="u-status"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-icon" style="background:#c792ea"></div>
+      <div class="panel-title">Options avancées</div>
+      <div class="panel-path" id="adv-count">0 module(s) activé(s)</div>
+    </div>
+    <div class="panel-body" id="adv-panel-body">
+      <div class="loading">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        chargement des options…
+      </div>
+    </div>
+    <div class="panel-footer">
+      <div class="status" id="adv-status"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-icon machine-icon"></div>
+      <div class="panel-title">Machine</div>
+      <div class="panel-path">inventory/machines/<span id="m-filename-preview">SN</span>.nix</div>
+    </div>
+    <div class="panel-body" id="machine-panel-body">
+      <div class="loading">
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        <div class="loading-dot"></div>
+        chargement des options…
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn btn-primary green" onclick="previewMachine()">Prévisualiser</button>
+      <button class="btn btn-secondary" onclick="resetPanel('machine')">Réinitialiser</button>
+      <div class="status" id="m-status"></div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Prévisualisation</div>
+      <button class="modal-close" onclick="closeModalBtn()">×</button>
+    </div>
+    <div class="modal-body">
+      <pre id="modal-content"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="copyContent()">Copier</button>
+      <button class="btn btn-primary" onclick="saveFile()">Télécharger le fichier</button>
+    </div>
+  </div>
+</div>
+
+<script src="inventory-generator.js"></script>
+</body>
+</html>
