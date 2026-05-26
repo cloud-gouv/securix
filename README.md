@@ -6,8 +6,8 @@ SPDX-License-Identifier: MIT
 -->
 
 # Sécurix: Base OS pour poste sécurisé
-
-Ce projet est en **alpha**, aucun support n'est proposé pour l'heure.
+> [!NOTE]
+> Ce projet est en **alpha**, aucun support n'est proposé pour l'heure.
 
 ## Objectifs
 
@@ -66,6 +66,6 @@ de cette VM.
 
 `nix-build -A tests`
 
-## Licence
+## Licences
 
-Sécurix est distribué sous licence [MIT](https://github.com/cloud-gouv/securix/blob/main/LICENSES/MIT.txt). Voir le dossier `LICENSE` pour plus de détails.
+Sécurix est distribué sous licence [MIT](https://github.com/cloud-gouv/securix/blob/main/LICENSES/MIT.txt). Voir le dossier `LICENSES` pour plus de détails.
