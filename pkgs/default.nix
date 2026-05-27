@@ -5,4 +5,5 @@
 { callPackage }:
 {
   mkPlasmaLookAndFeelPackage = callPackage ./plasma/mk-look-and-feel-package.nix { };
+  plasma-portail-tray-icon = callPackage ./plasma/portail-tray-icon { };
 }
