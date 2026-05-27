@@ -10,6 +10,8 @@ let
   localProxyStream = "127.0.0.1:8080";
 in
 {
+  imports = [ ./tray.nix ];
+
   config = mkIf (cfg.enable && cfg.implementation == "portail") {
     networking.proxy = {
       default = "http://${localProxyStream}";

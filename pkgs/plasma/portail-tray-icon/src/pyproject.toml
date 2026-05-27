@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "portail-tray-icon"
+version = "0.1.0"
+description = "Tray icon for Portail access proxy"
+requires-python = ">=3.13"
+authors = [
+    {name = "Ryan Lahfa", email = "ryan.lahfa.ext@numerique.gouv.fr"},
+]
+license = {text = "MIT"}
+
+dependencies = [
+    "PySide6",
+    "varlink",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[project.scripts]
+tray = "tray:main"
