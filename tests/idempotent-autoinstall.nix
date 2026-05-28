@@ -62,23 +62,22 @@ let
     };
   };
 
-  autoinstallPkg = lib.findFirst (
-    p: p.name or "" == "autoinstall-terminal"
-  ) (throw "autoinstall-terminal not found in installer packages") installer.config.environment.systemPackages;
+  autoinstallPkg =
+    lib.findFirst (p: p.name or "" == "autoinstall-terminal")
+      (throw "autoinstall-terminal not found in installer packages")
+      installer.config.environment.systemPackages;
 
 in
 pkgs.testers.nixosTest {
   name = "autoinstall-terminal-idempotent";
 
-  nodes.machine =
-    _:
-    {
-      virtualisation.emptyDiskImages = [ 4096 ];
-      environment.systemPackages = [
-        autoinstallPkg
-        pkgs.expect
-      ];
-    };
+  nodes.machine = _: {
+    virtualisation.emptyDiskImages = [ 4096 ];
+    environment.systemPackages = [
+      autoinstallPkg
+      pkgs.expect
+    ];
+  };
 
   testScript = ''
     import textwrap
