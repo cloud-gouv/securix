@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -480,7 +481,7 @@ rec {
     {
       users,
       vpn-profiles,
-      edition,
+      edition ? args.edition,
       compression ? "zstd -Xcompression-level 6",
     }:
     baseSystem:
