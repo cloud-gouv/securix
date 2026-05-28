@@ -50,5 +50,7 @@
     ./o11y
     # All the (default) filesystem definitions
     ./filesystems
+    # International-specific customizations, e.g. French
+    ./i18n.nix
   ];
 }
