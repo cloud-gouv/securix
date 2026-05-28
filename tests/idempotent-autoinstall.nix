@@ -71,7 +71,7 @@ pkgs.testers.nixosTest {
   name = "autoinstall-terminal-idempotent";
 
   nodes.machine =
-    { ... }:
+    _:
     {
       virtualisation.emptyDiskImages = [ 4096 ];
       environment.systemPackages = [

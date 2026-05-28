@@ -50,5 +50,7 @@
     ./o11y
     # All the (default) filesystem definitions
     ./filesystems
+    # Options related to the boot screen, UI, etc.
+    ./boot
   ];
 }
