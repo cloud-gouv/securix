@@ -51,7 +51,7 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 
 ## Contribuer
 
-Les contributions sont ouvertes aux projets, il est recommandé d'avoir une expertise NixOS afin d'en faciliter l'intégration.
+Les contributions sont ouvertes au projet, il est recommandé d'avoir une expertise NixOS pour en faciliter l'intégration.
 Consultez les tickets ouverts et le guide de contribution pour participer.
 Vous pouvez ouvrir des tickets pour proposer des fonctionnalités et discuter de l'architecture.
 Les PR générées par IA sans relecture ni test seront fermées, les contributions par le même auteur pourront être bloquées par la suite.
