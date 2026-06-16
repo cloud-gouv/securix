@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 > [!NOTE]
 > Ce projet est en **alpha**, aucun support n'est proposé pour l'heure.
 
-## Objectifs
+## Objectifs 
 
-Sécurix est un projet développé et utilisé au département de l'opérateur (OPI) de la DINUM. 
+SecurixOS est une distribution NixOS développée par la DINUM pour équiper des PC sécurisés pour l'administration système, la bureautique et le développement afin de traiter des informations Non Protégé dans un premier temps puis éventuellement par la suite des informations Diffusion Restreinte. 
 
 Il constitue un modèle de PC sécurisé conçu pour permettre des accès à la production et d'autres usages critiques en garantissant un niveau de sécurité variable selon la configuration employée.
 
@@ -51,11 +51,12 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 
 ## Contribuer
 
-Les contributions sont les bienvenues ! Consultez les tickets ouverts et le guide de contribution pour participer.
+Les contributions sont ouvertes aux projets, il est recommandé d'avoir une expertise NixOS afin d'en faciliter l'intégration.
+Consultez les tickets ouverts et le guide de contribution pour participer.
 Vous pouvez ouvrir des tickets pour proposer des fonctionnalités et discuter de l'architecture.
 Les PR générées par IA sans relecture ni test seront fermées, les contributions par le même auteur pourront être bloquées par la suite.
 
-Ce README est en français mais le reste du code est en anglais.
+Ce README est en français mais le reste du code, les issuers et les PR sont en anglais.
 
 
 ### Lancement des tests
