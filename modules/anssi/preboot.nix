@@ -70,7 +70,7 @@
           secure_boot_status=$(xxd -p -c 4 "$secure_boot_file")
 
           # Check if Secure Boot is enabled
-          if [[ "$secure_boot_status" =~ ".*01.*" ]]; then
+          if [[ "$secure_boot_status" =~ 01 ]]; then
             echo "Secure Boot is enabled."
             exit 0
           else
