@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 ## Objectifs 
 
-SecurixOS est une distribution NixOS développée par la DINUM pour équiper des PC sécurisés pour l'administration système, la bureautique et le développement afin de traiter des informations Non Protégé dans un premier temps puis éventuellement par la suite des informations Diffusion Restreinte. 
+SecurixOS est une distribution NixOS développée par la DINUM pour équiper des ordinateurs sécurisés pour l'administration système, la bureautique et le développement afin de traiter des informations Non Protégées dans un premier temps puis éventuellement des informations Diffusion Restreinte. 
 
 Il constitue un modèle de PC sécurisé conçu pour permettre des accès à la production et d'autres usages critiques en garantissant un niveau de sécurité variable selon la configuration employée.
 
