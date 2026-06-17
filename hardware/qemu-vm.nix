@@ -26,7 +26,6 @@
 
   # Support de base pour l'interface graphique QEMU
   services.xserver.videoDrivers = [
-    "virtio"
     "fbdev"
   ];
 
