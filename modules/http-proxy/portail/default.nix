@@ -6,7 +6,7 @@
 let
   cfg = config.securix.http-proxy;
   automaticCfg = config.securix.automatic-http-proxy;
-  inherit (lib) mkIf concatStringsSep mapAttrs concatMapAttrs;
+  inherit (lib) mkIf concatStringsSep mapAttrs mapAttrsToList filterAttrs optionalAttrs concatMapAttrs;
   localProxyStream = "127.0.0.1:8080";
 in
 {
@@ -60,6 +60,43 @@ in
       }
     ) automaticCfg.networkmanager.events.handlers;
 
+    # To allow users to call `portailctl`
+    environment.systemPackages = [
+      config.services.portail.package
+    ];
+
+    # Manage dynamically defined proxies
+    systemd.services.portail-dynamic-updates = 
+    let
+      isDynamic = _: proxy: proxy.definition == "dynamic";
+    in
+    {
+      description = "Update dynamically defined proxies target addresses";
+      after = [ "portail-rpc.socket" "portail.service" ];
+      requires = [ "portail-rpc.socket" "portail.service" ];
+      path = [ config.services.portail.package ];
+      serviceConfig = {
+        DynamicUser = true;
+        SupplementaryGroups = [ "portail-admins" ];
+        Type = "oneshot";
+        Restart = "on-failure";
+        RestartSec = 5;
+        LoadCredential = mapAttrsToList (id: { remotePath, ... }: "${id}:${remotePath}") (filterAttrs isDynamic config.securix.automatic-http-proxy.proxies);
+      };
+      script = 
+      let
+        mkUpdateScript = id: { remotePath, ... }: ''
+          echo "Updating dynamic proxy ${id}..."
+          source $CREDENTIALS_DIRECTORY/${id}
+          portail rpc update-dynamic-backend ${id} --target-address "$ADDRESS:$PORT"
+          echo "Updated!"
+        '';
+      in
+        # HACK(Ryan): this is a layer violation but it should disappear as soon as we tear down the proxy abstraction once g3proxy goes away.
+        # There's a too large feature difference between Portail and anything else.
+        concatStringsSep "\n" (mapAttrsToList mkUpdateScript (filterAttrs isDynamic config.securix.automatic-http-proxy.proxies));
+    };
+
     # This group is allowed to update any dynamic backend (if there's any).
     users.groups.portail-admins = { };
     services.portail = {
@@ -76,7 +113,11 @@ in
 
       settings = {
         # By default, we use ourselves to exit.
-        backends = mapAttrs (name: target-address: { inherit target-address; }) cfg.downstreams;
+        backends = mapAttrs (name: target-address: {
+          dynamic = target-address == null;
+        } // optionalAttrs (target-address != null) {
+          inherit target-address;
+        }) cfg.downstreams;
         rpc = {
           trusted-groups = [ "operator" ];
           admin-groups = [ "portail-admins" ];
