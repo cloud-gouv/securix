@@ -55,7 +55,7 @@ in
           '{records:[{fields:{InventoryID:$i,Hardware:$h,SSHPublicKey:$s,TPMPublicKey:$t,InstallDate:$d}}] }')
 
         echo "Envoi vers Grist (Proxy utilisé: ''${DETECTED_PROXY:-AUCUN})"
-        URL="${cfg.gristUrl}/api/docs/${cfg.docId}/tables/${cfg.tableId}/records"
+        URL="${cfg.gristUrl}/o/docs/api/s/${cfg.docId}/tables/${cfg.tableId}/records"
 
         RESPONSE=$(${pkgs.curl}/bin/curl -sf -w "\n%{http_code}" \
           ''${DETECTED_PROXY:+ -x "$DETECTED_PROXY"} \
