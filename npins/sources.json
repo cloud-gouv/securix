@@ -68,11 +68,11 @@
         "owner": "cloud-gouv",
         "repo": "portail"
       },
-      "branch": "main",
+      "branch": "metrics",
       "submodules": false,
-      "revision": "4660c2d231665f6539d857a95d4e6b82ad4c62c0",
-      "url": "https://github.com/cloud-gouv/portail/archive/4660c2d231665f6539d857a95d4e6b82ad4c62c0.tar.gz",
-      "hash": "1jfy7sl1zjas7apnml4c58ipbg2mqr8w1ryb7ar9c9mzi7v7iixi"
+      "revision": "1cb4aca4e934e6196c4e9db9828f8df76b9bf659",
+      "url": "https://github.com/cloud-gouv/portail/archive/1cb4aca4e934e6196c4e9db9828f8df76b9bf659.tar.gz",
+      "hash": "0jbn8q7m56i7nz9kwxkdcyav25g58g50lzfcklh0xlc84yv09cfy"
     }
   },
   "version": 5
