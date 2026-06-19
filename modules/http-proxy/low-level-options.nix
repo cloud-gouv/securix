@@ -24,7 +24,7 @@ in
     };
 
     downstreams = mkOption {
-      type = types.attrsOf types.str;
+      type = types.attrsOf (types.nullOr types.str);
       example = [
         {
           par_a = "1.2.3.4:8080";
@@ -32,7 +32,7 @@ in
           rbx_a = "1.8.9.2:9091";
         }
       ];
-      description = "Ensembles des proxies descendants";
+      description = "Ensembles des proxies descendants, s'il est indéfini, le proxy est dynamique.";
     };
 
     exceptions = mkOption {

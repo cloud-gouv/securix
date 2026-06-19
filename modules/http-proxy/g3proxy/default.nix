@@ -16,6 +16,7 @@ let
     tail
     splitString
     concatMapAttrs
+    mapAttrsToList
     ;
   json = pkgs.formats.json { };
   cfg = config.securix.http-proxy;
@@ -24,6 +25,11 @@ let
 in
 {
   config = mkIf (cfg.enable && cfg.implementation == "g3proxy") {
+    assertions = mapAttrsToList (name: { definition, ... }: {
+      assertion = definition == "static";
+      message = "Upstream proxy ${name} is not marked as a static proxy. The g3proxy implementation do not support dynamically defined proxies like Portail does.";
+    }) config.securix.automatic-http-proxy.proxies;
+
     networking.proxy = {
       default = "http://127.0.0.1:8080";
       noProxy = concatStringsSep "," cfg.exceptions;
