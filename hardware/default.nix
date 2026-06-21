@@ -11,6 +11,5 @@
     ./x9-15.nix
     ./e14-g7.nix
     ./x13-20ug.nix
-    ./qemu-vm.nix
   ];
 }
