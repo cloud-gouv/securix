@@ -228,22 +228,63 @@ in
             # This is the fallback local forward proxy.
             # Used for network locations with no forward proxy.
             {
-              name = "local_securix";
-              escaper = "default";
-              # TODO: intelli_proxy here.
-              type = "http_proxy";
+              name = "local_securix_intelli";
+              type = "intelli_proxy";
               listen.address = "127.0.0.1:8081";
+              http_server = "local_securix_http";
+              socks_server = "local_securix_socks";
+              dst_host_filter_set = cfg.noProxyAllowedHosts;
+            }
+            {
+              name = "local_securix_http";
+              type = "http_proxy";
+              escaper = "default";
+              listen.address = "127.0.0.1:9090";
+              tls_client = { };
+              dst_host_filter_set = cfg.noProxyAllowedHosts;
+            }
+            {
+              name = "local_securix_socks";
+              type = "socks_proxy";
+              escaper = "default";
+              listen.address = "127.0.0.1:9091";
               tls_client = { };
               dst_host_filter_set = cfg.noProxyAllowedHosts;
             }
 
             # This is the entrypoint of all proxy requests.
             {
-              name = "securix";
-              escaper = "dynamic";
-              # TODO: intelli_proxy here.
-              type = "http_proxy";
+              name = "securix_intelli";
+              type = "intelli_proxy";
+              http_server = "securix_http";
+              socks_server = "securix_socks";
               listen.address = "127.0.0.1:8080";
+              tls_client = { };
+              # dst_host_filter_set = {
+              #   exact = nonSubnetsExceptions ++ domainsExceptions;
+              #   child = domainsExceptions;
+              #   regex = domainsExceptions;
+              #   subnet = subnetsExceptions;
+              # };
+            }
+            {
+              name = "securix_http";
+              escaper = "dynamic";
+              type = "http_proxy";
+              listen.address = "127.0.0.1:9080";
+              tls_client = { };
+              # dst_host_filter_set = {
+              #   exact = nonSubnetsExceptions ++ domainsExceptions;
+              #   child = domainsExceptions;
+              #   regex = domainsExceptions;
+              #   subnet = subnetsExceptions;
+              # };
+            }
+            {
+              name = "securix_socks";
+              escaper = "dynamic";
+              type = "socks_proxy";
+              listen.address = "127.0.0.1:9081";
               tls_client = { };
               # dst_host_filter_set = {
               #   exact = nonSubnetsExceptions ++ domainsExceptions;
