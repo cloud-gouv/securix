@@ -74,6 +74,7 @@ in
       description = "Update dynamically defined proxies target addresses";
       after = [ "portail-rpc.socket" "portail.service" ];
       requires = [ "portail-rpc.socket" "portail.service" ];
+      partOf = [ "portail-rpc.socket" "portail.service" ];
       path = [ config.services.portail.package ];
       serviceConfig = {
         DynamicUser = true;
