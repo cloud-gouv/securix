@@ -97,6 +97,9 @@ in
         concatStringsSep "\n" (mapAttrsToList mkUpdateScript (filterAttrs isDynamic config.securix.automatic-http-proxy.proxies));
     };
 
+    # every time, portail starts successfully, start the dynamic updates.
+    systemd.services.portail.unitConfig.OnSuccess = [ "portail-dynamic-updates.service" ];
+
     # This group is allowed to update any dynamic backend (if there's any).
     users.groups.portail-admins = { };
     services.portail = {
