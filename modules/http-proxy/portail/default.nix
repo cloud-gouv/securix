@@ -72,24 +72,7 @@ in
     environment.systemPackages = [ config.services.portail.package ];
 
     # Manage dynamically defined proxies
-    systemd.services.portail-dynamic-updates = 
-    let
-      isDynamic = _: proxy: proxy.definition == "dynamic";
-    in
-    {
-      description = "Update dynamically defined proxies target addresses";
-      after = [ "portail-rpc.socket" "portail.service" ];
-      requires = [ "portail-rpc.socket" "portail.service" ];
-      path = [ config.services.portail.package ];
-      serviceConfig = {
-        DynamicUser = true;
-        SupplementaryGroups = [ "portail-admins" ];
-        Type = "oneshot";
-        Restart = "on-failure";
-        RestartSec = 5;
-        LoadCredential = mapAttrsToList (id: { remotePath, ... }: "${id}:${remotePath}") (filterAttrs isDynamic config.securix.automatic-http-proxy.proxies);
-      };
-      script = 
+    systemd.services.portail-dynamic-updates =
       let
         isDynamic = _: proxy: proxy.definition == "dynamic";
       in
