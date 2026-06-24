@@ -56,6 +56,7 @@ let
         )
     )
   ) operators;
+  defaultProxiesPerVPN = filterAttrs (n: arg: arg.default or false) ipsecProxies;
   mkIPsecConnectionProfile =
     operatorName:
     {
@@ -176,7 +177,11 @@ in
   ];
 
   config = mkIf cfg.enable {
-    # TODO: warn if ipsecProxies is non-empty to push for deprecation.
+    warnings = lib.optional (defaultProxiesPerVPN != { }) ''
+      Some proxies were specified via `availableHttpProxies` in your VPN profiles. This method is deprecated.
+      Migrate to `securix.automatic-http-proxy.networkmanager.events.handlers` to activate proxy automatically in response to declared VPN profiles.
+      Please consult Sécurix changelog for more information.
+    '';
 
     age.secrets = mapAttrs (_: path: { file = path; }) cfg.secretsPaths;
 
@@ -227,21 +232,17 @@ in
     securix.automatic-http-proxy = {
       enable = mkDefault true;
       proxies = ipsecProxies;
-      networkmanager.events.handlers =
-        let
-          defaultProxiesPerVPN = filterAttrs (n: arg: arg.default or false) ipsecProxies;
-        in
-        mapAttrs' (
-          proxyName:
-          { vpn, ... }:
-          {
-            name = "10-securix-ipsec-${vpn}";
-            value = {
-              matchConnectionId = "VPN ${vpn} for $user";
-              proxyToActuate = proxyName;
-            };
-          }
-        ) defaultProxiesPerVPN;
+      networkmanager.events.handlers = mapAttrs' (
+        proxyName:
+        { vpn, ... }:
+        {
+          name = "10-securix-ipsec-${vpn}";
+          value = {
+            matchConnectionId = "VPN ${vpn} for $user";
+            proxyToActuate = proxyName;
+          };
+        }
+      ) defaultProxiesPerVPN;
     };
 
     networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
