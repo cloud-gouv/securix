@@ -48,7 +48,7 @@ let
       remote = {
         address = mkOption {
           type = types.nullOr types.str;
-          default = if proxyConfig.options.definition == "127.0.0.1" then 8080 else null;
+          default = if proxyConfig.options.definition == "static" then "127.0.0.1" else null;
           description = "Adresse IP du proxy d'accès distant";
         };
 
