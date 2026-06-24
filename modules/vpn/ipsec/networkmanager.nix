@@ -167,6 +167,19 @@ in
       default = { };
       description = "Chemin vers vers les secrets (PSK, IPs, ...) transmit au profil VPN";
     };
+
+    proxies.map = mkOption {
+      type = types.attrsOf types.str;
+      default = { };
+      description = ''
+        An attribute set to relate a VPN name with a proxy.
+        In Sécurix, naming of VPN at the NetworkManager level is as it follows: "VPN $name for $user".
+        You should provide $name as a key here.
+      '';
+      example = {
+        "office" = "office-proxy";
+      };
+    };
   };
 
   imports = [
@@ -179,7 +192,8 @@ in
   config = mkIf cfg.enable {
     warnings = lib.optional (defaultProxiesPerVPN != { }) ''
       Some proxies were specified via `availableHttpProxies` in your VPN profiles. This method is deprecated.
-      Migrate to `securix.automatic-http-proxy.networkmanager.events.handlers` to activate proxy automatically in response to declared VPN profiles.
+      Migrate to `securix.automatic-http-proxy.networkmanager.events.handlers` or `securix.vpn.ipsec.proxies.map` to activate proxy automatically in response to declared VPN profiles.
+      Note that `securix.vpn.ipsec.proxies.map` is a temporary attribute set for the purpose of achieving https://github.com/cloud-gouv/securix/issues/195.
       Please consult Sécurix changelog for more information.
     '';
 
@@ -232,7 +246,7 @@ in
     securix.automatic-http-proxy = {
       enable = mkDefault true;
       proxies = ipsecProxies;
-      networkmanager.events.handlers = mapAttrs' (
+      networkmanager.events.handlers = (mapAttrs' (
         proxyName:
         { vpn, ... }:
         {
@@ -242,7 +256,13 @@ in
             proxyToActuate = proxyName;
           };
         }
-      ) defaultProxiesPerVPN;
+        ) defaultProxiesPerVPN) // (mapAttrs' (vpnName: proxyName: {
+          name = "11-securix-map-ipsec-${vpnName}";
+          value = {
+            matchConnectionId = "VPN ${vpnName} for $user";
+            proxyToActuate = proxyName;
+          };
+        }) cfg.proxies.map);
     };
 
     networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
