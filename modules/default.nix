@@ -52,5 +52,8 @@
     ./filesystems
     # Options related to the boot screen, UI, etc.
     ./boot
+    # React to NetworkManager events (low-level API)
+    # Used to turn on proxies in response to certain VPNs lifecycles.
+    ./networkmanager-events.nix
   ];
 }
