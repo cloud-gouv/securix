@@ -62,6 +62,7 @@ let
       username,
       email,
       bit ? null,
+      cn ? null,
       ...
     }:
     profileName:
@@ -102,7 +103,7 @@ let
         encap = "yes";
         ipcomp = "no";
         # It's automatically derived when the cert is on the smartcard.
-        local-identity = mkIf (method != "cert-on-security-token") email;
+        local-identity = mkIf (method != "cert-on-security-token") (if cn != null then cn else email);
         proposal = "yes";
         inherit ike esp;
         remote-ts = concatStringsSep ";" remoteSubnets;
