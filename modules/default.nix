@@ -51,7 +51,7 @@
     # All the (default) filesystem definitions
     ./filesystems
     # International-specific customizations, e.g. French
-    ./i18n.nix
+    ./i18n
     # Options related to the boot screen, UI, etc.
     ./boot
   ];
