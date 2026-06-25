@@ -60,9 +60,8 @@ let
     operatorName:
     {
       username,
-      email,
+      local-identity,
       bit ? null,
-      local-identity ? null,
       ...
     }:
     profileName:
