@@ -139,6 +139,12 @@ in
         ];
       };
 
+      "local-identity" = lib.mkOption {
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Identité locale pour l'IPsec (ex: CN).";
+      };
+
     };
 
     machine = {
