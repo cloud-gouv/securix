@@ -102,7 +102,7 @@ let
         encap = "yes";
         ipcomp = "no";
         # It's automatically derived when the cert is on the smartcard.
-        local-identity = mkIf (method != "cert-on-security-token") local-identity;
+        local-identity = mkIf (local-identity != null) local-identity;
         proposal = "yes";
         inherit ike esp;
         remote-ts = concatStringsSep ";" remoteSubnets;
