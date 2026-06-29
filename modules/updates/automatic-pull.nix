@@ -146,6 +146,7 @@ in
           100
           101
           102
+          103
         ];
         Environment = [
           "SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock"
