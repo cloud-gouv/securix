@@ -23,13 +23,15 @@ let
     mkIf
     optionalString
     mkRenamedOptionModule
+    head
     ;
   deriveUsernameFromEmail =
     email:
     let
-      parts = splitString "." email;
-      firstName = elemAt 0 parts;
-      lastName = elemAt 1 parts;
+      localPart = head (splitString "@" email);
+      parts = splitString "." localPart;
+      firstName = elemAt parts 0;
+      lastName = elemAt parts 1;
       firstLetter = substring 0 1 firstName;
       usernameLimit = 32;
     in
