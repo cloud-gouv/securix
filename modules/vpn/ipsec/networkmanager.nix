@@ -56,6 +56,7 @@ let
         )
     )
   ) operators;
+  defaultProxiesPerVPN = filterAttrs (n: arg: arg.default or false) ipsecProxies;
   mkIPsecConnectionProfile =
     operatorName:
     {
@@ -166,6 +167,19 @@ in
       default = { };
       description = "Chemin vers vers les secrets (PSK, IPs, ...) transmit au profil VPN";
     };
+
+    proxies.map = mkOption {
+      type = types.attrsOf types.str;
+      default = { };
+      description = ''
+        An attribute set to relate a VPN name with a proxy.
+        In Sécurix, naming of VPN at the NetworkManager level is as it follows: "VPN $name for $user".
+        You should provide $name as a key here.
+      '';
+      example = {
+        "office" = "office-proxy";
+      };
+    };
   };
 
   imports = [
@@ -176,6 +190,13 @@ in
   ];
 
   config = mkIf cfg.enable {
+    warnings = lib.optional (defaultProxiesPerVPN != { }) ''
+      Some proxies were specified via `availableHttpProxies` in your VPN profiles. This method is deprecated.
+      Migrate to `securix.automatic-http-proxy.networkmanager.events.handlers` or `securix.vpn.ipsec.proxies.map` to activate proxy automatically in response to declared VPN profiles.
+      Note that `securix.vpn.ipsec.proxies.map` is a temporary attribute set for the purpose of achieving https://github.com/cloud-gouv/securix/issues/195.
+      Please consult Sécurix changelog for more information.
+    '';
+
     age.secrets = mapAttrs (_: path: { file = path; }) cfg.secretsPaths;
 
     # This is an extra rule to allow any user to do `sudo pkill charon-nm` to reset the VPN state.
@@ -221,67 +242,28 @@ in
 
     # Add all available proxies and default proxies for
     # IPsec VPN profiles.
+    securix.networkmanager.events.enable = true;
     securix.automatic-http-proxy = {
       enable = mkDefault true;
       proxies = ipsecProxies;
+      networkmanager.events.handlers = (mapAttrs' (
+        proxyName:
+        { vpn, ... }:
+        {
+          name = "10-securix-ipsec-${vpn}";
+          value = {
+            matchConnectionId = "VPN ${vpn} for $user";
+            proxyToActuate = proxyName;
+          };
+        }
+        ) defaultProxiesPerVPN) // (mapAttrs' (vpnName: proxyName: {
+          name = "11-securix-map-ipsec-${vpnName}";
+          value = {
+            matchConnectionId = "VPN ${vpnName} for $user";
+            proxyToActuate = proxyName;
+          };
+        }) cfg.proxies.map);
     };
-    # Automatically switch to the default proxy of the
-    # enabled VPN.
-    networking.networkmanager.dispatcherScripts =
-      let
-        defaultProxiesPerVPN = filterAttrs (n: arg: arg.default or false) ipsecProxies;
-        mkSwitchFor =
-          proxyName:
-          { vpn, ... }:
-          ''
-            # Hook for ${vpn}
-            # Default proxy: ${proxyName}
-            if [[ "$CONNECTION_ID" == "VPN ${vpn} for $user" ]]; then
-              logger "[IPsec proxy hook] Automatically switching to proxy ${proxyName}"
-              ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyName} --cli
-              # FIXME(Ryan): this hardcodes the SSH forward method for this proxy.
-              # We should check if that's needed and perhaps encode `bringupLogic` as a property of the proxy.
-              systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
-              systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyName}.service
-            else
-              logger "[IPsec proxy hook] Skipping ${proxyName} for $CONNECTION_ID as it doesn't match $user-${vpn}.nmconnection"
-            fi
-          '';
-      in
-      [
-        {
-          type = "basic";
-          source = pkgs.writeText "10-automatic-proxy-switch-up-hook" ''
-            if [ "$2" != "vpn-up" ]; then
-              logger "exit: event $2, waiting for a vpn-up event"
-              exit
-            fi
-
-            # This retrieves the caller user of the dispatcher.
-            # NOTE(Ryan): this logic is brittle. on a multi-seat system,
-            # there's multiple results.
-            # NetworkManager should pass who sent the D-Bus message as an environment variable.
-            user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
-            ${concatStringsSep "\n" (mapAttrsToList mkSwitchFor defaultProxiesPerVPN)}
-          '';
-        }
-        {
-          type = "basic";
-          source = pkgs.writeText "20-automatic-proxy-switch-down-hook" ''
-            if [ "$2" != "vpn-down" ]; then
-              logger "exit: event $2, waiting for a vpn-down event"
-              exit
-            fi
-            # This retrieves the caller user of the dispatcher.
-            # NOTE(Ryan): this logic is brittle. on a multi-seat system,
-            # there's multiple results.
-            # NetworkManager should pass who sent the D-Bus message as an environment variable.
-            user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
-            ${pkgs.proxy-switcher}/bin/proxy-switcher np
-          '';
-        }
-      ];
 
     networking.networkmanager.plugins = [ pkgs.networkmanager_strongswan ];
     networking.networkmanager.ensureProfiles.environmentFiles = mapAttrsToList (
