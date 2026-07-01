@@ -60,7 +60,7 @@ let
     operatorName:
     {
       username,
-      local-identity,
+      local-identity ? null,
       bit ? null,
       ...
     }:
@@ -79,6 +79,12 @@ let
       dns ? null,
       ...
     }:
+    let
+      resolvedLocalIdentity =
+        if lib.isAttrs local-identity
+        then local-identity.${profileName} or null
+        else local-identity;
+    in
     assert lib.assertMsg (bit != null -> mkAddress != null)
       "Il n'est pas possible de générer un profil IPsec si le paramètre `bit` n'est pas rempli pour l'administrateur ${operatorName}";
     assert lib.assertMsg (mkPasswordVariable == null -> method != "psk")
@@ -102,7 +108,7 @@ let
         encap = "yes";
         ipcomp = "no";
         # It's automatically derived when the cert is on the smartcard.
-        local-identity = mkIf (local-identity != null) local-identity;
+        local-identity = mkIf (resolvedLocalIdentity != null) resolvedLocalIdentity;
         proposal = "yes";
         inherit ike esp;
         remote-ts = concatStringsSep ";" remoteSubnets;
