@@ -512,6 +512,66 @@ rec {
       }
     ) users;
 
+  mkTerminal-refactor =
+    {
+      name,
+      vpnProfiles,
+      modules,
+      edition ? args.edition,
+      compression ? "zstd -Xcompression-level 6",
+      postInstallScript ? "",
+    }:
+    let
+      allModules = [
+        ../modules
+        ../hardware
+        (import sources.lanzaboote).nixosModules.lanzaboote
+        "${sources.disko}/module.nix"
+        "${sources.agenix}/modules/age.nix"
+        {
+          securix.self.machine.identifier = name;
+          securix.self.edition = edition;
+          _module.args.vpnProfiles = vpnProfiles;
+          age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+        }
+      ] ++ modules;
+    in
+    {
+      modules = allModules;
+      partitioningModules = [
+        "${sources.disko}/module.nix"
+        ../modules/filesystems
+        ../modules/self.nix
+        ../modules/pam
+      ];
+      installer = buildUSBInstallerISO {
+        modules = allModules;
+        inherit compression postInstallScript;
+      };
+      system = pkgs.nixos allModules;
+    };
+
+  mkTerminals-refactor =
+    {
+      users,
+      vpn-profiles,
+      edition ? args.edition,
+      compression ? "zstd -Xcompression-level 6",
+    }:
+    baseSystem:
+    mapAttrs (
+      name: userModule:
+      mkTerminal-refactor {
+        inherit name edition compression;
+        vpnProfiles = vpn-profiles;
+        modules = [
+          baseSystem
+          userModule
+        ];
+      }
+    ) users;
+
+
   # Build all documentation outputs for the Securix OS.
   mkDocs =
     {
