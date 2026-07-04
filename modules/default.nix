@@ -54,5 +54,7 @@
     ./i18n
     # Options related to the boot screen, UI, etc.
     ./boot
+    # Inventory related modules (machines and users)
+    ./inventory
   ];
 }

@@ -7,4 +7,6 @@
   minimal = import ./minimal.nix { inherit pkgs libSecurix; };
   anssi-minimal = import ./anssi-minimal.nix { inherit pkgs libSecurix; };
   idempotent-autoinstall = import ./idempotent-autoinstall.nix { inherit pkgs libSecurix; };
+  inventory2 = import ./inventory2.nix { inherit pkgs libSecurix; };
+  inventory-refactor = import ./inventory-refactor.nix { inherit pkgs libSecurix; };
 }
