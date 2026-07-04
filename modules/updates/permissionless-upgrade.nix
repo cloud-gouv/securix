@@ -90,7 +90,7 @@ let
       .BI \-\-subdir " CHEMIN"
       Sous-répertoire du dépôt contenant la configuration NixOS à utiliser.
       Par défaut : ${
-        if self.infraRepositorySubdir == "" then "<à la racine>" else self.infraRepositorySubdir
+        if self.machine.infraRepositorySubdir == "" then "<à la racine>" else self.machine.infraRepositorySubdir
       }.
       .TP
       .B \-\-do-not-pull
@@ -234,7 +234,7 @@ let
         --branch NOM          Branche Git à utiliser
                               (défaut : ${config.securix.auto-updates.branch})
         --subdir CHEMIN       Sous-répertoire du dépôt contenant la config NixOS
-                              (défaut : ${self.infraRepositorySubdir})
+                              (défaut : ${self.machine.infraRepositorySubdir})
         --do-not-pull         Ne pas récupérer les changements distants avant de
                               reconstruire
         --securix-branch NOM  Branche du dépôt securix (surcharge du npins)
@@ -253,8 +253,8 @@ let
 
       # Default values
       BRANCH="${config.securix.auto-updates.branch}"
-      REPO_PATH="${self.infraRepositoryPath}"
-      SUBDIR="${self.infraRepositorySubdir}"
+      REPO_PATH="${self.machine.infraRepositoryPath}"
+      SUBDIR="${self.machine.infraRepositorySubdir}"
       REMOTE_PULL=true
       USE_SN=false
       SECURIX_BRANCH=""
@@ -337,7 +337,7 @@ let
       upgrade_cleanup() {
         local exit_code=$?
         if [ -n "$INFRA_TEMP_DIR" ]; then
-          git -C "${self.infraRepositoryPath}" worktree remove "$INFRA_TEMP_DIR" || true
+          git -C "${self.machine.infraRepositoryPath}" worktree remove "$INFRA_TEMP_DIR" || true
           rm -rf "$INFRA_TEMP_DIR"
         fi
         if [ -n "$SECURIX_OVERRIDE_TEMP_DIR" ]; then
@@ -347,23 +347,23 @@ let
       }
       trap upgrade_cleanup EXIT
 
-      # Check if ${self.infraRepositoryPath} exist
-      if [ ! -d "${self.infraRepositoryPath}/.git" ]; then
+      # Check if ${self.machine.infraRepositoryPath} exist
+      if [ ! -d "${self.machine.infraRepositoryPath}/.git" ]; then
             echo "Repository does not exist, cloning..."
-            mkdir -p "${self.infraRepositoryPath}" || exit 1
+            mkdir -p "${self.machine.infraRepositoryPath}" || exit 1
 
-            git clone "${config.securix.auto-updates.repoUrl}" "${self.infraRepositoryPath}" -b "${config.securix.auto-updates.branch}" 
+            git clone "${config.securix.auto-updates.repoUrl}" "${self.machine.infraRepositoryPath}" -b "${config.securix.auto-updates.branch}" 
       fi
 
       # Ensure that the origin is the right URL.
-      git -C "${self.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
+      git -C "${self.machine.infraRepositoryPath}" remote set-url origin "${config.securix.auto-updates.repoUrl}"
 
       if [ "$REMOTE_PULL" = true ]; then
-        git -C "${self.infraRepositoryPath}" fetch origin
+        git -C "${self.machine.infraRepositoryPath}" fetch origin
         if [ "$BRANCH" == "${config.securix.auto-updates.branch}" ]; then
           # Update the repo.
           # On main branch, it's ABSOLUTELY forbidden to do anything else than --ff-only.
-          git -C "${self.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
+          git -C "${self.machine.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
           git -C "$REPO_PATH" pull --ff-only || exit 1
         else
           ${optionalString (
@@ -373,7 +373,7 @@ let
           INFRA_TEMP_DIR=$(mktemp -d)
 
           # Extract a worktree for the specified branch in the temporary directory
-          git -C "${self.infraRepositoryPath}" worktree add "$INFRA_TEMP_DIR" "$BRANCH" || exit 1
+          git -C "${self.machine.infraRepositoryPath}" worktree add "$INFRA_TEMP_DIR" "$BRANCH" || exit 1
           REPO_PATH="$INFRA_TEMP_DIR"
 
           # Update the worktree.

@@ -56,5 +56,8 @@
     ./boot
     # Inventory related modules (machines and users)
     ./inventory
+    # React to NetworkManager events (low-level API)
+    # Used to turn on proxies in response to certain VPNs lifecycles.
+    ./networkmanager-events.nix
   ];
 }

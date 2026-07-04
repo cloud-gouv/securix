@@ -1,0 +1,61 @@
+name: Bug Report
+description: A report of an error in a recent SecurixOS version
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to fill out this bug report!
+
+  - type: input
+    id: version
+    attributes:
+      label: securix version the issue has been seen with
+      description: |
+        Do not submit bug reports about anything but the two most recently released *major* SecurixOS versions upstream!
+      placeholder: '0.14'
+    validations:
+      required: true
+
+  - type: input
+    id: kernel
+    attributes:
+      label: Linux kernel version used
+      description: |
+        Please use `uname -r` to get linux kernel version.
+      placeholder: 6.14.0-0.rc3.29.fc42.x86_64
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected-behaviour
+    attributes:
+      label: Expected behaviour you didn't see
+    validations:
+      required: false
+
+  - type: textarea
+    id: unexpected-behaviour
+    attributes:
+      label: Unexpected behaviour you saw
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce the problem
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: Additional program output to the terminal or log subsystem illustrating the issue
+      description: |
+        Please paste relevant program terminal or journal output here, ideally when generated in debug mode.
+        For very long copy/pasted data consider using a service like https://gist.github.com/. Where copy/paste is not possible (for example early boot or late shutdown), a photo of the screen might do too, but text is always much preferred.
+      placeholder: This will be automatically formatted into code, so no need for backticks.
+      render: sh
+    validations:
+      required: false
