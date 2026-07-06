@@ -8,7 +8,7 @@ let
     let
       # Normalize whitespace (tabs to spaces, collapse runs, trim edges)
       # so that sysctl output like "32768\t65535" matches Nix value "32768 65535".
-      normalizeWhitespace = ''tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//' '';
+      normalizeWhitespace = "tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//' ";
       mkCheckSingularSysctl = attr: expectedValue: ''
         # Check for sysctl '${attr}'
         actual_value=$(sysctl -n "${attr}" | ${normalizeWhitespace}) || {
