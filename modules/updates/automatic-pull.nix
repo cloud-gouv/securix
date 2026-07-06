@@ -84,7 +84,7 @@ in
                         notify-send "$title" "$message" || true
                 else
                     # Terminal notification for non-GUI sessions
-                    sudo -u "$user" echo "$title: $message" | wall
+                    echo "$title: $message" | wall
                 fi
             done
           }
@@ -146,10 +146,11 @@ in
           100
           101
           102
+          103
         ];
         Environment = [
           "SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock"
-          "REPO_DIR=${config.securix.self.infraRepositoryPath}"
+          "REPO_DIR=${config.securix.self.machine.infraRepositoryPath}"
           "REPO_URL=${cfg.repoUrl}"
           "REPO_SUBDIR=${cfg.repoSubdir}"
         ];

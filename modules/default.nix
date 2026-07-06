@@ -50,7 +50,12 @@
     ./o11y
     # All the (default) filesystem definitions
     ./filesystems
+    # International-specific customizations, e.g. French
+    ./i18n
     # Options related to the boot screen, UI, etc.
     ./boot
+    # React to NetworkManager events (low-level API)
+    # Used to turn on proxies in response to certain VPNs lifecycles.
+    ./networkmanager-events.nix
   ];
 }
