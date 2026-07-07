@@ -60,6 +60,19 @@
       "name": "nixos-26.05",
       "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.1947.a0374025a863/nixexprs.tar.xz",
       "hash": "13acdfkryy995aqwjibkfp9rsysaz0jjnf994h21d4mmz46m311y"
+    },
+    "portail": {
+      "type": "Git",
+      "repository": {
+        "type": "GitHub",
+        "owner": "cloud-gouv",
+        "repo": "portail"
+      },
+      "branch": "main",
+      "submodules": false,
+      "revision": "4660c2d231665f6539d857a95d4e6b82ad4c62c0",
+      "url": "https://github.com/cloud-gouv/portail/archive/4660c2d231665f6539d857a95d4e6b82ad4c62c0.tar.gz",
+      "hash": "1jfy7sl1zjas7apnml4c58ipbg2mqr8w1ryb7ar9c9mzi7v7iixi"
     }
   },
   "version": 5
