@@ -5,13 +5,13 @@ SPDX-FileCopyrightText: 2026 Julien Dauphant <julien.dauphant@numerique.gouv.fr>
 SPDX-License-Identifier: MIT
 -->
 
-# Sécurix: Base OS pour poste sécurisé
+# SécurixOS: Base OS pour poste sécurisé
 > [!NOTE]
 > Ce projet est en **alpha**, aucun support n'est proposé pour l'heure.
 
 ## Objectifs 
 
-SecurixOS est une distribution NixOS développée par la DINUM pour équiper des ordinateurs sécurisés pour l'administration système, la bureautique et le développement afin de traiter des informations Non Protégées dans un premier temps puis éventuellement des informations Diffusion Restreinte. 
+SécurixOS est une distribution NixOS développée par la DINUM pour équiper des ordinateurs sécurisés pour l'administration système, la bureautique et le développement afin de traiter des informations Non Protégées dans un premier temps puis éventuellement des informations Diffusion Restreinte. 
 
 Il constitue un modèle de PC sécurisé conçu pour permettre des accès à la production et d'autres usages critiques en garantissant un niveau de sécurité variable selon la configuration employée.
 
