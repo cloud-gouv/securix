@@ -24,7 +24,15 @@ let
         securix.automatic-http-proxy = {
           enable = true;
           implementation = "portail";
-          proxies = { };
+          proxies = {
+            dyntest = {
+              definition = "dynamic";
+              remotePath = pkgs.writeText "secret" ''
+                ADDRESS=1.2.3.4
+                PORT=8080
+              '';
+            };
+          };
         };
       }
     ];
@@ -38,8 +46,14 @@ pkgs.testers.nixosTest {
     };
   };
   testScript = ''
-    securix_unbranded_000000.wait_for_unit("default.target")
-    securix_unbranded_000000.succeed("cat /etc/os-release | grep securix")
-    securix_unbranded_000000.wait_for_unit("portail.service")
+    import json
+
+    securix = securix_unbranded_000000
+    securix.wait_for_unit("default.target")
+    securix.succeed("cat /etc/os-release | grep securix")
+    securix.wait_for_unit("portail.service")
+    securix.succeed("systemctl restart portail.service")
+    securix.wait_for_unit("portail.service")
+    assert json.loads(securix.succeed("portail rpc --json list-backends"))[0]['spec'] is not None, "Specification did not get reloaded"
   '';
 }

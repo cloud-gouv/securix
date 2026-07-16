@@ -82,14 +82,11 @@ in
           "portail-rpc.socket"
           "portail.service"
         ];
-        requires = [
+        bindsTo = [
           "portail-rpc.socket"
           "portail.service"
         ];
-        partOf = [
-          "portail-rpc.socket"
-          "portail.service"
-        ];
+        wantedBy = [ "portail.service" ];
         path = [ config.services.portail.package ];
         serviceConfig = {
           DynamicUser = true;
