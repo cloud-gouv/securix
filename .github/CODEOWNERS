@@ -1,0 +1,4 @@
+* @jdauphant-dinum @rlahfa-dinum
+
+# All changes to .github/CODEOWNERS must be approved by jdauphant-dinum.
+.github/CODEOWNERS @jdauphant-dinum
