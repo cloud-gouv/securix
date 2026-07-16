@@ -90,7 +90,10 @@ let
       .BI \-\-subdir " CHEMIN"
       Sous-répertoire du dépôt contenant la configuration NixOS à utiliser.
       Par défaut : ${
-        if self.machine.infraRepositorySubdir == "" then "<à la racine>" else self.machine.infraRepositorySubdir
+        if self.machine.infraRepositorySubdir == "" then
+          "<à la racine>"
+        else
+          self.machine.infraRepositorySubdir
       }.
       .TP
       .B \-\-do-not-pull

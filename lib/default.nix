@@ -273,88 +273,88 @@ rec {
 
             environment.systemPackages = [
               (pkgs.writeShellScriptBin "autoinstall-terminal" ''
-                #!/usr/bin/env bash
+                        #!/usr/bin/env bash
 
-                log() {
-                  local level="$1"
-                  local msg="$2"
-                  case "$level" in
-                    info)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
-                      ;;
-                    warn)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
-                      ;;
-                    error)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
-                      ;;
-                    *)
-                      ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
-                      ;;
-                  esac
-                }
+                        log() {
+                          local level="$1"
+                          local msg="$2"
+                          case "$level" in
+                            info)
+                              ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
+                              ;;
+                            warn)
+                              ${pkgs.gum}/bin/gum log -t rfc822 -l warn "$msg"
+                              ;;
+                            error)
+                              ${pkgs.gum}/bin/gum log -t rfc822 -l error "$msg"
+                              ;;
+                            *)
+                              ${pkgs.gum}/bin/gum log -t rfc822 -l debug "$msg"
+                              ;;
+                          esac
+                        }
 
-                log_info() {
-                  local msg="$1"
-                  log info "$msg"
-                }
+                        log_info() {
+                          local msg="$1"
+                          log info "$msg"
+                        }
 
-                log_warn() {
-                  local msg="$1"
-                  log warn "$msg"
-                }
+                        log_warn() {
+                          local msg="$1"
+                          log warn "$msg"
+                        }
 
-                log_error() {
-                  local msg="$1"
-                  log error "$msg"
-                  }
+                        log_error() {
+                          local msg="$1"
+                          log error "$msg"
+                          }
 
-                box_message() {
-                  local msg="$1"
-                  ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
-                }
+                        box_message() {
+                          local msg="$1"
+                          ${pkgs.gum}/bin/gum style --border "rounded" --padding "1" --foreground "yellow" "$msg"
+                        }
 
-                umount -R /mnt || true
+                        umount -R /mnt || true
 
-        	for dm in /dev/mapper/*; do
-        	  [ "$dm" = "/dev/mapper/control" ] && continue
-        	  ${pkgs.cryptsetup}/bin/cryptsetup close "$dm" 2>/dev/null \
-        	    || ${pkgs.lvm2}/bin/dmsetup remove -f "$dm" 2>/dev/null \
-        	    || true
-        	done
-        	${pkgs.lvm2}/bin/vgchange -an 2>/dev/null || true
-        	${pkgs.systemd}/bin/udevadm settle
+                	for dm in /dev/mapper/*; do
+                	  [ "$dm" = "/dev/mapper/control" ] && continue
+                	  ${pkgs.cryptsetup}/bin/cryptsetup close "$dm" 2>/dev/null \
+                	    || ${pkgs.lvm2}/bin/dmsetup remove -f "$dm" 2>/dev/null \
+                	    || true
+                	done
+                	${pkgs.lvm2}/bin/vgchange -an 2>/dev/null || true
+                	${pkgs.systemd}/bin/udevadm settle
 
-                box_message "Welcome in the Securix automatic installer."
-                log_info "Here is the list of current block devices."
-                lsblk
+                        box_message "Welcome in the Securix automatic installer."
+                        log_info "Here is the list of current block devices."
+                        lsblk
 
-                ${pkgs.systemd}/bin/udevadm settle
-                log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
-                ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
+                        ${pkgs.systemd}/bin/udevadm settle
+                        log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
+                        ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
 
-                wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
-                log_info "${mainDisk} re-initialized and formatted."
+                        wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
+                        log_info "${mainDisk} re-initialized and formatted."
 
-                ${pkgs.systemd}/bin/udevadm settle
-                ${diskProcedureScript}
-                # At this point, we need to assert that /mnt is on another disk and well mounted.
-                # Otherwise, we should fail the installation.
-                if mountpoint -q /mnt && ! df -T /mnt | grep -q 'tmpfs'; then
-                  log_info "/mnt is confirmed to be a mountpoint on a persistent disk. Partitioning step has succeeded."
-                else
-                  log_error "/mnt is not a mountpoint or resides on a /tmpfs. The installation cannot succeed. Exiting."
-                  exit 1
-                fi
-                ${optionalString createSecureBootKeys createSecureBootKeysScript}
-                box_message "Burning the image on ${mainDisk}..."
-                ${installProcedureScript config}
-                ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
-                ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
-                ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
-                ${postInstallScript}
-                lsblk
-                log_info "Installation is complete. You can now reboot in the installed system."
+                        ${pkgs.systemd}/bin/udevadm settle
+                        ${diskProcedureScript}
+                        # At this point, we need to assert that /mnt is on another disk and well mounted.
+                        # Otherwise, we should fail the installation.
+                        if mountpoint -q /mnt && ! df -T /mnt | grep -q 'tmpfs'; then
+                          log_info "/mnt is confirmed to be a mountpoint on a persistent disk. Partitioning step has succeeded."
+                        else
+                          log_error "/mnt is not a mountpoint or resides on a /tmpfs. The installation cannot succeed. Exiting."
+                          exit 1
+                        fi
+                        ${optionalString createSecureBootKeys createSecureBootKeysScript}
+                        box_message "Burning the image on ${mainDisk}..."
+                        ${installProcedureScript config}
+                        ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
+                        ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
+                        ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
+                        ${postInstallScript}
+                        lsblk
+                        log_info "Installation is complete. You can now reboot in the installed system."
               '')
             ];
           }
@@ -385,18 +385,15 @@ rec {
       // {
         inherit targetSystem;
         extraInstallerModules = extraInstallerModules ++ [
-          (
-            { lib, modulesPath, ... }:
-            {
-              imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-base.nix" ];
-              # This is an intermediate priority override, normal override is 100, mkDefault is 1000. We take the middle here.
-              networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.machine.inventoryId}";
-              system.nixos.tags = [ "m${toString targetSystem.config.securix.self.machine.inventoryId}" ];
+          ({ lib, modulesPath, ... }: {
+            imports = [ "${modulesPath}/installer/cd-dvd/installation-cd-base.nix" ];
+            # This is an intermediate priority override, normal override is 100, mkDefault is 1000. We take the middle here.
+            networking.hostName = lib.mkOverride 500 "m${toString targetSystem.config.securix.self.machine.inventoryId}";
+            system.nixos.tags = [ "m${toString targetSystem.config.securix.self.machine.inventoryId}" ];
 
-              isoImage.storeContents = [ targetSystemClosure ];
-              isoImage.squashfsCompression = compression;
-            }
-          )
+            isoImage.storeContents = [ targetSystemClosure ];
+            isoImage.squashfsCompression = compression;
+          })
         ];
       }
     );

@@ -1,2 +1,7 @@
+# SPDX-FileCopyrightText: 2026 systemd project
+# SPDX-FileContributor: Julien Dauphant <julien.dauphant@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
 ---
 blank_issues_enabled: true
