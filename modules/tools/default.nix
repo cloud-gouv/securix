@@ -4,7 +4,7 @@
 
 { pkgs, ... }:
 {
-  imports = [ ./firefox.nix ];
+  imports = [ ./browsers ];
 
   programs.mtr.enable = true;
 
