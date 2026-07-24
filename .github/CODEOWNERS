@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
-* @jdauphant-dinum @rlahfa-dinum
+* @jdauphant-dinum @rlahfa-dinum @olebrouster-dinum @plegrand-dinum
 
-# All changes to .github/CODEOWNERS must be approved by jdauphant-dinum.
-.github/CODEOWNERS @jdauphant-dinum
+# All changes to .github/CODEOWNERS must be approved :
+.github/CODEOWNERS @jdauphant-dinum @olebrouster-dinum
