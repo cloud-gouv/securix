@@ -38,6 +38,11 @@ in
       default = "securix";
       description = "Sous-répertoire de la souche Sécurix";
     };
+    maxGenerationsToKeep = mkOption {
+      type = types.int;
+      default = 30;
+      description = "Nombre des dernières générations à préserver";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -137,6 +142,8 @@ in
 
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
             nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system
+            nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.maxGenerationsToKeep}
+            nix-store --gc --max-freed 10G
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           fi
       '';
