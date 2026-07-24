@@ -83,7 +83,7 @@ in
           # there's multiple results.
           # NetworkManager should pass who sent the D-Bus message as an environment variable.
           # https://gitlab.freedesktop.org/NetworkManager/NetworkManager/-/work_items/1976
-          user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm)$')
+          user=$(loginctl list-sessions --no-legend | ${pkgs.gawk}/bin/awk '{print $3}' | sort -u | grep -vE '^(root|gdm|sddm)$')
 
           if [[ "$2" != "vpn-up" && "$2" != "vpn-down" ]]; then
             logger "[securix-nm-events-hook] exit: event $2, waiting for vpn-up or vpn-down event"
