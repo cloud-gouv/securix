@@ -140,9 +140,9 @@ in
       };
 
       "local-identity" = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
+        type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.attrsOf lib.types.str));
         default = null;
-        description = "Identité locale pour l'IPsec (ex: CN).";
+        description = "Identité locale pour l'IPsec (ex: CN), soit une chaîne unique, soit un attrset indexé par nom de profil VPN.";
       };
 
     };

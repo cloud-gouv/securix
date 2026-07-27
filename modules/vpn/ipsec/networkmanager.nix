@@ -82,8 +82,14 @@ let
       ...
     }:
     let
+      defaultLocalIdentity = if method != "cert-on-security-token" then email else null;
       resolvedLocalIdentity =
-        if lib.isAttrs local-identity then local-identity.${profileName} or mkIf( method != "cert-on-security-token" ) (email) else local-identity;
+        if lib.isAttrs local-identity then
+          local-identity.${profileName} or defaultLocalIdentity
+        else if local-identity != null then
+          local-identity
+        else
+          defaultLocalIdentity;
     in
     assert lib.assertMsg (bit != null -> mkAddress != null)
       "Il n'est pas possible de générer un profil IPsec si le paramètre `bit` n'est pas rempli pour l'administrateur ${operatorName}";
