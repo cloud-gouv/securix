@@ -61,7 +61,9 @@ let
     operatorName:
     {
       username,
-      ipsec ? { local-identity = null; },
+      ipsec ? {
+        local-identity = null;
+      },
       bit ? null,
       email,
       ...
