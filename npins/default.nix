@@ -73,10 +73,7 @@ let
         else
           {
             fetchTarball =
-              {
-                url,
-                sha256,
-              }:
+              { url, sha256 }:
               pkgs.fetchzip {
                 inherit url sha256;
                 extension = "tar";
@@ -116,11 +113,7 @@ let
     spec // { outPath = mayOverride name path; };
 
   mkGitSource =
-    {
-      fetchTarball,
-      fetchGit,
-      ...
-    }:
+    { fetchTarball, fetchGit, ... }:
     {
       repository,
       revision,
@@ -171,11 +164,7 @@ let
 
   mkPyPiSource =
     { fetchurl, ... }:
-    {
-      url,
-      hash,
-      ...
-    }:
+    { url, hash, ... }:
     fetchurl {
       inherit url;
       sha256 = hash;
@@ -183,11 +172,7 @@ let
 
   mkChannelSource =
     { fetchTarball, ... }:
-    {
-      url,
-      hash,
-      ...
-    }:
+    { url, hash, ... }:
     fetchTarball {
       inherit url;
       sha256 = hash;
