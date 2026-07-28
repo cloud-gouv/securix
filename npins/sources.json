@@ -11,7 +11,7 @@
       "submodules": false,
       "revision": "fcdea223397448d35d9b31f798479227e80183f6",
       "url": "https://github.com/ryantm/agenix/archive/fcdea223397448d35d9b31f798479227e80183f6.tar.gz",
-      "hash": "1d4m7hsq727q7ndjqmgyl8vkbkqjwps962ygmv2mcc5dbqzgn963"
+      "hash": "sha256-wyT7Pl6tMFbFrs8Lk/TlEs81N6L+VSybPfiIgzU8lbQ="
     },
     "disko": {
       "type": "Git",
@@ -24,7 +24,7 @@
       "submodules": false,
       "revision": "5ba0c9555c28685e57fa54c7a25e42c7efdbfc8d",
       "url": "https://github.com/nix-community/disko/archive/5ba0c9555c28685e57fa54c7a25e42c7efdbfc8d.tar.gz",
-      "hash": "1aq9fbkhizdms6jbhfx11jdnh0d9bbfnijh2wfl0v6m7694rmh0i"
+      "hash": "sha256-EcCaSTKnmg2o4wLKaN1aqQFomwyhO7ik0bX9COdyCas="
     },
     "git-hooks": {
       "type": "Git",
@@ -37,7 +37,7 @@
       "submodules": false,
       "revision": "9364dc02281ce2d37a1f55b6e51f7c0f65a75f17",
       "url": "https://github.com/cachix/git-hooks.nix/archive/9364dc02281ce2d37a1f55b6e51f7c0f65a75f17.tar.gz",
-      "hash": "1n2qlj5l8c4g7gm5v6rvc4hff3ka8ljv7y62inybli093bd2ypa7"
+      "hash": "sha256-R10v2hoJRLq8jcL4syVFag7nIGE7m13qO48wRIukWNg="
     },
     "lanzaboote": {
       "type": "GitRelease",
@@ -53,13 +53,13 @@
       "version": "v0.4.2",
       "revision": "f0212638a2ec787a7841882f4477d40ae24f0a5d",
       "url": "https://api.github.com/repos/nix-community/lanzaboote/tarball/v0.4.2",
-      "hash": "0xc1wawnb0297h5khxblmf9pd1fry950xkcm7mwlck19s2906h80"
+      "hash": "sha256-AEEDktApTEZ5PZXNDkry2YV2k6t0dTgLPEmAZbnigXU="
     },
     "nixpkgs": {
       "type": "Channel",
       "name": "nixos-26.05",
       "url": "https://releases.nixos.org/nixos/26.05/nixos-26.05.1947.a0374025a863/nixexprs.tar.xz",
-      "hash": "13acdfkryy995aqwjibkfp9rsysaz0jjnf994h21d4mmz46m311y"
+      "hash": "sha256-PoRRDfm1khYEJCk5KyX4Snud03VzRcmxKil5n6drTI0="
     },
     "portail": {
       "type": "Git",
@@ -70,10 +70,10 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "4660c2d231665f6539d857a95d4e6b82ad4c62c0",
-      "url": "https://github.com/cloud-gouv/portail/archive/4660c2d231665f6539d857a95d4e6b82ad4c62c0.tar.gz",
-      "hash": "1jfy7sl1zjas7apnml4c58ipbg2mqr8w1ryb7ar9c9mzi7v7iixi"
+      "revision": "2bec618ca715e7da233dd9aa93f538ae096c3f28",
+      "url": "https://github.com/cloud-gouv/portail/archive/2bec618ca715e7da233dd9aa93f538ae096c3f28.tar.gz",
+      "hash": "sha256-xZayo8BN4349pCPBrYV+PnkfbW4YNR+wpl/Tnmy9rP8="
     }
   },
-  "version": 5
+  "version": 7
 }
