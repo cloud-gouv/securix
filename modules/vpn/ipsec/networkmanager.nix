@@ -61,7 +61,7 @@ let
     operatorName:
     {
       username,
-      local-identity ? null,
+      ipsec ? { local-identity = null; },
       bit ? null,
       email,
       ...
@@ -84,10 +84,10 @@ let
     let
       defaultLocalIdentity = if method != "cert-on-security-token" then email else null;
       resolvedLocalIdentity =
-        if lib.isAttrs local-identity then
-          local-identity.${profileName} or defaultLocalIdentity
-        else if local-identity != null then
-          local-identity
+        if lib.isAttrs ipsec.local-identity then
+          ipsec.local-identity.${profileName} or defaultLocalIdentity
+        else if ipsec.local-identity != null then
+          ipsec.local-identity
         else
           defaultLocalIdentity;
     in
