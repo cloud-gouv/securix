@@ -27,9 +27,7 @@ in
       "sdhci_pci"
     ];
     boot.initrd.kernelModules = [ ];
-    boot.kernelModules = [
-      "kvm-intel"
-    ];
+    boot.kernelModules = [ "kvm-intel" ];
     boot.extraModulePackages = [ ];
 
     hardware.firmware = [

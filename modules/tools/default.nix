@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   imports = [ ./firefox.nix ];
 
   programs.mtr.enable = true;

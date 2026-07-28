@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
-{ lib, ... }:
-{
+{ lib, ... }: {
   # Sécurix is usually used in France.
   time.timeZone = lib.mkDefault "Europe/Paris";
   i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";

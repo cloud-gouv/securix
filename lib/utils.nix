@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2025 Elias Coppens <elias.coppens@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
-{ lib, ... }:
-{
+{ lib, ... }: {
   address =
     let
       ipv4-regex = "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";

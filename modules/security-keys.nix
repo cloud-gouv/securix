@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 # We mostly use Yubikeys.
-{ pkgs, ... }:
-{
+{ pkgs, ... }: {
   environment.systemPackages = [
     pkgs.yubikey-personalization
     pkgs.yubikey-manager
