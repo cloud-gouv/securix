@@ -14,8 +14,7 @@ let
   lib = pkgs.lib;
 
   targetSystem = pkgs.nixos (
-    { lib, ... }:
-    {
+    { lib, ... }: {
       imports = [ "${pkgs.disko.src}/module.nix" ];
 
       options.securix.self.mainDisk = lib.mkOption { type = lib.types.str; };

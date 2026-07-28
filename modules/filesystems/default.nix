@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ lib, ... }:
-{
+{ lib, ... }: {
   imports = [
     ./options.nix
     # Here's a list of layouts that are supported by the Securix framework.

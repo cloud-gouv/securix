@@ -73,17 +73,9 @@ in
     services.homepage-dashboard = {
       enable = true;
 
-      bookmarks = map (
-        { name, value }:
-        {
-          ${name} = map (
-            { name, value }:
-            {
-              ${name} = [ value ];
-            }
-          ) (lib.attrsToList value);
-        }
-      ) (lib.attrsToList cfg.bookmarks);
+      bookmarks = map ({ name, value }: {
+        ${name} = map ({ name, value }: { ${name} = [ value ]; }) (lib.attrsToList value);
+      }) (lib.attrsToList cfg.bookmarks);
     };
 
     programs.firefox = {
@@ -108,14 +100,11 @@ in
         Bookmarks = lib.flatten (
           map (
             folder:
-            map (
-              { name, value }:
-              {
-                Title = name;
-                URL = value.href;
-                Folder = folder.name;
-              }
-            ) (lib.attrsToList folder.value)
+            map ({ name, value }: {
+              Title = name;
+              URL = value.href;
+              Folder = folder.name;
+            }) (lib.attrsToList folder.value)
           ) (lib.attrsToList cfg.bookmarks)
         );
         DisplayBookmarksToolbar = "always";

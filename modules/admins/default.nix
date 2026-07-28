@@ -13,27 +13,25 @@ let
     nameValuePair
     ;
   cfg = config.securix.admins;
-  accountOpts =
-    { name, ... }:
-    {
-      options = {
-        name = mkOption {
-          type = types.str;
-          default = name;
-          description = "PAM name for this account";
-        };
+  accountOpts = { name, ... }: {
+    options = {
+      name = mkOption {
+        type = types.str;
+        default = name;
+        description = "PAM name for this account";
+      };
 
-        u2f_keys = mkOption {
-          type = types.listOf types.str;
-          description = ''
-            List of PAM U2F keys that are allowed to connect to this account
+      u2f_keys = mkOption {
+        type = types.listOf types.str;
+        description = ''
+          List of PAM U2F keys that are allowed to connect to this account
 
-            NOTE: you have to use pamu2cfg with the same parameters for appid
-            and origin as the one described in `config.securix.pam.u2f`.
-          '';
-        };
+          NOTE: you have to use pamu2cfg with the same parameters for appid
+          and origin as the one described in `config.securix.pam.u2f`.
+        '';
       };
     };
+  };
 
   mkAdminAccount =
     _:

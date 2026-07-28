@@ -21,8 +21,7 @@ rec {
   vpn-profiles = import ./vpn-profiles { inherit lib; };
   # Base system is provided.
   terminals = securix.lib.mkTerminals users vpn-profiles (
-    { lib, ... }:
-    {
+    { lib, ... }: {
       imports = [
         # Any custom module here...
       ];

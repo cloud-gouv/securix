@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 # On vérifie que la conformité en licence de Sécurix reste valide.
-{ runs-on, commonSteps, ... }:
-{
+{ runs-on, commonSteps, ... }: {
   name = "[Sécurix] REUSE Licensing conformance";
 
   on = {

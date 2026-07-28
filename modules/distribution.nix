@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ lib, ... }:
-{
+{ lib, ... }: {
   system.nixos.distroId = lib.mkDefault "securix";
   system.nixos.distroName = lib.mkDefault "Sécurix";
   system.stateVersion = "24.11";

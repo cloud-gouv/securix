@@ -2,8 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, libSecurix }:
-{
+{ pkgs, libSecurix }: {
   minimal = import ./minimal.nix { inherit pkgs libSecurix; };
   anssi-minimal = import ./anssi-minimal.nix { inherit pkgs libSecurix; };
   idempotent-autoinstall = import ./idempotent-autoinstall.nix { inherit pkgs libSecurix; };

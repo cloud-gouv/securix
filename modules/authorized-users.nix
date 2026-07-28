@@ -21,20 +21,16 @@ let
     "tss" # tpm2
     "operator" # can upgrade the system permissionlessly
   ];
-  mkOperator =
-    { hashedPassword }:
-    {
-      isNormalUser = true;
-      inherit hashedPassword;
-      extraGroups = operatorGroups;
-    };
-  mkAdmin =
-    { hashedPassword }:
-    {
-      isNormalUser = true;
-      inherit hashedPassword;
-      extraGroups = operatorGroups ++ [ "wheel" ];
-    };
+  mkOperator = { hashedPassword }: {
+    isNormalUser = true;
+    inherit hashedPassword;
+    extraGroups = operatorGroups;
+  };
+  mkAdmin = { hashedPassword }: {
+    isNormalUser = true;
+    inherit hashedPassword;
+    extraGroups = operatorGroups ++ [ "wheel" ];
+  };
   inherit (lib)
     mkMerge
     mkIf
