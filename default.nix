@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Pamplemousse <xavier.maso@beta.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -31,10 +32,10 @@ let
         settings.config = toString ./statix.toml;
       };
 
-      nixfmt-rfc-style = {
+      nixfmt = {
         enable = true;
         stages = [ "pre-push" ];
-        package = pkgs.nixfmt-rfc-style;
+        package = pkgs.nixfmt;
         args = [ "-s" ];
       };
 
