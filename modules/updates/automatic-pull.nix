@@ -16,6 +16,20 @@ let
     mkOption
     types
     ;
+  # nixos-rebuild is wrapped to add the repository HEAD commit id to the added boot menu entry.  
+  # Note the derivation produced by this nixos-rebuild wrapper then differs from the one produced from the repository itself since it injects the commit id via builtins.getEnv.
+  nixos-rebuild-wrapped = pkgs.writeShellApplication {
+    name = "nixos-rebuild-wrapped";
+    runtimeInputs = [
+      pkgs.nixos-rebuild
+      pkgs.git
+    ];
+    text = ''
+      revision=$(git rev-parse HEAD)
+      export NIXOS_LABEL_VERSION="''${revision:0:7}"
+      nixos-rebuild "$@"
+    '';
+  };
 in
 {
   options.securix.auto-updates = {
@@ -54,7 +68,7 @@ in
         pkgs.gawk
         pkgs.libnotify
         pkgs.sudo
-        pkgs.nixos-rebuild
+        nixos-rebuild-wrapped
       ];
       script = ''
         _notify_current_user() {
@@ -126,7 +140,7 @@ in
             git pull || exit 1
 
             _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
-            nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system
+            nixos-rebuild-wrapped boot --attr terminals."${config.securix.self.machine.identifier}".system
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           else
             echo "Repository does not exist, cloning..."
@@ -136,7 +150,7 @@ in
             git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
 
             cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
-            nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system
+            nixos-rebuild-wrapped boot --attr terminals."${config.securix.self.machine.identifier}".system
             _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
           fi
       '';
