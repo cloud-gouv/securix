@@ -120,9 +120,7 @@
       };
     };
 
-    config = _: {
-      # TODO: grub or systemd-boot password
-    };
+    config = _: { boot.loader.systemd-boot.editor = false; };
 
     checkScript =
       pkgs:
@@ -141,9 +139,7 @@
 
     # implementations.secureboot = { checkScript = {}; depends = [ "R3" ]; };
 
-    config = _: {
-      # TODO
-    };
+    config = _: { boot.loader.systemd-boot.editor = false; };
 
     checkScript =
       pkgs:

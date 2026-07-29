@@ -154,6 +154,10 @@ in
         description = "Numéro d'inventaire du système";
         example = 123456;
       };
+      inventoryID = mkOption {
+        type = types.nullOr types.int;
+        default = null;
+      };
 
       hardwareSKU = mkOption {
         type = types.enum [
@@ -164,6 +168,8 @@ in
           "x9-15"
           "e14-g7"
           "x13-20ug"
+          "qemu-vm"
+          "galaxybook6-pvap"
           "p14sg6"
         ];
         description = "Identifiant de configuration du matériel";

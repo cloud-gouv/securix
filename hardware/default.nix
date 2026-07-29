@@ -10,6 +10,8 @@
     ./p14sg6.nix
     ./t14g6.nix
     ./x13-20ug.nix
+    ./qemu-vm.nix
+    ./galaxybook6-pvap.nix
     ./x280.nix
     ./x390.nix
     ./x9-15.nix

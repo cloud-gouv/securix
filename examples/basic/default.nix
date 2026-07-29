@@ -9,18 +9,18 @@
   mainDisk ? "/dev/nvme0n1",
 }:
 let
-  securix = import securix {
+   securixPkgs = import securix {
     edition = "my-team";
     defaultTags = [ "my-team" ];
-    inherit mainDisk pkgs;
+  inherit pkgs;
   };
   inherit (pkgs) lib;
 in
 rec {
-  users = securix.lib.readInventory ./inventory;
+  users = securixPkgs.lib.readInventory ./inventory;
   vpn-profiles = import ./vpn-profiles { inherit lib; };
   # Base system is provided.
-  terminals = securix.lib.mkTerminals users vpn-profiles (
+ terminals = securixPkgs.lib.mkTerminals { inherit users vpn-profiles; edition = "my-team"; } (
     { lib, ... }:
     {
       imports = [
@@ -28,6 +28,7 @@ rec {
       ];
 
       securix = {
+  self.mainDisk = mainDisk;
         # Le terminal est multi-opérateur
         users.allowAnyOperator = true;
 
@@ -54,5 +55,5 @@ rec {
     }
   );
 
-  docs = securix.lib.mkDocs { inherit users terminals vpn-profiles; };
+  docs = securixPkgs.lib.mkDocs { inherit users terminals vpn-profiles; };
 }
