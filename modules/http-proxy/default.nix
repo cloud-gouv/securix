@@ -4,8 +4,12 @@
 
 {
   imports = [
-    # Low-level configuration of g3proxy and proxy-switcher.
-    ./http-proxy.nix
+    # Low-level interface for HTTP proxies
+    ./low-level-options.nix
+    # Low-level implementation for g3proxy and proxy-switcher
+    ./g3proxy
+    # Low-level implementation for Portail
+    ./portail
     # Authentication method to HTTP proxies via SSH forward, implemented as socket activated SSH units.
     ./ssh-forward.nix
     # High-level module to automatically connect to HTTP proxies with built-in authentication methods.

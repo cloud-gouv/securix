@@ -170,6 +170,7 @@ in
           "x13-20ug"
           "qemu-vm"
           "galaxybook6-pvap"
+          "p14sg6"
         ];
         description = "Identifiant de configuration du matériel";
         example = "x280";

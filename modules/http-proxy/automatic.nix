@@ -15,6 +15,7 @@ let
     mkOption
     mkIf
     mapAttrs
+    mapAttrsToList
     filterAttrs
     types
     concatMapAttrs
@@ -48,18 +49,47 @@ let
         description = "VPN requis pour ce proxy HTTP";
       };
 
+      definition = mkOption {
+        type = types.enum [
+          "static"
+          "dynamic"
+        ];
+        default = "static";
+        description = ''
+          Si la définition est statique, `remote` doit etre donné,
+          sinon `remotePath` doit etre donné et doit contenir `ADDRESS` et `PORT` sous la forme suivante:
+
+          ADDRESS="..."
+          PORT="..."
+        '';
+      };
+
       remote = {
         address = mkOption {
-          type = types.str;
-          default = "127.0.0.1";
+          type = types.nullOr types.str;
+          default = null;
           description = "Adresse IP du proxy d'accès distant";
         };
 
         port = mkOption {
-          type = types.port;
-          default = 8080;
+          type = types.nullOr types.port;
+          default = null;
           description = "Port du proxy d'accès distant";
         };
+      };
+
+      remotePath = mkOption {
+        type = types.nullOr types.path;
+        default = null;
+        description = ''
+          Chemin vers les définitions d'adresse et de port du proxy d'accès distant.
+          Le fichier doit etre au format:
+
+          ADDRESS="..."
+          PORT="..."
+
+          de sorte à ce qu'un interpréteur Bash puisse charger les variables.
+        '';
       };
 
       auth.sshForward = {
@@ -109,63 +139,53 @@ let
       remoteAddress = auth.sshForward.remote.address;
       remotePort = auth.sshForward.remote.port;
     };
+
+  mkDefinitionAssert =
+    {
+      name,
+      definition,
+      remote,
+    }:
+    {
+      assertion = definition == "static" -> remote.address != null && remote.port != null;
+      message = ''
+        Upstream `${name}` is defined as a static proxy but its remote information is not specified (${builtins.toJSON remote})
+        Either use `definition = "dynamic";` to load its definition at runtime or specify `remote = { address = "..."; port = "..."; };`
+      '';
+    };
 in
 {
   options.securix.automatic-http-proxy = {
     enable = mkEnableOption "configure des proxies HTTP automatiquement";
+
+    implementation = mkOption {
+      type = types.enum [
+        "g3proxy"
+        "portail"
+      ];
+      default = "g3proxy";
+    };
 
     proxies = mkOption { type = types.attrsOf (types.submodule httpProxyOpts); };
     networkmanager.events.handlers = mkOption { type = types.attrsOf (types.submodule handlerOpts); };
   };
 
   config = mkIf cfg.enable {
+    assertions = mapAttrsToList (
+      name: { definition, remote, ... }: mkDefinitionAssert { inherit name definition remote; }
+    ) cfg.proxies;
+
     securix.http-proxy = {
       enable = true;
 
+      inherit (cfg) implementation;
+
       downstreams = mapAttrs (
-        _: { remote, ... }: "${remote.address}:${toString remote.port}"
+        _:
+        { definition, remote, ... }:
+        if definition == "static" then "${remote.address}:${toString remote.port}" else null
       ) cfg.proxies;
     };
-
-    securix.networkmanager.events.handlers = concatMapAttrs (
-      eventName:
-      { matchConnectionId, proxyToActuate }:
-      let
-        proxyMetadata =
-          cfg.proxies.${proxyToActuate}
-            or (throw "Proxy '${proxyToActuate}' is not defined in the list of automatically managed proxies");
-      in
-      {
-        "${eventName}-up" = {
-          event = "vpn-up";
-          inherit matchConnectionId;
-
-          script = ''
-            # Hook for proxy ${proxyToActuate} related to VPN ${proxyMetadata.vpn}
-            # For connection ID: ${matchConnectionId}
-            logger "[Generic proxy hook] Automatically switching to proxy ${proxyToActuate}"
-            ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyToActuate} --cli
-            # TODO: only run this if the auth method uses ssh tunnels.
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
-            systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyToActuate}.service
-          '';
-        };
-
-        "${eventName}-down" = {
-          event = "vpn-down";
-          inherit matchConnectionId;
-
-          script = ''
-            # Hook for proxy ${proxyToActuate}
-            # For connection ID: ${matchConnectionId}
-            logger "[Generic proxy hook] Automatically switching to no proxy"
-            ${pkgs.proxy-switcher}/bin/proxy-switcher np
-            # TODO: only run this if the auth method uses ssh tunnels.
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-${proxyToActuate}.service"
-          '';
-        };
-      }
-    ) cfg.networkmanager.events.handlers;
 
     securix.ssh-tunnels = mapAttrs mkSSHTunnel (
       filterAttrs (_: { auth, ... }: auth.sshForward.enable) cfg.proxies
