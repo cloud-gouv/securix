@@ -63,6 +63,9 @@ in
     pkgs = pkgs';
     libSecurix = lib-securix;
   };
+  docs = pkgs.runCommand "docs" { } ''
+    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual} --dest-dir $out
+  '';
   shell = pkgs'.mkShell {
     packages = [
       pkgs'.npins
