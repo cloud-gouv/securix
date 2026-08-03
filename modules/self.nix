@@ -140,7 +140,7 @@ in
       };
 
       ipsec = {
-        "local-identity" = lib.mkOption {
+        local-identity = lib.mkOption {
           type = lib.types.nullOr (lib.types.either lib.types.str (lib.types.attrsOf lib.types.str));
           default = null;
           example = ''
