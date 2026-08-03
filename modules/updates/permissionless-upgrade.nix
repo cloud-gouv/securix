@@ -405,7 +405,7 @@ let
           fi
       fi
 
-      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."$TERMINAL".system
+      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."$TERMINAL".system --option narinfo-cache-positive-ttl 0
     '';
   };
 in
