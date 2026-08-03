@@ -407,7 +407,7 @@ let
       # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
       # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
       # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
-      
+
       nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."$TERMINAL".system --option narinfo-cache-positive-ttl 0
     '';
   };
