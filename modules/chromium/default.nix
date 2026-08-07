@@ -18,8 +18,6 @@ in
 
   options = {
     programs.chromium = {
-      enable = lib.mkEnableOption "policies for chromium based browsers like Chromium, Google Chrome or Brave";
-
       extraOptsRecommended = lib.mkOption {
         type = lib.types.attrs;
         description = ''
