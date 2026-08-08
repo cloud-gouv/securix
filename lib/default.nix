@@ -195,6 +195,15 @@ rec {
         # Generate normal host SSH keys.
         box_message "Generating age keys..."
         ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.openssh}/bin/ssh-keygen -A"
+        # ssh-keygen stamps the comment with the hostname of the running system,
+        # and nixos-enter keeps the installer's UTS namespace. Left alone, the
+        # installed keys therefore read `root@m<inventoryId>` -- the installer's
+        # hostname -- instead of the machine's own. Rewrite them with the
+        # hostname the target system actually boots with.
+        for key in /mnt/etc/ssh/ssh_host_*_key; do
+          [ -e "$key" ] || continue
+          ${pkgs.openssh}/bin/ssh-keygen -c -C "root@${targetSystem.config.networking.hostName}" -f "$key" > /dev/null
+        done
         log_info "age host SSH keys available in /mnt/etc/ssh/ssh_host_ed25519_key*"
       '';
       # We export the public key here.
