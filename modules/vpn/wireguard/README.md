@@ -68,7 +68,9 @@ Once your VPN profile is installed, use the following commands to manage it:
 
 - `wireguard-<vpn-name>-pubkey`  
   Computes the corresponding public key from the generated private key.  
-  Useful for sharing with VPN peers.
+  Useful for sharing with VPN peers.  
+  The key is printed as text and also rendered as a scannable QR code, so it can
+  be transferred to the peer side without retyping it.
 
 - `wireguard-<vpn-name> up`  
   Activates the VPN using the private key decrypted by the YubiKey.
