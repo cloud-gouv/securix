@@ -27,6 +27,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Contributor guide
 
+- [How to contribute to the documentation](./contributor/docs.md)
 - [Testing]()
   - [How to test my changes in a virtual machine?]()
   - [How to test my changes on a real machine?]()
