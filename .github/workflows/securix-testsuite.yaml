@@ -10,6 +10,40 @@ jobs:
         secret_keys: ${{ secrets.NIX_SIGNING_PRIVATE_KEY }}
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
+    # Necessary until https://gerrit.lix.systems/c/lix/+/4995 lands in a released version.
+    - name: Patch post-build-hook with retry logic
+      run: |
+        HOOK_PATH=$(grep -Po '^post-build-hook\s*=\s*\K.*' /etc/nix/nix.conf) || true
+        if [ -z "$HOOK_PATH" ] || [ ! -x "$HOOK_PATH" ]; then
+          echo "No post-build-hook found, skipping patch."
+          exit 0
+        fi
+        ORIG_HOOK="${HOOK_PATH}.orig"
+        echo "Patching post-build-hook at $HOOK_PATH (backing up to $ORIG_HOOK)"
+        sudo mv "$HOOK_PATH" "$ORIG_HOOK"
+        sudo tee "$HOOK_PATH" > /dev/null <<'ENDOFSCRIPT'
+        #!/usr/bin/env bash
+        max_retries=10
+        attempt=0
+        delay=1
+        while true; do
+          if XXHOOKPATHXX "$@"; then
+            exit 0
+          fi
+          attempt=$((attempt + 1))
+          if [ $attempt -ge $max_retries ]; then
+            echo "post-build-hook failed after $max_retries attempts, giving up"
+            exit 1
+          fi
+          echo "post-build-hook attempt $attempt failed, retrying in ${delay}s..."
+          sleep $delay
+          delay=$((delay * 2))
+          [ $delay -gt 300 ] && delay=300
+        done
+        ENDOFSCRIPT
+        sudo sed -i "s|XXHOOKPATHXX|$ORIG_HOOK|" "$HOOK_PATH"
+        sudo chmod +x "$HOOK_PATH"
+        echo "Patched post-build-hook successfully."
     - name: Build tests
       run: nix-build -A tests
 name: '[Sécurix] Test suite'
