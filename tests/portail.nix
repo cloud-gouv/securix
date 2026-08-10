@@ -16,7 +16,7 @@ let
             mainDisk = "/dev/nvme0n1";
             machine = {
               hardwareSKU = "x280";
-              serialNumber = "000000";
+              inventoryId = 0;
             };
           };
         };
@@ -41,14 +41,14 @@ in
 pkgs.testers.nixosTest {
   name = "portail";
   nodes = {
-    securix-unbranded-000000 = {
+    securix-unbranded-0 = {
       imports = terminal.modules;
     };
   };
   testScript = ''
     import json
 
-    securix = securix_unbranded_000000
+    securix = securix_unbranded_0
     securix.wait_for_unit("default.target")
     securix.succeed("cat /etc/os-release | grep securix")
     securix.wait_for_unit("portail.service")

@@ -23,7 +23,7 @@ let
             mainDisk = "/dev/nvme0n1";
             machine = {
               hardwareSKU = "x280";
-              serialNumber = "000000";
+              inventoryId = 0;
             };
           };
         };
@@ -34,12 +34,12 @@ in
 pkgs.testers.nixosTest {
   name = "anssi-minimal";
   nodes = {
-    securix-unbranded-000000 = {
+    securix-unbranded-0 = {
       imports = terminal.modules;
     };
   };
   testScript = ''
-    securix_unbranded_000000.wait_for_unit("default.target")
-    securix_unbranded_000000.succeed("cat /etc/os-release | grep securix")
+    securix_unbranded_0.wait_for_unit("default.target")
+    securix_unbranded_0.succeed("cat /etc/os-release | grep securix")
   '';
 }
