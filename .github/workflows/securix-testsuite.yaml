@@ -1,10 +1,16 @@
 jobs:
   tests:
     runs-on: ubuntu-latest
+    # Secrets are not exposed to workflows triggered by a pull request opened
+    # from a fork. Without credentials, every request to the S3 substituter is
+    # rejected, so the cache is only configured when they are available.
+    env:
+      HAS_CACHE_CREDENTIALS: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_KEY != '' && secrets.NIX_SIGNING_PRIVATE_KEY != '' }}
     steps:
     - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
     - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
     - uses: zombiezen/setup-nix-cache-action@cacc7abf0a6636b0ef45ec2ae055a9734cdd4122 # main
+      if: env.HAS_CACHE_CREDENTIALS == 'true'
       with:
         substituters: s3://oss-securix?endpoint=https://s3.gra.io.cloud.ovh.net&region=gra&compression=xz&parallel-compression=true
         secret_keys: ${{ secrets.NIX_SIGNING_PRIVATE_KEY }}
