@@ -45,6 +45,7 @@ let
     secureBoot = "self-contained";
     tpm2HostKeys = true;
     ageHostKeys = true;
+    skipPreflightChecks = false;
   };
 in
 rec {
@@ -336,6 +337,26 @@ rec {
                         lsblk
 
                         ${pkgs.systemd}/bin/udevadm settle
+
+                        ${lib.optionalString (preprovisionOptions.skipPreflightChecks or false) ''
+                          box_message "Preflight checks..."
+
+                          log_info "Checking for FIDO2 security keys..."
+                          if ${pkgs.yubikey-manager}/bin/ykman list 2>/dev/null | grep -q '.'; then
+                            log_info "FIDO2 key detected:"
+                            ${pkgs.yubikey-manager}/bin/ykman list 2>/dev/null | while read -r line; do
+                              log_info "  $line"
+                            done
+                          else
+                            log_error "No FIDO2 key detected."
+                            log_error "A FIDO2 security key is required."
+                            box_message "Installation aborted: Plug in your security key and retry."
+                            exit 1
+                          fi
+                        ''}
+
+                        box_message "All preflight checks passed."
+
                         log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
                         ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
 
@@ -362,11 +383,12 @@ rec {
                         lsblk
                         log_info "Installation is complete. You can now reboot in the installed system."
 
-                        if [ -f "$install_log" ]; then
+                        if [ -f "$INSTALL_LOG" ]; then
                           mkdir -p /mnt/var/log
                           cp "$INSTALL_LOG" /mnt/var/log/securix-install.log
                           log_info "Install log saved to /var/log/securix-install.log on the target system."
                         fi
+
               '')
             ];
           }
