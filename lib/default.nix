@@ -275,9 +275,15 @@ rec {
               (pkgs.writeShellScriptBin "autoinstall-terminal" ''
                         #!/usr/bin/env bash
 
+                        INSTALL_LOG="/tmp/install.log"
+                        touch "$INSTALL_LOG"
+
                         log() {
                           local level="$1"
                           local msg="$2"
+                          local timestamp
+                          timestamp=$(date -Iseconds)
+                          echo "[$timestamp] [$level] $msg" >> "$INSTALL_LOG"
                           case "$level" in
                             info)
                               ${pkgs.gum}/bin/gum log -t rfc822 -l info "$msg"
@@ -355,6 +361,12 @@ rec {
                         ${postInstallScript}
                         lsblk
                         log_info "Installation is complete. You can now reboot in the installed system."
+
+                        if [ -f "$install_log" ]; then
+                          mkdir -p /mnt/var/log
+                          cp "$INSTALL_LOG" /mnt/var/log/securix-install.log
+                          log_info "Install log saved to /var/log/securix-install.log on the target system."
+                        fi
               '')
             ];
           }
