@@ -23,6 +23,7 @@ let
     mkIf
     optionalString
     mkRenamedOptionModule
+    hashString
     ;
   deriveUsernameFromEmail =
     email:
@@ -41,7 +42,7 @@ let
     if cfg.machine.inventoryId != null then
       cfg.machine.inventoryId
     else if cfg.machine.serialNumber != null then
-      cfg.machine.serialNumber
+      substring 0 12 (hashString "sha256" cfg.machine.serialNumber)
     else
       "unknown machine";
 in
