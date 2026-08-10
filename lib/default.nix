@@ -444,7 +444,7 @@ rec {
         ../modules
         ../hardware
         # For Secure Boot.
-        (import sources.lanzaboote).nixosModules.lanzaboote
+        (import sources.lanzaboote { inherit pkgs; }).nixosModules.lanzaboote
         "${sources.portail}/nix/module.nix"
         "${sources.disko}/module.nix"
         "${sources.agenix}/modules/age.nix"
