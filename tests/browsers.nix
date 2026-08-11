@@ -43,6 +43,15 @@ pkgs.testers.nixosTest {
   nodes = {
     securix-unbranded-0 = {
       imports = terminal.modules;
+
+      users.manageLingering = true;
+      users.users.tester = {
+        isNormalUser = true;
+        # The user unit registering security devices must run without a login.
+        linger = true;
+      };
+
+      environment.systemPackages = [ pkgs.nssTools ];
     };
   };
   testScript = ''
@@ -59,6 +68,11 @@ pkgs.testers.nixosTest {
         "Folder": "Productivity",
     } in firefox["Bookmarks"], firefox["Bookmarks"]
     assert firefox["ExtensionSettings"]["*"]["installation_mode"] == "blocked"
+    devices = firefox["SecurityDevices"]
+    assert devices["Add"]["OpenSC PKCS#11 Module"].endswith(
+        "/lib/opensc-pkcs11.so"
+    ), devices
+    assert devices["Delete"] == ["OpenSC PKCS#11 Module"], devices
 
     chromium = json.loads(
         securix.succeed("cat /etc/chromium/policies/managed/extra.json")
@@ -77,5 +91,11 @@ pkgs.testers.nixosTest {
 
     securix.wait_for_unit("homepage-dashboard.service")
     securix.wait_for_open_port(8082)
+
+    securix.wait_for_unit("securix-register-security-devices.service", "tester")
+    securix.succeed(
+        "su - tester -c 'modutil -dbdir sql:$HOME/.pki/nssdb -list'"
+        " | grep -q 'OpenSC PKCS#11 Module'"
+    )
   '';
 }
