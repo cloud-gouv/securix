@@ -16,6 +16,7 @@ let
     mkIf
     mapAttrsToList
     concatStringsSep
+    optionalAttrs
     ;
   inherit (lib.types)
     attrsOf
@@ -28,6 +29,25 @@ let
   inherit (import ./option-types.nix { inherit lib; }) lockFlagEnum bookmarkType proxyConfig;
 
   cfg = config.securix.chromium;
+
+  # `extraOpts` is a plain attribute set: a nested `mkIf` is not discharged and
+  # would land verbatim in the policy JSON.
+  proxySettings = optionalAttrs (cfg.proxy != null) {
+    ProxySettings = {
+      ProxyMode =
+        if cfg.proxy.httpProxy != null then
+          "fixed_servers"
+        else if cfg.proxy.autoConfigURL != null then
+          "pac_script"
+        else
+          "auto_detect";
+      ProxyBypassList = concatStringsSep "," cfg.proxy.noProxy;
+      # TODO: expose an option called `cfg.proxy.autoConfigFailSafe`
+      ProxyPacMandatory = false;
+    }
+    // optionalAttrs (cfg.proxy.autoConfigURL != null) { ProxyPacUrl = cfg.proxy.autoConfigURL; }
+    // optionalAttrs (cfg.proxy.httpProxy != null) { ProxyServer = cfg.proxy.httpProxy; };
+  };
 in
 {
   options.securix.chromium = {
@@ -39,7 +59,7 @@ in
     '';
 
     lockFlags = mkOption {
-      type = enum lockFlagEnum;
+      type = listOf (enum lockFlagEnum);
 
       default = [
         "allow-default-overrides"
@@ -47,19 +67,27 @@ in
       ];
 
       description = ''
-        The lock flags determine how locked down the Firefox configuration is.
+        The lock flags determine how locked down the Chromium configuration is.
 
         By default, we do not let the user install any extension, but we still
-        let them modify the Firefox defaults.
+        let them modify the Chromium defaults.
       '';
     };
 
     proxy = mkOption {
-      type = nullOr submodule proxyConfig;
+      type = nullOr (submodule proxyConfig);
       default = null;
       description = ''
-        Proxy configuration for this instance of Firefox.
+        Proxy configuration for this instance of Chromium.
         By default, it configures nothing.
+      '';
+    };
+
+    homepage = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        URL of the home page, or `null` to leave the browser default alone.
       '';
     };
 
@@ -236,29 +264,11 @@ in
         # Do not let WebAuthn store credentials on broken TLS certificates.
         AllowWebAuthnWithBrokenTlsCerts = false;
 
-        # HTTP proxy
-        ProxySettings = {
-          ProxyMode =
-            if cfg.proxy.httpProxy != null then
-              "fixed_servers"
-            else if cfg.proxy.autoConfigUrl != null then
-              "pac_script"
-            else
-              "auto_detect";
-          ProxyBypassList = concatStringsSep "," cfg.proxy.noProxy;
-          # TODO: expose an option called `cfg.proxy.autoConfigFailSafe`
-          ProxyPacMandatory = false;
-          ProxyPacUrl = mkIf (cfg.proxy.autoConfigUrl != null) cfg.proxy.autoConfigUrl;
-          ProxyServer = mkIf (cfg.proxy.httpProxy != null) cfg.proxy.httpProxy;
-        };
-
         # Pre-installed bookmarks
         ManagedBookmarks =
           let
             mkItems = mapAttrsToList (
-              name:
-              { href, ... }:
-              {
+              name: { href, ... }: {
                 inherit name;
                 url = href;
               }
@@ -269,7 +279,8 @@ in
             };
           in
           mapAttrsToList mkChildren cfg.bookmarks;
-      };
+      }
+      // proxySettings;
 
       inherit (cfg) extensions;
     };
