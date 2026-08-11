@@ -22,6 +22,9 @@ in
   };
 
   config = mkIf cfg.enable {
+    # Sécurix ships a preconfigured browser out of the box.
+    securix.browser.enable = lib.mkDefault true;
+
     programs.mtr.enable = true;
 
     environment.systemPackages = with pkgs; [
@@ -97,8 +100,6 @@ in
       glibcInfo
       man-pages
       man-pages-posix
-      # Browser
-      firefox
       qrencode
     ];
   };

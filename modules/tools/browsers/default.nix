@@ -26,7 +26,7 @@ in
     '';
 
     lockFlags = mkOption {
-      type = types.listOf lockFlagEnum;
+      type = types.listOf (types.enum lockFlagEnum);
       description = ''
         The lock flags determine how locked down the browser configuration is.
 
@@ -51,8 +51,11 @@ in
           "chromium"
         ]
       );
-      # This is the default recommended one.
-      default = [ "chromium" ];
+      # Sécurix shipped Firefox only, keep it as the default.
+      default = [ "firefox" ];
+      description = ''
+        Browsers to install and preconfigure.
+      '';
     };
 
     extensions = mkOption {
@@ -118,9 +121,13 @@ in
       # NOTE: this is a backward compatibility default.
       enableLocalHomepage = lib.mkDefault (lib.elem "firefox" cfg.browsers);
       extensions = {
-        firefox = lib.mkDefault { ublock-origin = "uBlock0@raymondhill.net"; };
+        firefox = lib.mkDefault {
+          ublock-origin = "uBlock0@raymondhill.net";
+          bitwarden-password-manager = "{446900e4-71c2-419f-a6a7-df9c091e268b}";
+        };
         chromium = lib.mkDefault [
           "ddkjiahejlhfcafbddmgiahcphecmpfh" # uBlock Origin Lite
+          "nngceckbapebfimnlniiiahkandclblb" # Bitwarden Password Manager
         ];
       };
 

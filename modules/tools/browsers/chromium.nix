@@ -130,6 +130,9 @@ in
   };
 
   config = mkIf cfg.enable {
+    # programs.chromium only writes policy files, it installs nothing.
+    environment.systemPackages = [ pkgs.chromium ];
+
     programs.chromium = {
       enable = true;
 
