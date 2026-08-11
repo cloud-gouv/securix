@@ -56,9 +56,29 @@ in
     };
 
     extensions = mkOption {
-      type = types.attrsOf (types.either types.attrs types.list);
+      type = types.submodule {
+        options = {
+          firefox = mkOption {
+            type = types.attrsOf types.str;
+            default = { };
+            description = ''
+              Firefox extensions, keyed by their short ID in the Mozilla store,
+              valued by their UUID.
+            '';
+          };
+
+          chromium = mkOption {
+            type = types.listOf types.str;
+            default = [ ];
+            description = ''
+              Chromium extension IDs to install from the Chrome web store.
+            '';
+          };
+        };
+      };
+      default = { };
       description = ''
-        Per-browser attribute set of list of extensions to install in each instance.
+        Per-browser set of extensions to install in each instance.
       '';
     };
 
@@ -118,7 +138,7 @@ in
     securix.firefox = {
       enable = lib.elem "firefox" cfg.browsers;
       inherit (cfg) enableEncryptedMediaExtensions;
-      extensions = cfg.extensions.firefox or [ ];
+      extensions = cfg.extensions.firefox;
       inherit (cfg) bookmarks lockFlags;
       inherit homepage;
     };
@@ -126,7 +146,7 @@ in
     securix.chromium = {
       enable = lib.elem "chromium" cfg.browsers;
       inherit (cfg) enableEncryptedMediaExtensions;
-      extensions = cfg.extensions.chromium or { };
+      extensions = cfg.extensions.chromium;
       inherit (cfg) bookmarks lockFlags;
       inherit homepage;
     };
