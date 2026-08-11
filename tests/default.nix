@@ -10,4 +10,5 @@
   netboot-ipxe-script = import ./netboot-ipxe-script.nix { inherit pkgs libSecurix; };
   portail = import ./portail.nix { inherit pkgs libSecurix; };
   tools = import ./tools.nix { inherit pkgs libSecurix; };
+  browsers = import ./browsers.nix { inherit pkgs libSecurix; };
 }
