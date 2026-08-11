@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.securix.browser;
   inherit (lib)
@@ -24,6 +29,16 @@ in
 
       This is required for websites like Netflix or YouTube.
     '';
+
+    enableSmartcards = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Whether to register the OpenSC PKCS#11 module in the configured
+        browsers, so that smartcards such as Yubikeys are picked up without any
+        manual setup.
+      '';
+    };
 
     securityDevices = mkOption {
       type = types.attrsOf types.path;
@@ -153,7 +168,14 @@ in
         "allow-user-messaging-overrides"
         "allow-default-overrides"
       ];
+
+      securityDevices = mkIf cfg.enableSmartcards {
+        "OpenSC PKCS#11 Module" = lib.mkDefault "${pkgs.opensc}/lib/opensc-pkcs11.so";
+      };
     };
+
+    # OpenSC talks to the reader through pcscd.
+    services.pcscd.enable = lib.mkDefault cfg.enableSmartcards;
 
     securix.homepage-dashboard = {
       enable = cfg.enableLocalHomepage;
