@@ -136,7 +136,9 @@ in
     programs.chromium = {
       enable = true;
 
-      initialPrefs = {
+      homepageLocation = cfg.homepage;
+
+      extraOpts = {
         # Always show the bookmark bar.
         BookmarkBarEnabled = true;
         # Always let the user create more profiles.
@@ -167,12 +169,11 @@ in
 
         # Allow DNS interception to determine whether
         # we have a proxy that knows how to deal with certain DNS.
-        # Allow to suggest "Try http://intranet" error messages.u
+        # Allow to suggest "Try http://intranet" error messages.
         IntranetRedirectBehavior = 3;
 
         # Home page != New tab page.
         HomepageIsNewTabPage = false;
-        HomepageLocation = "";
         # Always restore previous tabs on startup.
         RestoreOnStartup = 1;
         # Show the home button.
@@ -183,13 +184,18 @@ in
 
         # Some websites may require it.
         BlockThirdPartyCookies = true;
-      };
 
-      extraOpts = {
         # Isolate all origins into their own process/sandbox.
-        IsolateOrigins = true;
+        # IsolateOrigins takes a list of origins, SitePerProcess is the
+        # blanket switch.
+        SitePerProcess = true;
         # Block any external extension to install.
         BlockExternalExtensions = true;
+        # By default, we will block any extension install, mirroring what the
+        # Firefox side does. Unlocking it is opt-in through the lock flags.
+        ExtensionInstallBlocklist = lib.optionals (!lib.elem "allow-extension-installs" cfg.lockFlags) [
+          "*"
+        ];
         # Block developer mode for extensions.
         ExtensionDeveloperModeSettings = 1;
 
@@ -202,8 +208,8 @@ in
         PasswordManagerEnabled = false;
 
         # Forbid all generative AI from Google.
-        GenAiSettings = 2;
-        BuiltInAIAPIIsEnabled = false;
+        GenAiDefaultSettings = 2; # Do not allow GenAI features.
+        BuiltInAIAPIsEnabled = false;
 
         # Do not let the browser use Google to obtain accurate time information.
         BrowserNetworkTimeQueriesEnabled = false;
@@ -285,7 +291,7 @@ in
       }
       // proxySettings;
 
-      inherit (cfg) extensions;
+      extensions = if cfg.extensions == [ ] then null else cfg.extensions;
     };
   };
 }
