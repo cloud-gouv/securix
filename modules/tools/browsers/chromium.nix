@@ -21,6 +21,7 @@ let
   inherit (lib.types)
     attrsOf
     enum
+    path
     submodule
     nullOr
     listOf
@@ -92,6 +93,15 @@ in
       default = null;
       description = ''
         URL of the home page, or `null` to leave the browser default alone.
+      '';
+    };
+
+    securityDevices = mkOption {
+      type = attrsOf path;
+      default = { };
+      description = ''
+        PKCS#11 modules to register, keyed by the name Chromium displays for
+        the security device.
       '';
     };
 

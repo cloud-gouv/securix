@@ -15,6 +15,7 @@ let
     attrsOf
     enum
     listOf
+    path
     submodule
     str
     nullOr
@@ -61,6 +62,15 @@ in
       default = null;
       description = ''
         URL of the home page, or `null` to leave the browser default alone.
+      '';
+    };
+
+    securityDevices = mkOption {
+      type = attrsOf path;
+      default = { };
+      description = ''
+        PKCS#11 modules to register, keyed by the name Firefox displays for the
+        security device.
       '';
     };
 
@@ -113,6 +123,14 @@ in
       ];
 
       policies = {
+        SecurityDevices = mkIf (cfg.securityDevices != { }) {
+          # Firefox runs Delete first, and only adds a module when none is
+          # loaded with that library path: without the delete, a store path
+          # change leaves the stale entry behind.
+          Delete = lib.attrNames cfg.securityDevices;
+          Add = cfg.securityDevices;
+        };
+
         Homepage = mkIf (cfg.homepage != null) {
           URL = cfg.homepage;
           # By default, the user is not allowed to update the homepage.
