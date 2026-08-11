@@ -147,6 +147,38 @@ in
     # programs.chromium only writes policy files, it installs nothing.
     environment.systemPackages = [ pkgs.chromium ];
 
+    # Chromium has no policy for PKCS#11 modules: it reads the user NSS
+    # database in ~/.pki/nssdb, and nixpkgs' NSS does not load p11-kit modules.
+    systemd.user.services.securix-register-security-devices = mkIf (cfg.securityDevices != { }) {
+      description = "Register PKCS#11 security devices in the user NSS database";
+      wantedBy = [ "default.target" ];
+      path = [ pkgs.nssTools ];
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      script = ''
+        set -eu
+
+        db="$HOME/.pki/nssdb"
+        if [ ! -f "$db/pkcs11.txt" ]; then
+          mkdir -p "$db"
+          certutil -N --empty-password -d "sql:$db"
+        fi
+
+        ${lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (name: library: ''
+            # Delete first so the entry follows the store path across upgrades.
+            modutil -dbdir "sql:$db" -force -delete ${lib.escapeShellArg name} || true
+            modutil -dbdir "sql:$db" -force -add ${lib.escapeShellArg name} \
+              -libfile ${lib.escapeShellArg library}
+          '') cfg.securityDevices
+        )}
+      '';
+    };
+
     programs.chromium = {
       enable = true;
 
