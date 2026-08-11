@@ -25,6 +25,24 @@ in
       This is required for websites like Netflix or YouTube.
     '';
 
+    securityDevices = mkOption {
+      type = types.attrsOf types.path;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          "OpenSC PKCS#11 Module" = "''${pkgs.opensc}/lib/opensc-pkcs11.so";
+        }
+      '';
+      description = ''
+        PKCS#11 modules to register in the configured browsers, keyed by the
+        name the browser displays for the security device.
+
+        Firefox gets them through the SecurityDevices policy. Chromium has no
+        equivalent policy, so they are registered in the per-user NSS database
+        it reads.
+      '';
+    };
+
     lockFlags = mkOption {
       type = types.listOf (types.enum lockFlagEnum);
       description = ''
@@ -144,7 +162,7 @@ in
 
     securix.firefox = {
       enable = lib.elem "firefox" cfg.browsers;
-      inherit (cfg) enableEncryptedMediaExtensions;
+      inherit (cfg) enableEncryptedMediaExtensions securityDevices;
       extensions = cfg.extensions.firefox;
       inherit (cfg) bookmarks lockFlags;
       inherit homepage;
@@ -152,7 +170,7 @@ in
 
     securix.chromium = {
       enable = lib.elem "chromium" cfg.browsers;
-      inherit (cfg) enableEncryptedMediaExtensions;
+      inherit (cfg) enableEncryptedMediaExtensions securityDevices;
       extensions = cfg.extensions.chromium;
       inherit (cfg) bookmarks lockFlags;
       inherit homepage;
