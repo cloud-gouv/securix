@@ -14,6 +14,7 @@ let
   inherit (lib.types)
     attrsOf
     enum
+    listOf
     submodule
     str
     nullOr
@@ -32,7 +33,7 @@ in
     '';
 
     lockFlags = mkOption {
-      type = enum lockFlagEnum;
+      type = listOf (enum lockFlagEnum);
       default = [
         "allow-default-overrides"
         "allow-user-messaging-overrides"
@@ -47,11 +48,19 @@ in
     };
 
     proxy = mkOption {
-      type = nullOr submodule proxyConfig;
+      type = nullOr (submodule proxyConfig);
       default = null;
       description = ''
         Proxy configuration for this instance of Firefox.
         By default, it configures nothing.
+      '';
+    };
+
+    homepage = mkOption {
+      type = nullOr str;
+      default = null;
+      description = ''
+        URL of the home page, or `null` to leave the browser default alone.
       '';
     };
 
@@ -104,7 +113,7 @@ in
       ];
 
       policies = {
-        Homepage = {
+        Homepage = mkIf (cfg.homepage != null) {
           URL = cfg.homepage;
           # By default, the user is not allowed to update the homepage.
           # This can be bypassed if the lock flag contains an allow element.
@@ -116,14 +125,11 @@ in
         Bookmarks = lib.flatten (
           map (
             folder:
-            map (
-              { name, value }:
-              {
-                Title = name;
-                URL = value.href;
-                Folder = folder.name;
-              }
-            ) (lib.attrsToList folder.value)
+            map ({ name, value }: {
+              Title = name;
+              URL = value.href;
+              Folder = folder.name;
+            }) (lib.attrsToList folder.value)
           ) (lib.attrsToList cfg.bookmarks)
         );
 
