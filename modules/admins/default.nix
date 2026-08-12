@@ -38,7 +38,10 @@ let
     { name, ... }:
     nameValuePair name {
       isNormalUser = true;
-      extraGroups = [ "wheel" ];
+      extraGroups = [
+        "wheel"
+        "operator"
+      ];
     };
   mkAdminU2F = _: { name, u2f_keys, ... }: nameValuePair name u2f_keys;
 in
