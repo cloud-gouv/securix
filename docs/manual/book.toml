@@ -1,9 +1,10 @@
 # SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
 #
 # SPDX-License-Identifier: CC-BY-SA-4.0
 
 [book]
-authors = ["Ryan Lahfa"]
+authors = ["Ryan Lahfa", "Xavier Maso"]
 language = "en"
 src = "src"
 title = "Sécurix"
