@@ -43,3 +43,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 - [Secure Boot]()
 - [ANSSI compliance]()
 - [Security key user logins]()
+
+# External references
+
+- [Resources](./external/links.md)
