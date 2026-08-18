@@ -70,9 +70,9 @@
       },
       "branch": "main",
       "submodules": false,
-      "revision": "2bec618ca715e7da233dd9aa93f538ae096c3f28",
-      "url": "https://github.com/cloud-gouv/portail/archive/2bec618ca715e7da233dd9aa93f538ae096c3f28.tar.gz",
-      "hash": "sha256-xZayo8BN4349pCPBrYV+PnkfbW4YNR+wpl/Tnmy9rP8="
+      "revision": "464948f6f52bb343e7cb1bc3906a3c6dc79556f3",
+      "url": "https://github.com/cloud-gouv/portail/archive/464948f6f52bb343e7cb1bc3906a3c6dc79556f3.tar.gz",
+      "hash": "sha256-K6x/DA3Y3SSIUYfGeDO0VUdIkT5szKXfK3J5Zlg/V7E="
     }
   },
   "version": 7
