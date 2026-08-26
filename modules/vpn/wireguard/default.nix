@@ -42,6 +42,7 @@ let
   ykman = "${pkgs.yubikey-manager}/bin/ykman";
   age = "${pkgs.age}/bin/age";
   age-yubikey = "${pkgs.age-plugin-yubikey}/bin/age-plugin-yubikey";
+  qrencode = "${pkgs.qrencode}/bin/qrencode";
 
   # Create users scripts to run
   mkWireGuardScripts =
@@ -112,8 +113,20 @@ let
         ${importkey}/bin/wireguard-${wireguardName}-importkey <(${wg} genkey)
       '';
 
+      # The key is computed once and bound to a variable because it is now needed
+      # twice: the private key is read from the YubiKey, whose touch policy is
+      # `always`, so recomputing it would ask for a second touch.
+      #
+      # ANSIUTF8 rather than UTF8: UTF8 emits no colour escape at all, so the
+      # blocks take the terminal palette and the code comes out inverted on a
+      # light background, which most phone scanners reject. ANSIUTF8 pins the
+      # colours (black background, bright white blocks), keeping the polarity
+      # correct on every theme.
       pubkey = pkgs.writeShellScriptBin "wireguard-${wireguardName}-pubkey" ''
-        echo "The wireguard public key is: $(${private-key} | ${wg} pubkey)"
+        pub=$(${private-key} | ${wg} pubkey)
+        echo "The wireguard public key is: $pub"
+        echo
+        ${qrencode} -t ANSIUTF8 -- "$pub"
       '';
 
       importkey = pkgs.writeShellScriptBin "wireguard-${wireguardName}-importkey" ''
