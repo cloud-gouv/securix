@@ -23,6 +23,7 @@ in
   };
   config = mkIf cfg.enable {
     services.openssh.enable = true;
+    services.openssh.settings.PasswordAuthentication = false;
     users.users.root.openssh.authorizedKeys.keys = cfg.keys;
   };
 }
