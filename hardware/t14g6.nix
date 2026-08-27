@@ -19,7 +19,6 @@ in
   imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
 
   config = mkIf (config.securix.self.machine.hardwareSKU == "t14g6") {
-    boot.kernelPackages = pkgs.linuxPackages_latest;
     boot.initrd.availableKernelModules = [
       "xhci_pci"
       "nvme"
