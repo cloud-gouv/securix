@@ -14,9 +14,6 @@ let
   inherit (lib)
     mkOption
     types
-    optional
-    elemAt
-    splitString
     substring
     mkDefault
     mkMerge
@@ -25,16 +22,6 @@ let
     mkRenamedOptionModule
     hashString
     ;
-  deriveUsernameFromEmail =
-    email:
-    let
-      parts = splitString "." email;
-      firstName = elemAt 0 parts;
-      lastName = elemAt 1 parts;
-      firstLetter = substring 0 1 firstName;
-      usernameLimit = 32;
-    in
-    substring 0 usernameLimit "${firstLetter}${lastName}";
 
   isUserConfig = cfg.selfDescriptionType == "user" || cfg.selfDescriptionType == "both";
   isMachineConfig = cfg.selfDescriptionType == "machine" || cfg.selfDescriptionType == "both";
@@ -80,7 +67,7 @@ in
 
       username = mkOption {
         type = types.nullOr types.str;
-        default = if cfg.user.email != null then deriveUsernameFromEmail cfg.user.email else null;
+        default = null;
         defaultText = "<première lettre de prénom><nom de famille> tronqué à 32 caractères";
         description = ''
           Nom d'utilisateur de la session PAM, dérivé par l'email en calculant:
