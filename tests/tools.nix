@@ -8,7 +8,7 @@ let
     {
       name,
       serialNumber,
-      inventoryId,
+      inventoryId ? null,
       extraSecurixConfig,
     }:
     {
@@ -43,7 +43,6 @@ let
   terminal-without-tools = libSecurix.mkTerminal (terminalWith {
     name = "tools";
     serialNumber = "000001";
-    inventoryId = 1;
     extraSecurixConfig = { };
   });
 in
@@ -53,13 +52,13 @@ pkgs.testers.nixosTest {
     securix-unbranded-0 = {
       imports = terminal-with-tools.modules;
     };
-    securix-unbranded-1 = {
+    "securix-unbranded-${builtins.substring 0 12 (builtins.hashString "sha256" "000001")}" = {
       imports = terminal-without-tools.modules;
     };
   };
   testScript = ''
     securix_with_tools = securix_unbranded_0
-    securix_without_tools = securix_unbranded_1
+    securix_without_tools = securix_unbranded_${builtins.substring 0 12 (builtins.hashString "sha256" "000001")}
 
     securix_with_tools.wait_for_unit("default.target")
     securix_without_tools.wait_for_unit("default.target")
