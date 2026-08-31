@@ -210,6 +210,8 @@ let
   upgradeScript = pkgs.writeShellApplication {
     name = "upgrade";
 
+    runtimeInputs = [ pkgs.git ];
+
     text = ''
       # Ensure the script runs as root
       if [ "$(id -u)" -ne 0 ]; then
