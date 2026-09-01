@@ -17,6 +17,7 @@ let
     splitString
     concatMapAttrs
     mapAttrsToList
+    optionalString
     ;
   json = pkgs.formats.json { };
   cfg = config.securix.http-proxy;
@@ -53,9 +54,10 @@ in
             # For connection ID: ${matchConnectionId}
             logger "[Generic proxy hook] Automatically switching to proxy ${proxyToActuate}"
             ${pkgs.proxy-switcher}/bin/proxy-switcher ${proxyToActuate} --cli
-            # TODO: only run this if the auth method uses ssh tunnels.
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
-            systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyToActuate}.service
+            ${optionalString proxyMetadata.auth.sshForward.enable ''
+              systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
+              systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyToActuate}.service
+            ''}
           '';
         };
 
@@ -68,8 +70,9 @@ in
             # For connection ID: ${matchConnectionId}
             logger "[Generic proxy hook] Automatically switching to no proxy"
             ${pkgs.proxy-switcher}/bin/proxy-switcher np
-            # TODO: only run this if the auth method uses ssh tunnels.
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-${proxyToActuate}.service"
+            ${optionalString proxyMetadata.auth.sshForward.enable ''
+              systemctl --user -M "$user"@ stop "ssh-tunnel-to-${proxyToActuate}.service"
+            ''}
           '';
         };
       }
@@ -217,12 +220,6 @@ in
             type = "http_proxy";
             listen.address = "127.0.0.1:8080";
             tls_client = { };
-            # dst_host_filter_set = {
-            #   exact = nonSubnetsExceptions ++ domainsExceptions;
-            #   child = domainsExceptions;
-            #   regex = domainsExceptions;
-            #   subnet = subnetsExceptions;
-            # };
           }
         ];
       };
