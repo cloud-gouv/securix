@@ -58,7 +58,9 @@ pkgs.testers.nixosTest {
   };
   testScript = ''
     securix_with_tools = securix_unbranded_0
-    securix_without_tools = securix_unbranded_${builtins.substring 0 12 (builtins.hashString "sha256" "000001")}
+    securix_without_tools = securix_unbranded_${
+      builtins.substring 0 12 (builtins.hashString "sha256" "000001")
+    }
 
     securix_with_tools.wait_for_unit("default.target")
     securix_without_tools.wait_for_unit("default.target")
