@@ -6,45 +6,44 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Summary
 
-[What is Sécurix?](./about/securix.md)
+[Qu'est-ce que Sécurix ?](./about/securix.md)
 
-# User guide
+# Guide de déploiement
 
-- [Quick start](./user/quick_start.md)
-- [Variants](./user/variants.md)
-- [Operations]()
-  - [Deployment options](./user/deployment.md)
-  - [A cache for your deployment](./user/cache.md)
+- [Initialisation]()
+  - [Contexte]()
+  - [Préparer le dépôt]()
+  - [Gérer l'inventaire]()
+  - [Déclarer les outils & programmes]()
+  - [Activer un premier VPN et un premier proxy]()
+- [Gestion du cycle de vie]()
+  - [Installer un Bureautix]()
+  - [Opérations d'administration]()
+- [Adaptations métiers]()
+  - [Certificats agents]()
+  - [Profil développeur]()
 
-# Developer guide
+# Guide de développement / ingénierie
 
-- [Search Sécurix specific module options]()
-- [High level extensions]()
-  - [How to add a new VPN type?]()
-  - [How to add a new desktop environment?]()
-  - [How to add a new compliance module?]()
-  - [How to add a new update system?]()
+- [MCO / MCS d'un Bureautix]()
+- [Nouveau VPN]()
+- [Nouveau proxy]()
+- [Fabriquer des profils métiers]()
 
-# Contributor guide
+# Guide utilisateur
 
-- [How to contribute to the documentation](./contributor/docs.md)
-- [Testing]()
-  - [How to test my changes in a virtual machine?]()
-  - [How to test my changes on a real machine?]()
-  - [Integration testing]()
-- [Future work]()
+- [Prise en main rapide](./user/quick_start.md)
+- [Variantes](./user/variants.md)
+- [Options de déploiement](./user/deployment.md)
+- [Cache pour votre déploiement](./user/cache.md)
 
-# Design references
+# Guide contributeur
 
-- [Installer]()
-- [Update system]()
-- [Inventory system]()
-- [Multi-users on same system]()
-- [VPN support]()
-- [Secure Boot]()
-- [ANSSI compliance]()
-- [Security key user logins]()
+- [Comment contribuer](./contributor/docs.md)
+- [Tests]()
+  - [Tester dans une VM](./testing/vm.md)
+  - [Tester sur machine physique](./testing/physical.md)
 
-# External references
+# Références externes
 
-- [Resources](./external/links.md)
+- [Ressources](./external/links.md)

@@ -4,28 +4,28 @@ SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa@numerique.gouv.fr>
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# Quick Start
+# Prise en main rapide
 
-## 1. Copy the Skeleton Template
+## 1. Copier le squelette
 
-To get started, copy the skeleton `default.nix` file provided in the [examples/basic](../../../examples/basic) directory.
+Pour commencer, copiez le fichier `default.nix` squelette fourni dans le répertoire [examples/basic](../../../examples/basic).
 
-## 2. Create Users and Inventory
+## 2. Créer les utilisateurs et l'inventaire
 
-Next, create your system inventory. You can use the example structure provided by Bureautix here: [Bureautix example inventory](https://github.com/cloud-gouv/bureautix-example/tree/main/inventory).
+Créez ensuite votre inventaire système. Vous pouvez vous inspirer de la structure d'exemple fournie par Bureautix ici : [inventaire d'exemple Bureautix](https://github.com/cloud-gouv/bureautix-example/tree/main/inventory).
 
-In your inventory, you can organize items into two main sections: *machines* and *users*. Each machine can have a list of users assigned to it.
+Dans votre inventaire, vous pouvez organiser les éléments en deux sections principales : *machines* et *utilisateurs*. Chaque machine peut avoir une liste d'utilisateurs assignés.
 
-## 3. Customize Your System
+## 3. Personnaliser votre système
 
-At this point, you can customize your NixOS system. You have two options:
+À ce stade, vous pouvez personnaliser votre système NixOS. Vous avez deux options :
 
-* Use the modules provided by Sécurix, such as `securix.firefox` for Firefox configuration.
-* Alternatively, you can use standard NixOS modules for system customization.
+* Utiliser les modules fournis par Sécurix, tels que `securix.firefox` pour la configuration de Firefox.
+* Ou utiliser des modules NixOS standards pour la personnalisation du système.
 
-## 4. Deploy the USB Installer
+## 4. Déployer l'installateur USB
 
-Sécurix provides a set of default attributes for each terminal:
+Sécurix fournit un ensemble d'attributs par défaut pour chaque terminal :
 
-* `installer`: This is a USB installer specific to the terminal. Booting from this USB will provide the `autoinstall-terminal` command to automatically install the system.
-* `system`: This is the top-level NixOS attribute, useful for advanced deployment options.
+* `installer` : un installateur USB spécifique au terminal. Démarrer depuis cette clé USB fournit la commande `autoinstall-terminal` pour installer automatiquement le système.
+* `system` : l'attribut NixOS de plus haut niveau, utile pour les options de déploiement avancées.
