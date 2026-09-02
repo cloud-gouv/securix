@@ -28,6 +28,15 @@ In the SécurixOS project, we recommend keeping a reference to the open source p
 * your VPN configuration items
 * your proxy configuration items
 
+```mermaid
+graph TD
+    A[securix<br/>open-source<br/>cloud-gouv/securix] --> B[securix-$org<br/>org repo<br/>custom + inventory + VPN/proxy]
+    A --> C[bureautix-$org<br/>org office repo]
+    B -.-> D[securix-acme<br/>e.g. acme]
+    C -.-> E[bureautix-acme<br/>e.g. acme]
+    D & E --> F[deployed workstations]
+```
+
 For example, if your organization `acme` decides to deploy an admin workstation and an office workstation (two populations, sometimes overlapping) under the management of two different divisions, you can then build `securix-acme` and `bureautix-acme` and they will both refer to the open source project <https://github.com/cloud-gouv/securix>. It is of course possible to mirror this project on your forge and depend on the mirrored version.
 
 Thus, for upgrades, there are two major components to manage:
