@@ -8,6 +8,7 @@ let
     {
       name,
       serialNumber,
+      inventoryId ? null,
       extraSecurixConfig,
     }:
     {
@@ -21,7 +22,7 @@ let
             self = {
               mainDisk = "/dev/nvme0n1";
               machine = {
-                inherit serialNumber;
+                inherit serialNumber inventoryId;
                 hardwareSKU = "x280";
               };
             };
@@ -34,6 +35,7 @@ let
   terminal-with-tools = libSecurix.mkTerminal (terminalWith {
     name = "tools";
     serialNumber = "000000";
+    inventoryId = 0;
     extraSecurixConfig = {
       tools.enable = true;
     };
@@ -47,16 +49,18 @@ in
 pkgs.testers.nixosTest {
   name = "tools";
   nodes = {
-    securix-unbranded-000000 = {
+    securix-unbranded-0 = {
       imports = terminal-with-tools.modules;
     };
-    securix-unbranded-000001 = {
+    "securix-unbranded-${builtins.substring 0 12 (builtins.hashString "sha256" "000001")}" = {
       imports = terminal-without-tools.modules;
     };
   };
   testScript = ''
-    securix_with_tools = securix_unbranded_000000
-    securix_without_tools = securix_unbranded_000001
+    securix_with_tools = securix_unbranded_0
+    securix_without_tools = securix_unbranded_${
+      builtins.substring 0 12 (builtins.hashString "sha256" "000001")
+    }
 
     securix_with_tools.wait_for_unit("default.target")
     securix_without_tools.wait_for_unit("default.target")
