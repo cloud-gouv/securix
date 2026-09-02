@@ -28,6 +28,15 @@ Dans le projet SécurixOS, nous conseillons de garder une référence vers le pr
 * vos éléments de configuration VPNs
 * vos éléments de configuration de proxy
 
+```mermaid
+graph TD
+    A[securix<br/>open-source<br/>cloud-gouv/securix] --> B[securix-$org<br/>dépôt orga<br/>custom + inventaire + VPN/proxy]
+    A --> C[bureautix-$org<br/>dépôt orga bureautique]
+    B -.-> D[securix-acme<br/>ex. acme]
+    C -.-> E[bureautix-acme<br/>ex. acme]
+    D & E --> F[postes déployés]
+```
+
 Par exemple, si votre organisation `acme` décide de déployer un poste d'administration et un poste de bureautique (deux populations, parfois qui se recoupent) sous la gestion de deux divisions différentes, vous pouvez construire alors `securix-acme` et `bureautix-acme` et ils feront tous les deux référence au projet open source <https://github.com/cloud-gouv/securix>. Il est bien entendu possible de faire un miroir de ce projet sur votre forge et de dépendre de la version en miroir.
 
 Ainsi, pour la montée de version, il existe deux composants majeurs à gérer :
