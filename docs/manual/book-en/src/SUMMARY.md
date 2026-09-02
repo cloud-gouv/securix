@@ -30,12 +30,10 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 - [New proxy]()
 - [Create use-case profiles]()
 
-# User guide
+# Reference
 
-- [Quick start](./user/quick_start.md)
-- [Variants](./user/variants.md)
-- [Deployment options](./user/deployment.md)
-- [Cache for your deployment](./user/cache.md)
+- [Deployment modes — Reference](./reference/deployment.md)
+- [CI/CD binary cache](./reference/cache.md)
 
 # Contributor guide
 

@@ -30,12 +30,10 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 - [Nouveau proxy]()
 - [Fabriquer des profils métiers]()
 
-# Guide utilisateur
+# Référence
 
-- [Prise en main rapide](./user/quick_start.md)
-- [Variantes](./user/variants.md)
-- [Options de déploiement](./user/deployment.md)
-- [Cache pour votre déploiement](./user/cache.md)
+- [Options de déploiement](./reference/deployment.md)
+- [Cache binaire CI/CD](./reference/cache.md)
 
 # Guide contributeur
 
