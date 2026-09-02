@@ -10,11 +10,11 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 # Deployment guide
 
-- [Initialization]()
-  - [Context]()
-  - [Prepare the repository]()
-  - [Manage inventory]()
-  - [Declare tools & programs]()
+- [Initialization](deployment/initialization/README.md)
+  - [Context](deployment/initialization/context.md)
+  - [Prepare the repository](deployment/initialization/prepare-repo.md)
+  - [Manage inventory](deployment/initialization/inventory.md)
+  - [Declare tools & programs](deployment/initialization/tools.md)
   - [Enable a first VPN and proxy]()
 - [Lifecycle management]()
   - [Install a Bureautix]()
