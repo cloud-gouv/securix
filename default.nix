@@ -55,12 +55,34 @@ let
       sources
       ;
   };
-  docsEn = pkgs.runCommand "docs-en" { } ''
-    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual/book-en} --dest-dir $out
-  '';
-  docsFr = pkgs.runCommand "docs-fr" { } ''
-    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual/book-fr} --dest-dir $out
-  '';
+  docsEn =
+    pkgs.runCommand "docs-en"
+      {
+        nativeBuildInputs = [
+          pkgs.mdbook
+          pkgs.mdbook-mermaid
+        ];
+      }
+      ''
+        cp -r ${./docs/manual/book-en} book-en
+        chmod -R u+w book-en
+        mdbook-mermaid install book-en
+        mdbook build book-en --dest-dir $out
+      '';
+  docsFr =
+    pkgs.runCommand "docs-fr"
+      {
+        nativeBuildInputs = [
+          pkgs.mdbook
+          pkgs.mdbook-mermaid
+        ];
+      }
+      ''
+        cp -r ${./docs/manual/book-fr} book-fr
+        chmod -R u+w book-fr
+        mdbook-mermaid install book-fr
+        mdbook build book-fr --dest-dir $out
+      '';
   docsAll = pkgs.runCommand "docs-all" { } ''
     mkdir -p $out/en $out/fr
     cp -r ${docsEn}/* $out/en/
@@ -93,6 +115,7 @@ in
     packages = [
       pkgs'.npins
       pkgs'.mdbook
+      pkgs'.mdbook-mermaid
       (pkgs'.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
     ]
     ++ git-checks.enabledPackages;

@@ -11,4 +11,7 @@ title = "Sécurix"
 
 [output.html]
 additional-css = ["theme/language-switcher.css"]
-additional-js = ["theme/language-switcher.js"]
+additional-js = ["theme/language-switcher.js", "mermaid.min.js", "mermaid-init.js"]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
