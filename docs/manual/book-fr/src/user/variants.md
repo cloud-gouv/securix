@@ -4,8 +4,8 @@ SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa@numerique.gouv.fr>
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# Variants
+# Variantes
 
 ## Bureautix
 
-[Bureautix](https://github.com/cloud-gouv/bureautix-example) is a complete variant example which explores the usage of Sécurix for office users and developers usecases.
+[Bureautix](https://github.com/cloud-gouv/bureautix-example) est un exemple complet de variante qui explore l'usage de Sécurix pour les cas d'usage bureautique et développeur.
