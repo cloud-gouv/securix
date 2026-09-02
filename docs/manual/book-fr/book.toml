@@ -5,6 +5,10 @@
 
 [book]
 authors = ["Ryan Lahfa", "Xavier Maso"]
-language = "en"
+language = "fr"
 src = "src"
 title = "Sécurix"
+
+[output.html]
+additional-css = ["theme/language-switcher.css"]
+additional-js = ["theme/language-switcher.js"]
