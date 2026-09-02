@@ -4,171 +4,159 @@ SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa@numerique.gouv.fr>
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# A cache for your (internal) CI/CD pipelines
+# Un cache pour vos pipelines CI/CD (internes)
 
-This document describes how to configure a **Nix binary cache** in a CI/CD pipeline so that build results can be reused across runs and across machines.
-Using a cache dramatically reduces build times and load on your CI infrastructure when building Sécurix-related artifacts (ISOs, system configurations, etc.)
+Ce document décrit comment configurer un **cache binaire Nix** dans un pipeline CI/CD pour réutiliser les résultats de compilation entre les exécutions et les machines.
+Utiliser un cache réduit drastiquement les temps de compilation et la charge sur votre CI lors de la construction d'artefacts Sécurix (ISOs, configurations système, etc.).
 
-The examples are intentionally **CI-agnostic**. Where GitHub Actions–specific tooling is referenced, we explain how to replace it in other CI systems.
+Les exemples sont volontairement **agnostiques de la CI**. Quand un outillage spécifique à GitHub Actions est mentionné, nous expliquons comment le remplacer dans d'autres CI.
 
-## High-level pipeline flow
+## Flux haut niveau du pipeline
 
-A CI pipeline using a Nix cache usually follows these steps:
+Un pipeline CI utilisant un cache Nix suit généralement ces étapes :
 
-1. Check out the repository
-2. Install Nix (Sécurix upstream is developed and tested using https://lix.systems/).
-3. Configure cache access (substituters + credentials)
-4. Run `nix-build`, `nix develop`, or `nix build`
-5. Upload build results to the cache
+1. Cloner le dépôt
+2. Installer Nix (Sécurix est développé et testé avec https://lix.systems/)
+3. Configurer l'accès au cache (substituters + identifiants)
+4. Lancer `nix-build`, `nix develop` ou `nix build`
+5. Envoyer les résultats vers le cache
 
-Each of these steps is described below.
+Chacune de ces étapes est décrite ci-dessous.
 
-> Note: Garbage collection is not covered in this document. After a while, your S3 cache will accumulate useless Nix store paths.
-> You can run a scheduled pipeline to expire objects based on date or liveness using on-the-shelf S3 tooling.
+> Note : le garbage collection n'est pas couvert ici. Après un certain temps, votre cache S3 accumulera des chemins Nix inutiles.
+> Vous pouvez lancer un pipeline planifié pour expirer les objets selon la date ou leur vivacité avec des outils S3 standards.
 
-## Step 1: Check out the repository
+## Étape 1 : Cloner le dépôt
 
-Your CI system must fetch the source code before running Nix commands.
+Votre CI doit récupérer le code source avant de lancer les commandes Nix.
 
-No Nix-specific configuration is required here.
+Aucune configuration spécifique à Nix n'est requise ici.
 
-## Step 2: Install Nix
+## Étape 2 : Installer Nix
 
-A Nix interpreter must be installed on the CI runner.
+Un interpréteur Nix doit être installé sur le runner CI.
 
-### Requirements
+### Prérequis
 
-* Linux or macOS
-* Root or sudo access (unless using user-mode Nix which is not recommended)
+* Linux ou macOS
+* Accès root ou sudo (sauf Nix en mode utilisateur, non recommandé)
 
-### Generic installation options
+### Options d'installation génériques
 
-You can install Lix using (Linux example):
+Vous pouvez installer Lix avec (exemple Linux) :
 
 ```sh
 curl -L https://install.lix.systems/lix/lix-installer-x86_64-linux | sh
 ```
 
-After installation, ensure that:
+Après installation, vérifiez :
 
 ```sh
 nix --version
 ```
 
-works in subsequent CI steps.
+### Remarques
 
-### Remarks
+Beaucoup de CI proposent des workflows réutilisables pour installer Nix.
+Ils :
 
-Many CI systems offer reusable workflows or templates to install Nix.
-These often:
+- préconfigurent `nix.conf` pour les entrées `nixpkgs`
+- injectent les jetons de forge (GitHub, GitLab, etc.) pour éviter les limites d'API
+- activent des fonctionnalités optionnelles comme l'accélération KVM
 
-- Preconfigure `nix.conf` for `nixpkgs` inputs
-- Inject forge tokens (GitHub, GitLab, etc.) to avoid API rate limits
-- Enable optional features such as KVM acceleration
+Si vous utilisez GitHub Actions, nous recommandons
+<https://github.com/samueldr/lix-gha-installer-action>, rapide, léger et facile à auditer. Sa logique est portable vers d'autres CI.
 
-If you are using GitHub Actions, we recommend
-<https://github.com/samueldr/lix-gha-installer-action>, which is fast, slim,
-and easy to audit. Its logic can be ported to other CI systems if needed.
+## Étape 3 : Configurer le cache binaire
 
-## Step 3: Configure the binary cache
+C'est l'étape la plus importante, et souvent la plus complexe.
 
-This is the most important, and often the most complex, step, depending on your needs.
+### Configurer les substituters
 
-### Configure substituters
+Un substituter indique à Nix où télécharger les artefacts cachés.
 
-A substituter tells Nix where to download cached artifacts from.
-
-Example substituter configuration:
+Exemple :
 
 ```
 s3://oss-securix
 ```
 
-With additional parameters:
+Avec paramètres additionnels :
 
-* `endpoint`: custom S3-compatible endpoint
-* `region`: object storage region
-* `compression`: artifact compression format. We recommend `zstd` over `xz`:
-  `zstd` offers much faster compression and decompression with a reasonable
-  size trade-off. Prefer `xz` only if storage or bandwidth is the primary
-  constraint.
-* `parallel-compression`: speed optimization for `xz` or `zstd`
+* `endpoint` : endpoint S3 compatible
+* `region` : région du stockage objet
+* `compression` : format de compression. Nous recommandons `zstd` plutôt que `xz` : `zstd` offre une compression/décompression bien plus rapide pour un compromis taille raisonnable.
+* `parallel-compression` : optimisation vitesse pour `xz` ou `zstd`
 
-These settings can be applied via:
+Ces réglages peuvent être appliqués via :
 
 * `nix.conf`
-* Environment variables
-* CLI flags
+* variables d'environnement
+* drapeaux CLI
 
-Example `nix.conf` snippet:
+Exemple `nix.conf` :
 
 ```conf
 substituters = https://cache.nixos.org s3://oss-securix?endpoint=https://s3.gra.io.cloud.ovh.net&region=gra
 trusted-public-keys = oss-securix-1:PUBLIC_KEY_HERE
 ```
 
-## Step 4: Configure secrets
+## Étape 4 : Configurer les secrets
 
-To upload artifacts to a cache, Nix must **sign** them and have write access to the S3 object store.
+Pour envoyer des artefacts vers le cache, Nix doit **signer** et avoir l'accès en écriture au stockage S3.
 
-### Required secrets
+### Secrets requis
 
-Store the following as CI secrets:
+Stockez en secrets CI :
 
-* **Nix signing private key**: can be generated via `nix key generate-secret`
-* **Object storage access key**: your S3 provider should give you that information.
-* **Object storage secret key**: your S3 provider should give you that information.
+* **Clé privée de signature Nix** : générable via `nix key generate-secret`
+* **Access key du stockage objet**
+* **Secret key du stockage objet**
 
-If your project accepts untrusted pull requests, it is strongly recommended
-to separate caches:
+Si votre projet accepte des PR non fiables, séparez les caches :
 
-- **Untrusted CI cache**: builds triggered by pull requests or forks
-- **Trusted CD cache**: builds triggered after merge or approval
+- **Cache CI non fiable** : builds déclenchés par PR/forks
+- **Cache CD fiable** : builds après merge/approbation
 
-This prevents unreviewed code from polluting trusted binary caches.
+Cela évite que du code non revu pollue les caches fiables.
 
-### Setting secrets in the CI system
+### Déclarer les secrets en CI
 
-Most CI systems support masked secrets, prefer using that mechanism to
-a mechanism that can accidentally show the actual credentials.
+La plupart des CI supportent les secrets masqués, préférez ce mécanisme à un autre pouvant exposer les identifiants.
 
-The signing key is typically referenced in `nix.conf`:
+La clé de signature est typiquement référencée dans `nix.conf` :
 
 ```conf
 secret-key-files = /path/to/signing-key
 ```
 
-## Step 5: Enable cache uploads
+## Étape 5 : Activer l'envoi vers le cache
 
-To ensure build results are uploaded:
+Pour que les résultats soient envoyés :
 
-* The cache must be listed as a substituter
-* The signing key must be available
-* The CI job must have write access to the object store
-* Some part of your workflow must upload the paths you care about
+* Le cache doit être listé comme substituter
+* La clé de signature doit être disponible
+* Le job CI doit avoir l'accès en écriture au stockage objet
+* Une partie de votre workflow doit envoyer les chemins
 
-For the last item, there's many solutions:
+Pour ce dernier point, plusieurs solutions :
 
-- Use a `post-build-hook` to upload built paths immediately. This ensures that
-  **all** store paths touched by the workflow are uploaded, including paths
-  copied from <https://cache.nixos.org>.
-- use a manual upload step using `nix copy $built_path s3://your-bucket?endpoint=...` at the end
-- run a daemon at the same time and watch for filesystem events and copy store path as you build them
+- Utiliser un `post-build-hook` pour envoyer immédiatement. Cela garantit que **tous** les chemins touchés sont envoyés, y compris ceux copiés depuis <https://cache.nixos.org>.
+- envoyer manuellement avec `nix copy $built_path s3://your-bucket?endpoint=...` à la fin
+- lancer un daemon observant le filesystem et copiant les chemins au fil de la construction
 
-## Step 6: Run the build
+## Étape 6 : Lancer la compilation
 
-Once everything is configured, run your build as usual:
+Une fois tout configuré, lancez comme d'habitude :
 
 ```sh
 nix-build -A tests
 ```
 
-## Security considerations
+## Considérations de sécurité
 
-* Never commit private signing keys
-* Scope object storage credentials to the minimum required permissions (read and write here)
-* Use separate caches for trusted vs untrusted builds if necessary
-* Restrict who can upload to the cache
-* Removing direct access to the signing key and S3 credentials is possible by
-  introducing an intermediate service between CI and the cache, such as
-  [Attic](https://github.com/zhaofengli/attic).
+* Ne jamais committer de clé privée
+* Limiter les identifiants au minimum requis (lecture/écriture)
+* Utiliser des caches séparés pour builds fiables/non fiables si nécessaire
+* Restreindre qui peut envoyer vers le cache
+* Supprimer l'accès direct à la clé de signature et aux identifiants S3 est possible via un service intermédiaire comme [Attic](https://github.com/zhaofengli/attic).

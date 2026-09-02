@@ -5,7 +5,7 @@ SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
 
-# What is Sécurix?
+# Qu'est-ce que Sécurix ?
 
-An operating system developped at [DINUM](https://www.numerique.gouv.fr/), primarily for internal use, for building workstation environments that are declarative, reproducible, and secure by default.
-Based on [`NixOS`](https://nixos.org/), it allows to write configuration as code for defining users, programs, services, configurations, and more.
+Un système d'exploitation développé à la [DINUM](https://www.numerique.gouv.fr/), principalement pour un usage interne, pour construire des environnements de poste de travail déclaratifs, reproductibles et sécurisés par défaut.
+Basé sur [`NixOS`](https://nixos.org/), il permet d'écrire la configuration sous forme de code pour définir les utilisateurs, programmes, services, configurations, et plus encore.
