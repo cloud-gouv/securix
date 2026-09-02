@@ -55,6 +55,24 @@ let
       sources
       ;
   };
+  docsEn = pkgs.runCommand "docs-en" { } ''
+    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual/book-en} --dest-dir $out
+  '';
+  docsFr = pkgs.runCommand "docs-fr" { } ''
+    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual/book-fr} --dest-dir $out
+  '';
+  docsAll = pkgs.runCommand "docs-all" { } ''
+    mkdir -p $out/en $out/fr
+    cp -r ${docsEn}/* $out/en/
+    cp -r ${docsFr}/* $out/fr/
+    cp ${./docs/manual/index.html} $out/index.html
+  '';
+  docs = docsAll // {
+    inherit docsEn docsFr docsAll;
+    en = docsEn;
+    fr = docsFr;
+    all = docsAll;
+  };
 in
 {
   lib = lib-securix;
@@ -64,9 +82,13 @@ in
     pkgs = pkgs';
     libSecurix = lib-securix;
   };
-  docs = pkgs.runCommand "docs" { } ''
-    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual} --dest-dir $out
-  '';
+  inherit
+    docs
+    docsEn
+    docsFr
+    docsAll
+    ;
+  all = docsAll;
   shell = pkgs'.mkShell {
     packages = [
       pkgs'.npins
