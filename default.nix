@@ -55,6 +55,46 @@ let
       sources
       ;
   };
+  docsEn =
+    pkgs.runCommand "docs-en"
+      {
+        nativeBuildInputs = [
+          pkgs.mdbook
+          pkgs.mdbook-mermaid
+        ];
+      }
+      ''
+        cp -r ${./docs/manual/book-en} book-en
+        chmod -R u+w book-en
+        mdbook-mermaid install book-en
+        mdbook build book-en --dest-dir $out
+      '';
+  docsFr =
+    pkgs.runCommand "docs-fr"
+      {
+        nativeBuildInputs = [
+          pkgs.mdbook
+          pkgs.mdbook-mermaid
+        ];
+      }
+      ''
+        cp -r ${./docs/manual/book-fr} book-fr
+        chmod -R u+w book-fr
+        mdbook-mermaid install book-fr
+        mdbook build book-fr --dest-dir $out
+      '';
+  docsAll = pkgs.runCommand "docs-all" { } ''
+    mkdir -p $out/en $out/fr
+    cp -r ${docsEn}/* $out/en/
+    cp -r ${docsFr}/* $out/fr/
+    cp ${./docs/manual/index.html} $out/index.html
+  '';
+  docs = docsAll // {
+    inherit docsEn docsFr docsAll;
+    en = docsEn;
+    fr = docsFr;
+    all = docsAll;
+  };
 in
 {
   lib = lib-securix;
@@ -64,13 +104,18 @@ in
     pkgs = pkgs';
     libSecurix = lib-securix;
   };
-  docs = pkgs.runCommand "docs" { } ''
-    ${pkgs.mdbook}/bin/mdbook build ${./docs/manual} --dest-dir $out
-  '';
+  inherit
+    docs
+    docsEn
+    docsFr
+    docsAll
+    ;
+  all = docsAll;
   shell = pkgs'.mkShell {
     packages = [
       pkgs'.npins
       pkgs'.mdbook
+      pkgs'.mdbook-mermaid
       (pkgs'.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
     ]
     ++ git-checks.enabledPackages;
