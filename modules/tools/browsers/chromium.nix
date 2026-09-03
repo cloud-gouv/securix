@@ -42,10 +42,14 @@ let
         else
           "auto_detect";
       ProxyBypassList = concatStringsSep "," cfg.proxy.noProxy;
-      # TODO: expose an option called `cfg.proxy.autoConfigFailSafe`
-      ProxyPacMandatory = false;
     }
-    // optionalAttrs (cfg.proxy.autoConfigURL != null) { ProxyPacUrl = cfg.proxy.autoConfigURL; }
+    // optionalAttrs (cfg.proxy.autoConfigURL != null) {
+      ProxyPacUrl = cfg.proxy.autoConfigURL;
+      # Do not fall back to a direct connection when the PAC script cannot be
+      # fetched.
+      # TODO: expose an option called `cfg.proxy.autoConfigFailSafe`
+      ProxyPacMandatory = true;
+    }
     // optionalAttrs (cfg.proxy.httpProxy != null) { ProxyServer = cfg.proxy.httpProxy; };
   };
 in
