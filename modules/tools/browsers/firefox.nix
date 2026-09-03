@@ -3,12 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 let
   inherit (lib)
     mkOption
@@ -116,8 +111,6 @@ in
         "fr"
         "en-US"
       ];
-
-      nativeMessagingHosts.packages = [ pkgs.tridactyl-native ];
 
       policies = {
         Homepage = mkIf (cfg.homepage != null) {
