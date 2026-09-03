@@ -13,6 +13,7 @@ let
     mapAttrsToList
     filterAttrs
     optionalAttrs
+    optionalString
     concatMapAttrs
     ;
   localProxyStream = "127.0.0.1:8080";
@@ -44,10 +45,11 @@ in
             # For connection ID: ${matchConnectionId}
             logger "[Portail proxy hook] Automatically switching to proxy ${proxyToActuate}"
             ${config.services.portail.package}/bin/portail rpc set-default-backend ${proxyToActuate}
-            # TODO: only run this if the auth method uses ssh tunnels.
             # TODO: use Portail's native SSH tunnels later on.
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
-            systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyToActuate}.service
+            ${optionalString proxyMetadata.auth.sshForward.enable ''
+              systemctl --user -M "$user"@ stop "ssh-tunnel-to-*" --all
+              systemctl --user -M "$user"@ start ssh-tunnel-to-${proxyToActuate}.service
+            ''}
           '';
         };
 
@@ -60,9 +62,10 @@ in
             # For connection ID: ${matchConnectionId}
             logger "[Portail proxy hook] Automatically switching to no proxy"
             ${config.services.portail.package}/bin/portail rpc unset-default-backend
-            # TODO: only run this if the auth method uses ssh tunnels.
             # TODO: use Portail's native SSH tunnels later on.
-            systemctl --user -M "$user"@ stop "ssh-tunnel-to-${proxyToActuate}.service"
+            ${optionalString proxyMetadata.auth.sshForward.enable ''
+              systemctl --user -M "$user"@ stop "ssh-tunnel-to-${proxyToActuate}.service"
+            ''}
           '';
         };
       }
