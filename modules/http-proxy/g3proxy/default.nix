@@ -217,12 +217,6 @@ in
             type = "http_proxy";
             listen.address = "127.0.0.1:8080";
             tls_client = { };
-            # dst_host_filter_set = {
-            #   exact = nonSubnetsExceptions ++ domainsExceptions;
-            #   child = domainsExceptions;
-            #   regex = domainsExceptions;
-            #   subnet = subnetsExceptions;
-            # };
           }
         ];
       };
