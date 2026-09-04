@@ -20,7 +20,7 @@ In your inventory, you can organize items into two main sections: *machines* and
 
 At this point, you can customize your NixOS system. You have two options:
 
-* Use the modules provided by Sécurix, such as `securix.firefox` for Firefox configuration.
+* Use the modules provided by Sécurix, such as `securix.browser` for browser configuration.
 * Alternatively, you can use standard NixOS modules for system customization.
 
 ## 4. Deploy the USB Installer
