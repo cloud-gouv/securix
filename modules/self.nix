@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 {
-  vpnProfiles,
   pkgs,
   config,
   lib,
@@ -109,7 +108,7 @@ in
       };
 
       allowedVPNs = mkOption {
-        type = types.listOf (types.enum (builtins.attrNames vpnProfiles));
+        type = types.listOf types.str;
         default = [ ];
         description = "Liste des VPNs provisionnés pour l'utilisateur";
         example = [ "vpn-01" ];
@@ -253,7 +252,11 @@ in
           assertion = cfg.user.hashedPassword != "";
           message = "securix.self.user.hashedPassword ne peut pas être une chaîne vide.";
         }
-      ];
+      ]
+      ++ map (vpn: {
+        assertion = config.securix.vpn.profiles ? ${vpn};
+        message = "L'utilisateur ${toString cfg.user.username} référence le VPN `${vpn}` qui n'existe pas dans `securix.vpn.profiles`.";
+      }) cfg.user.allowedVPNs;
       services.getty.helpLine = optionalString isMachineConfig ''
         Bienvenue sur Sécurix (identifiant ${toString machineIdentifier}).
         ${optionalString isUserConfig "Utilisateur principal: ${toString cfg.user.email}."}

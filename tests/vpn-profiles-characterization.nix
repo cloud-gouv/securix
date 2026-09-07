@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 Mattias Kockum <mattias@kockum.net>
+#
+# SPDX-License-Identifier: MIT
+#
+# Characterization test for VPN profiles.
+#
+# This test evaluates the configuration produced by mkTerminal
+# and checks the observable artifacts,
+# using the legacy vpnProfiles channel.
+
+{ pkgs, libSecurix }:
+let
+  common = import ./vpn-profiles-common.nix { inherit pkgs; };
+in
+common.mkTest "vpn-profiles-characterization" (
+  libSecurix.mkTerminal {
+    name = "vpn-profiles";
+    inherit (common) userSpecificModule vpnProfiles;
+    extraOperators = { inherit (common) alice; };
+    modules = [ common.baseModule ];
+  }
+)

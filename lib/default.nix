@@ -474,7 +474,7 @@ rec {
     {
       name,
       userSpecificModule,
-      vpnProfiles,
+      vpnProfiles ? { },
       extraOperators ? { },
       modules,
       edition ? args.edition,
@@ -500,7 +500,15 @@ rec {
               cfg.securix.self.user or cfg.securix.self
             )
           ) extraOperators;
+
+          # Dual write: the same profiles are published through both channels so that
+          # out-of-tree modules asking for vpnProfiles in their signature keep working.
+          # Nothing in this repository reads the legacy channel any more.
+          # TODO(migration): drop the following _module.args line, along with
+          # tests/vpn-profiles-legacy-channel.nix and this comment,
+          # once no one reads it anymore.
           _module.args.vpnProfiles = vpnProfiles;
+          securix.vpn.profiles = vpnProfiles;
 
           age.identityPaths = [
             # FIXME: age ne sait pas encore utiliser le TPM2 pour déchiffrer des secrets

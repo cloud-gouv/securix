@@ -6,6 +6,7 @@
   imports = [
     ./ipsec
     ./netbird
+    ./profiles
     ./wireguard
   ];
 }
