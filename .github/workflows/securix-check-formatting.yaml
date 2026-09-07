@@ -1,16 +1,26 @@
-jobs:
-  reuse_lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
-    - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
-    - name: Check for statix
-      run: nix-shell --run 'statix check --config statix.toml'
-    - name: Check for formatting
-      run: nix-shell --run 'nixfmt -sc $(find . -name "*.nix" -not -path "./npins/*" -not -path "./lib/default.nix")'
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
 name: '[Sécurix] Formatting check'
+
 on:
   pull_request:
   push:
     branches:
     - main
+
+permissions: {}
+
+jobs:
+  reuse_lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      with:
+        persist-credentials: false
+    - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
+    - name: Check for statix
+      run: nix-shell --run 'statix check --config statix.toml'
+    - name: Check for formatting
+      run: nix-shell --run 'nixfmt -sc $(find . -name "*.nix" -not -path "./npins/*" -not -path "./lib/default.nix")'
