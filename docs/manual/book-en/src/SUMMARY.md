@@ -34,6 +34,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 - [Deployment modes — Reference](./reference/deployment.md)
 - [CI/CD binary cache](./reference/cache.md)
+- [Supported hardware](./user/hardware.md)
 
 # Contributor guide
 
