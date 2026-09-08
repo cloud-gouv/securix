@@ -9,4 +9,5 @@
   idempotent-autoinstall = import ./idempotent-autoinstall.nix { inherit pkgs libSecurix; };
   portail = import ./portail.nix { inherit pkgs libSecurix; };
   tools = import ./tools.nix { inherit pkgs libSecurix; };
+  vpn-ipsec-shutdown = import ./vpn-ipsec-shutdown.nix { inherit pkgs libSecurix; };
 }

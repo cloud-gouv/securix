@@ -231,6 +231,33 @@ in
       }
     ];
 
+    # `charon-nm` (strongSwan's NetworkManager VPN plugin subprocess) does not always
+    # handle SIGTERM correctly, in particular when a VPN connection attempt hasn't
+    # fully completed. When that happens, it keeps running inside NetworkManager's
+    # cgroup even after NetworkManager.service itself reports as stopped (its
+    # `Type=dbus` completion condition -- losing its D-Bus name -- doesn't require
+    # its whole cgroup to be empty), showing
+    # "NetworkManager.service: Unit process N (charon-nm) remains running after unit
+    # stopped." This is the same underlying strongSwan bug as the suspend/resume
+    # workaround above; it's tracked upstream (e.g.
+    # https://bugs.archlinux.org/task/68116) and we don't have the resources to fix
+    # strongSwan itself.
+    #
+    # Setting NetworkManager.service's own TimeoutStopSec is not sufficient here:
+    # since the unit is already considered stopped as soon as its main process
+    # exits, that per-unit timer never gets a chance to force-kill the leftover
+    # charon-nm. It's kept below anyway (bounds `systemctl stop
+    # NetworkManager.service` itself, and documents intent), but the process the
+    # bug report is actually about -- shutdown/reboot hanging on "waiting for
+    # charon-nm to stop" -- is bound by a *different*, later mechanism: once every
+    # unit has been stopped, systemd's low-level `systemd-shutdown` does one final
+    # SIGTERM-then-SIGKILL sweep over any processes still around, and the wait
+    # before that SIGKILL is `DefaultTimeoutStopSec` (system-wide default: 90s),
+    # not any per-unit TimeoutStopSec. Lower that instead to actually bound
+    # shutdown/reboot. See https://github.com/cloud-gouv/securix/issues/205.
+    systemd.services.NetworkManager.serviceConfig.TimeoutStopSec = mkDefault "10s";
+    systemd.settings.Manager.DefaultTimeoutStopSec = mkDefault "10s";
+
     environment.etc = {
       "strongswan.conf".text = ''
         charon-nm {
