@@ -2,8 +2,4 @@
 #
 # SPDX-License-Identifier: MIT
 
-final: prev:
-(import ./default.nix {
-  inherit (final) callPackage;
-  nixos-rebuild = prev.nixos-rebuild;
-})
+final: prev: (import ./default.nix { inherit (final) callPackage; })
