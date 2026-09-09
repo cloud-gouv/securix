@@ -2,4 +2,4 @@
 #
 # SPDX-License-Identifier: MIT
 
-super: self: (import ./default.nix { inherit (super) callPackage; })
+final: prev: (import ./default.nix { inherit (final) callPackage; })

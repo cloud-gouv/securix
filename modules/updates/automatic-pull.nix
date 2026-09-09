@@ -59,7 +59,7 @@ in
         pkgs.gawk
         pkgs.libnotify
         pkgs.sudo
-        pkgs.nixos-rebuild
+        pkgs.nixos-rebuild-git-aware
       ];
       script = ''
         _notify_current_user() {
