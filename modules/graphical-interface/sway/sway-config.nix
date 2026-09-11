@@ -90,19 +90,22 @@ in
 
       ### Key bindings
       #
+      # --to-code binds the physical key rather than the keysym, so the
+      # shortcuts stay the same on fr and en keyboards.
+      #
       # Basics:
       #
           # Start a terminal
-          bindsym $mod+Return exec $term
+          bindsym --to-code $mod+Return exec $term
 
           # Kill focused window
-          bindsym $mod+Shift+q kill
+          bindsym --to-code $mod+Shift+q kill
 
           # Start your launcher
-          bindsym $mod+d exec $menu
+          bindsym --to-code $mod+d exec $menu
 
           # Lock the session
-          bindsym $mod+Control+l exec --no-startup-id swaylock -c 000000 -e
+          bindsym --to-code $mod+Control+l exec --no-startup-id swaylock -c 000000 -e
 
           # Drag floating windows by holding down $mod and left mouse button.
           # Resize them with right mouse button + $mod.
@@ -112,88 +115,88 @@ in
           floating_modifier $mod normal
 
           # Reload the configuration file
-          bindsym $mod+Shift+c reload
+          bindsym --to-code $mod+Shift+c reload
 
           # Exit sway (logs you out of your Wayland session)
-          bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+          bindsym --to-code $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
       #
       # Moving around:
       #
           # Move your focus around
-          bindsym $mod+$left focus left
-          bindsym $mod+$down focus down
-          bindsym $mod+$up focus up
-          bindsym $mod+$right focus right
+          bindsym --to-code $mod+$left focus left
+          bindsym --to-code $mod+$down focus down
+          bindsym --to-code $mod+$up focus up
+          bindsym --to-code $mod+$right focus right
           # Or use $mod+[up|down|left|right]
-          bindsym $mod+Left focus left
-          bindsym $mod+Down focus down
-          bindsym $mod+Up focus up
-          bindsym $mod+Right focus right
+          bindsym --to-code $mod+Left focus left
+          bindsym --to-code $mod+Down focus down
+          bindsym --to-code $mod+Up focus up
+          bindsym --to-code $mod+Right focus right
 
           # Move the focused window with the same, but add Shift
-          bindsym $mod+Shift+$left move left
-          bindsym $mod+Shift+$down move down
-          bindsym $mod+Shift+$up move up
-          bindsym $mod+Shift+$right move right
+          bindsym --to-code $mod+Shift+$left move left
+          bindsym --to-code $mod+Shift+$down move down
+          bindsym --to-code $mod+Shift+$up move up
+          bindsym --to-code $mod+Shift+$right move right
           # Ditto, with arrow keys
-          bindsym $mod+Shift+Left move left
-          bindsym $mod+Shift+Down move down
-          bindsym $mod+Shift+Up move up
-          bindsym $mod+Shift+Right move right
+          bindsym --to-code $mod+Shift+Left move left
+          bindsym --to-code $mod+Shift+Down move down
+          bindsym --to-code $mod+Shift+Up move up
+          bindsym --to-code $mod+Shift+Right move right
       #
       # Workspaces:
       #
           # Switch to workspace
-          bindsym $mod+ampersand workspace number 1
-          bindsym $mod+eacute workspace number 2
-          bindsym $mod+quotedbl workspace number 3
-          bindsym $mod+apostrophe workspace number 4
-          bindsym $mod+parenleft workspace number 5
-          bindsym $mod+minus workspace number 6	# +section on Apple keyboards
-          bindsym $mod+egrave workspace number 7
-          bindsym $mod+underscore workspace number 8	# +exclam on Apple keyboards
-          bindsym $mod+ccedilla workspace number 9
-          bindsym $mod+agrave workspace number 10
+          bindsym --to-code $mod+ampersand workspace number 1
+          bindsym --to-code $mod+eacute workspace number 2
+          bindsym --to-code $mod+quotedbl workspace number 3
+          bindsym --to-code $mod+apostrophe workspace number 4
+          bindsym --to-code $mod+parenleft workspace number 5
+          bindsym --to-code $mod+minus workspace number 6	# +section on Apple keyboards
+          bindsym --to-code $mod+egrave workspace number 7
+          bindsym --to-code $mod+underscore workspace number 8	# +exclam on Apple keyboards
+          bindsym --to-code $mod+ccedilla workspace number 9
+          bindsym --to-code $mod+agrave workspace number 10
           # Move focused container to workspace
-          bindsym $mod+Shift+ampersand move container to workspace number 1
-          bindsym $mod+Shift+eacute move container to workspace number 2
-          bindsym $mod+Shift+quotedbl move container to workspace number 3
-          bindsym $mod+Shift+apostrophe move container to workspace number 4
-          bindsym $mod+Shift+parenleft move container to workspace number 5
-          bindsym $mod+Shift+minus move container to workspace number 6
-          bindsym $mod+Shift+egrave move container to workspace number 7
-          bindsym $mod+Shift+underscore move container to workspace number 8
-          bindsym $mod+Shift+ccedilla move container to workspace number 9
-          bindsym $mod+Shift+agrave move container to workspace number 10
+          bindsym --to-code $mod+Shift+ampersand move container to workspace number 1
+          bindsym --to-code $mod+Shift+eacute move container to workspace number 2
+          bindsym --to-code $mod+Shift+quotedbl move container to workspace number 3
+          bindsym --to-code $mod+Shift+apostrophe move container to workspace number 4
+          bindsym --to-code $mod+Shift+parenleft move container to workspace number 5
+          bindsym --to-code $mod+Shift+minus move container to workspace number 6
+          bindsym --to-code $mod+Shift+egrave move container to workspace number 7
+          bindsym --to-code $mod+Shift+underscore move container to workspace number 8
+          bindsym --to-code $mod+Shift+ccedilla move container to workspace number 9
+          bindsym --to-code $mod+Shift+agrave move container to workspace number 10
           # Note: workspaces can have any name you want, not just numbers.
           # We just use 1-10 as the default.
           # For multi-screens.
-          bindsym $mod+m move workspace to output left
+          bindsym --to-code $mod+m move workspace to output left
       #
       # Layout stuff:
       #
           # You can "split" the current object of your focus with
           # $mod+b or $mod+v, for horizontal and vertical splits
           # respectively.
-          bindsym $mod+b splith
-          bindsym $mod+v splitv
+          bindsym --to-code $mod+b splith
+          bindsym --to-code $mod+v splitv
 
           # Switch the current container between different layout styles
-          bindsym $mod+s layout stacking
-          bindsym $mod+w layout tabbed
-          bindsym $mod+e layout toggle split
+          bindsym --to-code $mod+s layout stacking
+          bindsym --to-code $mod+w layout tabbed
+          bindsym --to-code $mod+e layout toggle split
 
           # Make the current focus fullscreen
-          bindsym $mod+f fullscreen
+          bindsym --to-code $mod+f fullscreen
 
           # Toggle the current focus between tiling and floating mode
-          bindsym $mod+Shift+space floating toggle
+          bindsym --to-code $mod+Shift+space floating toggle
 
           # Swap focus between the tiling area and the floating area
-          bindsym $mod+space focus mode_toggle
+          bindsym --to-code $mod+space focus mode_toggle
 
           # Move focus to the parent container
-          bindsym $mod+a focus parent
+          bindsym --to-code $mod+a focus parent
       #
       # Scratchpad:
       #
@@ -201,11 +204,11 @@ in
           # You can send windows there and get them back later.
 
           # Move the currently focused window to the scratchpad
-          bindsym $mod+Shift+p move scratchpad
+          bindsym --to-code $mod+Shift+p move scratchpad
 
           # Show the next scratchpad window or hide the focused scratchpad window.
           # If there are multiple scratchpad windows, this command cycles through them.
-          bindsym $mod+p scratchpad show
+          bindsym --to-code $mod+p scratchpad show
       #
       # Resizing containers:
       #
@@ -214,22 +217,22 @@ in
           # right will grow the containers width
           # up will shrink the containers height
           # down will grow the containers height
-          bindsym $left resize shrink width 10px
-          bindsym $down resize grow height 10px
-          bindsym $up resize shrink height 10px
-          bindsym $right resize grow width 10px
+          bindsym --to-code $left resize shrink width 10px
+          bindsym --to-code $down resize grow height 10px
+          bindsym --to-code $up resize shrink height 10px
+          bindsym --to-code $right resize grow width 10px
 
           # Ditto, with arrow keys
-          bindsym Left resize shrink width 10px
-          bindsym Down resize grow height 10px
-          bindsym Up resize shrink height 10px
-          bindsym Right resize grow width 10px
+          bindsym --to-code Left resize shrink width 10px
+          bindsym --to-code Down resize grow height 10px
+          bindsym --to-code Up resize shrink height 10px
+          bindsym --to-code Right resize grow width 10px
 
           # Return to default mode
-          bindsym Return mode "default"
-          bindsym Escape mode "default"
+          bindsym --to-code Return mode "default"
+          bindsym --to-code Escape mode "default"
       }
-      bindsym $mod+r mode "resize"
+      bindsym --to-code $mod+r mode "resize"
 
       #
       # Status Bar:
