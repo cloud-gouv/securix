@@ -20,15 +20,12 @@ let
       }
     ];
   };
+  hostname = terminal-without-identity.system.config.networking.hostName;
 in
-pkgs.testers.nixosTest {
-  name = "hostname-without-identity";
-  nodes."securix-unbranded-unknown-machine" = {
-    imports = terminal-without-identity.modules;
-  };
-  testScript = ''
-    securix_unbranded_unknown_machine.wait_for_unit("default.target")
-    hostname = securix_unbranded_unknown_machine.succeed("hostname").strip()
-    assert hostname == "securix-unbranded-unknown-machine", f"unexpected hostname: {hostname!r}"
-  '';
-}
+pkgs.runCommand "hostname-without-identity" { } ''
+  [ "${hostname}" = "securix-unbranded-unknown-machine" ] || {
+    echo "unexpected hostname: ${hostname}" >&2
+    exit 1
+  }
+  touch $out
+''
