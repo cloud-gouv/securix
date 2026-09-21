@@ -56,7 +56,7 @@ let
     installScript = "echo 'install skipped for test'";
     preprovisionOptions = {
       secureBoot = "disabled";
-      skipPreflightCheck = true;
+      skipPreflightChecks = true;
       tpm2HostKeys = false;
       ageHostKeys = false;
     };

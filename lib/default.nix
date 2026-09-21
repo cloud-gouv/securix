@@ -347,7 +347,7 @@ rec {
 
                         ${pkgs.systemd}/bin/udevadm settle
 
-                        ${lib.optionalString (preprovisionOptions.skipPreflightChecks or false) ''
+                        ${lib.optionalString (!(preprovisionOptions.skipPreflightChecks or false)) ''
                           box_message "Preflight checks..."
 
                           log_info "Checking for FIDO2 security keys..."
