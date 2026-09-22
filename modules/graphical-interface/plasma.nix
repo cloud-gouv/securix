@@ -36,7 +36,9 @@ in
     services.displayManager.sddm = {
       enable = true;
       settings = mkIf config.securix.admins.enable {
-        Users.HideUsers = lib.concatMapStringsSep "," (admin: admin.name) config.securix.admins.accounts;
+        Users.HideUsers = lib.concatMapAttrsStringsSep "," (
+          _: admin: admin.name
+        ) config.securix.admins.accounts;
       };
     };
 
