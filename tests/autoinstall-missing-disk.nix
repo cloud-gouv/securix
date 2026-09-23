@@ -55,6 +55,7 @@ let
     inherit targetSystem;
     preprovisionOptions = {
       secureBoot = "disabled";
+      skipPreflightChecks = true;
       tpm2HostKeys = false;
       ageHostKeys = false;
     };
