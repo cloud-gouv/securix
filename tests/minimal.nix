@@ -11,7 +11,7 @@ let
     modules = [
       {
         securix = {
-          graphical-interface.variant = "sway";
+          graphical-interface.variant = "kde";
           self = {
             mainDisk = "/dev/nvme0n1";
             machine = {
