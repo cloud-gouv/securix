@@ -49,6 +49,12 @@ in
     systemd.services.system-infrastructure-sync = {
       description = "Synchronization of the system infrastructure repository";
       wantedBy = [ "multi-user.target" ];
+      # The upgrade must always retry, even after many consecutive failures
+      # (e.g. no network, TPM2 not ready). Disabling the start rate limit
+      # prevents systemd from leaving the unit in a permanent failed state
+      # once StartLimitBurst is reached. The exponential backoff below keeps
+      # the retry rate bounded instead.
+      startLimitIntervalSec = 0;
       wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
       path = [
@@ -160,12 +166,10 @@ in
       '';
       serviceConfig = {
         Restart = "on-failure";
-        RestartPreventExitStatus = [
-          100
-          101
-          102
-          103
-        ];
+        # Exponential backoff: RestartSec * 2^n, capped at restartMaxDelay.
+        RestartSec = "1min";
+        RestartSteps = 8;
+        RestartMaxDelaySec = "4h";
         Environment = [
           "SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock"
           "REPO_DIR=${config.securix.self.machine.infraRepositoryPath}"
@@ -179,8 +183,10 @@ in
       description = "Timer for synchronization of the system infrastructure repository";
       timerConfig = {
         OnBootSec = "10m"; # Delay before the first execution (10 minutes after boot)
-        OnUnitActiveSec = "1h"; # Set the interval to 1 hour (adjust as needed)
-        Persistent = true;
+        # Base the hourly check on inactivity rather than activity: after a
+        # long backoff sequence the OnUnitActiveSec deadline may already have
+        # elapsed, which would immediately re-trigger the unit on success.
+        OnUnitInactiveSec = "1h";
       };
       wantedBy = [ "timer.target" ];
     };
