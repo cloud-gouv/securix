@@ -4,13 +4,13 @@
 
 {
   pkgs,
-  vpnProfiles,
   operators,
   config,
   lib,
   ...
 }:
 let
+  vpnProfiles = config.securix.vpn.profiles;
   cfg = config.securix.vpn.ipsec;
   inherit (lib)
     mkIf

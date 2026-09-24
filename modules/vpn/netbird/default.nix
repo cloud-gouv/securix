@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 {
-  vpnProfiles,
   operators,
   pkgs,
   lib,
@@ -11,6 +10,7 @@
   ...
 }:
 let
+  vpnProfiles = config.securix.vpn.profiles;
   cfg = config.securix.vpn.netbird;
   inherit (lib)
     mkIf
