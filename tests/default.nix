@@ -8,6 +8,5 @@
   anssi-minimal = import ./anssi-minimal.nix { inherit pkgs libSecurix; };
   idempotent-autoinstall = import ./idempotent-autoinstall.nix { inherit pkgs libSecurix; };
   portail = import ./portail.nix { inherit pkgs libSecurix; };
-  sway-keybindings = import ./sway-keybindings.nix { inherit pkgs libSecurix; };
   tools = import ./tools.nix { inherit pkgs libSecurix; };
 }
