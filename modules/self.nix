@@ -31,7 +31,7 @@ let
     else if cfg.machine.serialNumber != null then
       substring 0 12 (hashString "sha256" cfg.machine.serialNumber)
     else
-      "unknown machine";
+      "unknown-machine";
 in
 {
   options.securix.self = {
