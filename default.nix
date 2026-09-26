@@ -44,6 +44,14 @@ let
         stages = [ "pre-push" ];
         package = pkgs.reuse;
       };
+
+      zizmor = {
+        enable = true;
+        stages = [ "pre-push" ];
+        package = pkgs.zizmor;
+        entry = "zizmor .github/workflows/ --offline";
+        pass_filenames = false;
+      };
     };
   };
   lib-securix = import ./lib {

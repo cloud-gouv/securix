@@ -1,0 +1,91 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+# Path-based auto-labelling for A/* area labels.
+# Used by .github/workflows/auto-label-areas.yml via actions/labeler@v5.
+# One PR can match multiple areas (e.g. modules + testing).
+
+"A/hardening":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "modules/anssi/**"
+          - "modules/auditd.nix"
+
+"A/auth":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "modules/security-keys.nix"
+          - "modules/pam/**"
+          - "modules/ssh-tpm-agent.nix"
+          - "modules/superadmins/**"
+          - "modules/admins/**"
+
+"A/encryption":
+  - changed-files:
+      - any-glob-to-any-file: "modules/filesystems/**"
+
+"A/secure-boot":
+  - changed-files:
+      - any-glob-to-any-file: "modules/bootloader.nix"
+
+"A/networking":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "modules/networking.nix"
+          - "modules/networkmanager-events.nix"
+          - "modules/vpn/**"
+          - "modules/http-proxy/**"
+          - "modules/bastion/**"
+
+"A/modules":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "modules/chromium/**"
+          - "modules/graphical-interface/**"
+          - "modules/tools/**"
+          - "modules/console.nix"
+          - "modules/shells.nix"
+          - "modules/pki.nix"
+
+"A/nixos":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "lib/**"
+          - "default.nix"
+          - "shell.nix"
+          - "npins/**"
+          - "pkgs/overlay.nix"
+
+"A/hardware":
+  - changed-files:
+      - any-glob-to-any-file: "hardware/**"
+
+"A/docs":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "*.md"
+          - "LICENSES/**"
+
+"A/testing":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tests/**"
+          - ".github/workflows/securix-testsuite.yaml"
+          - "workflows/**"
+
+"A/lifecycle":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "modules/updates/**"
+          - "modules/self.nix"
+          - "modules/distribution.nix"
+
+"A/infra":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/workflows/**"
+          - "config.yml"
+          - "statix.toml"
+          - ".pre-commit-config.yaml"

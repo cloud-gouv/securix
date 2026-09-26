@@ -1,0 +1,133 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+name: "Auto-label: status"
+
+on:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] - safe: pinned action, no secrets, same-repo only
+    types: [opened, reopened, synchronize, ready_for_review]
+  pull_request_review:
+    types: [submitted]
+  pull_request_review_comment:
+    types: [created]
+  issues:
+    types: [opened]
+
+permissions: {}
+
+jobs:
+  pr-opened:
+    # pull_request_target is safe here: github-script is pinned, no secrets are
+    # used, and the action only calls the GitHub API to manage labels.
+    if: github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+            const issue_number = pr.number;
+            const repo = context.repo;
+            const labels = pr.labels.map(l => l.name);
+            const has = n => labels.includes(n);
+
+            // On open/sync, ensure awaiting-maintainers is set and awaiting-author is cleared
+            // This implements: new PR -> awaiting-maintainers
+            if (!has('status: awaiting-maintainers') && !has('status: ready-to-merge') && !has('status: awaiting smoke testing') && !has('status: blocked')) {
+              await github.rest.issues.addLabels({ ...repo, issue_number, labels: ['status: awaiting-maintainers'] });
+            }
+            if (has('status: awaiting-author')) {
+              try { await github.rest.issues.removeLabel({ ...repo, issue_number, name: 'status: awaiting-author' }); } catch(e) {}
+            }
+            // New author push after review -> flip back from awaiting-author is handled here via synchronize
+            // If PR was in awaiting-author and author pushed, the above remove + add covers it
+
+  review:
+    if: github.event_name == 'pull_request_review' || github.event_name == 'pull_request_review_comment'
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
+        with:
+          script: |
+            const review = context.payload.review;
+            const pr = context.payload.pull_request || review?.pull_request;
+            if (!pr || !review) return;
+            const issue_number = pr.number;
+            const repo = context.repo;
+            const assoc = review.author_association; // OWNER, MEMBER, COLLABORATOR, etc.
+            const isMaintainer = ['OWNER','MEMBER'].includes(assoc);
+            if (!isMaintainer) return;
+
+            const state = review.state; // approved, changes_requested, commented
+            // Fetch current labels (payload may be stale)
+            const { data: cur } = await github.rest.issues.get({ ...repo, issue_number });
+            const has = n => cur.labels.some(l => l.name === n);
+
+            if (state === 'changes_requested' || (state === 'commented' && has('status: awaiting-maintainers'))) {
+              // Maintainer reviewed -> awaiting-author
+              if (has('status: awaiting-maintainers')) {
+                try { await github.rest.issues.removeLabel({ ...repo, issue_number, name: 'status: awaiting-maintainers' }); } catch(e) {}
+              }
+              if (!has('status: awaiting-author') && !has('status: blocked')) {
+                await github.rest.issues.addLabels({ ...repo, issue_number, labels: ['status: awaiting-author'] });
+              }
+            }
+            if (state === 'approved') {
+              if (has('status: awaiting-author')) {
+                try { await github.rest.issues.removeLabel({ ...repo, issue_number, name: 'status: awaiting-author' }); } catch(e) {}
+              }
+              // ready-to-merge is set after CI checks pass; we only ensure not stuck in awaiting-*
+              // If checks already green, mark ready; otherwise awaiting-maintainers will be set on next sync
+            }
+
+  ci-result:
+    # workflow_run is safe here: github-script is pinned, no secrets are used,
+    # and the action only calls the GitHub API to manage labels. We only act on
+    # PRs from the same repository to avoid processing fork-sourced workflow runs.
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.head_repository.full_name == github.repository
+    permissions:
+      pull-requests: write
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@d746ffe35508b1917358783b479e04febd2b8f71 # v9.0.0
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            if (!run) return;
+            // Only act on PRs
+            const prs = run.pull_requests;
+            if (!prs || prs.length === 0) return;
+            for (const pr of prs) {
+              const issue_number = pr.number;
+              const { data: cur } = await github.rest.issues.get({ ...context.repo, issue_number });
+              const has = n => cur.labels.some(l => l.name === n);
+              if (run.conclusion === 'failure' || run.conclusion === 'timed_out') {
+                if (!has('status: awaiting-ci')) {
+                  await github.rest.issues.addLabels({ ...context.repo, issue_number, labels: ['status: awaiting-ci'] });
+                }
+              } else if (run.conclusion === 'success') {
+                if (has('status: awaiting-ci')) {
+                  try { await github.rest.issues.removeLabel({ ...context.repo, issue_number, name: 'status: awaiting-ci' }); } catch(e) {}
+                }
+                // If PR is approved and CI just turned green, promote to ready-to-merge
+                // Check reviews: last review approved?
+                const { data: reviews } = await github.rest.pulls.listReviews({ ...context.repo, pull_number: issue_number, per_page: 20 });
+                const last = [...reviews].reverse().find(r => ['OWNER','MEMBER'].includes(r.author_association));
+                if (last && last.state === 'APPROVED' && !has('status: ready-to-merge') && !has('status: blocked')) {
+                  await github.rest.issues.addLabels({ ...context.repo, issue_number, labels: ['status: ready-to-merge'] });
+                  if (has('status: awaiting-maintainers')) {
+                    try { await github.rest.issues.removeLabel({ ...context.repo, issue_number, name: 'status: awaiting-maintainers' }); } catch(e) {}
+                  }
+                  if (has('status: awaiting-author')) {
+                    try { await github.rest.issues.removeLabel({ ...context.repo, issue_number, name: 'status: awaiting-author' }); } catch(e) {}
+                  }
+                }
+              }
+            }
