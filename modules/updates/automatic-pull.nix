@@ -66,6 +66,7 @@ in
         pkgs.libnotify
         pkgs.sudo
         pkgs.nixos-rebuild
+        config.nix.package
       ];
       script = ''
         _notify_current_user() {
