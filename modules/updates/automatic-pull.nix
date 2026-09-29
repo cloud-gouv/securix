@@ -69,94 +69,94 @@ in
         config.nix.package
       ];
       script = ''
-          _notify_current_user() {
-            local title="$1"
-            local message="$2"
+        _notify_current_user() {
+          local title="$1"
+          local message="$2"
 
-            # Get all active sessions with a valid user
-            mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
+          # Get all active sessions with a valid user
+          mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
 
-            # Check if there are active sessions
-            if [[ ''${#sessions[@]} -eq 0 ]]; then
-                echo "No active sessions found." >&2
-                return 1
-            fi
-
-            for session in "''${sessions[@]}"; do
-                # Extract session details: ID, user, and display
-                local session_id user display
-                session_id=$(echo "$session" | awk '{print $1}')
-                uid=$(echo "$session" | awk '{print $2}')
-                user=$(echo "$session" | awk '{print $3}')
-
-                # Notify each user/session
-                if [[ -n "$user" ]]; then
-                    # Graphical notification for GUI sessions
-                    sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-                        notify-send "$title" "$message" || true
-                else
-                    # Terminal notification for non-GUI sessions
-                    echo "$title: $message" | wall
-                fi
-            done
-          }
-
-          nm-online -q --timeout=30 || { echo "No Internet, skipping synchronization..."; exit 100; }
-          if ssh-add -L &>/dev/null; then
-              echo "SSH identities are loaded:"
-              ssh-add -L
-          else
-              echo "No system SSH identities loaded, is the TPM2 broken or the onboarding was insufficient?"
-              exit 101
-          fi
-          if [ -d "$REPO_DIR/.git" ]; then
-            echo "Repository exists, pulling latest changes..."
-            cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
-
-            git remote set-url origin "${cfg.repoUrl}"
-            git fetch origin || exit 1
-            git branch --set-upstream-to="origin/${cfg.branch}" "${cfg.branch}"
-
-            UPSTREAM='${cfg.branch}@{u}'
-            LOCAL=$(git rev-parse @)
-            REMOTE=$(git rev-parse "$UPSTREAM")
-            BASE=$(git merge-base @ "$UPSTREAM")
-
-            if [ $LOCAL = $REMOTE ]; then
-                echo "Up-to-date. Skipping."
-                exit 0
-            elif [ $LOCAL = $BASE ]; then
-                _notify_current_user "[Sécurix] Mises à jour" "Une mise à jour est disponible du système et sera téléchargé."
-            elif [ $REMOTE = $BASE ]; then
-                _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code à cause de changements locaux."
-                exit 102
-            else
-                _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code et ne peut etre synchronisé automatiquement."
-                exit 103
-            fi
-
-            git pull || exit 1
-
-            _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
-          else
-            echo "Repository does not exist, cloning..."
-            mkdir -p "$REPO_DIR" || exit 1
-
-            _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
-            git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
-
-            cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
+          # Check if there are active sessions
+          if [[ ''${#sessions[@]} -eq 0 ]]; then
+              echo "No active sessions found." >&2
+              return 1
           fi
 
-          # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
-          # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
-          # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
+          for session in "''${sessions[@]}"; do
+              # Extract session details: ID, user, and display
+              local session_id user display
+              session_id=$(echo "$session" | awk '{print $1}')
+              uid=$(echo "$session" | awk '{print $2}')
+              user=$(echo "$session" | awk '{print $3}')
 
-          nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system --option narinfo-cache-positive-ttl 0
-          nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.maxGenerationsToKeep}
-          nix-store --gc --max-freed 10G
+              # Notify each user/session
+              if [[ -n "$user" ]]; then
+                  # Graphical notification for GUI sessions
+                  sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+                      notify-send "$title" "$message" || true
+              else
+                  # Terminal notification for non-GUI sessions
+                  echo "$title: $message" | wall
+              fi
+          done
+        }
 
-          _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
+        nm-online -q --timeout=30 || { echo "No Internet, skipping synchronization..."; exit 100; }
+        if ssh-add -L &>/dev/null; then
+            echo "SSH identities are loaded:"
+            ssh-add -L
+        else
+            echo "No system SSH identities loaded, is the TPM2 broken or the onboarding was insufficient?"
+            exit 101
+        fi
+        if [ -d "$REPO_DIR/.git" ]; then
+          echo "Repository exists, pulling latest changes..."
+          cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
+
+          git remote set-url origin "${cfg.repoUrl}"
+          git fetch origin || exit 1
+          git branch --set-upstream-to="origin/${cfg.branch}" "${cfg.branch}"
+
+          UPSTREAM='${cfg.branch}@{u}'
+          LOCAL=$(git rev-parse @)
+          REMOTE=$(git rev-parse "$UPSTREAM")
+          BASE=$(git merge-base @ "$UPSTREAM")
+
+          if [ $LOCAL = $REMOTE ]; then
+              echo "Up-to-date. Skipping."
+              exit 0
+          elif [ $LOCAL = $BASE ]; then
+              _notify_current_user "[Sécurix] Mises à jour" "Une mise à jour est disponible du système et sera téléchargé."
+          elif [ $REMOTE = $BASE ]; then
+              _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code à cause de changements locaux."
+              exit 102
+          else
+              _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code et ne peut etre synchronisé automatiquement."
+              exit 103
+          fi
+
+          git pull || exit 1
+
+          _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
+        else
+          echo "Repository does not exist, cloning..."
+          mkdir -p "$REPO_DIR" || exit 1
+
+          _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
+          git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
+
+          cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
+        fi
+
+        # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
+        # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
+        # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
+
+        nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system --option narinfo-cache-positive-ttl 0
+        nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.maxGenerationsToKeep}
+        nix-store --gc --max-freed 10G
+
+        _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
       '';
       serviceConfig = {
         Restart = "on-failure";
