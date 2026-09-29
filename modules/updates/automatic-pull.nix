@@ -69,7 +69,7 @@ in
         config.nix.package
       ];
       script = ''
-        _notify_current_user() {
+          _notify_current_user() {
             local title="$1"
             local message="$2"
 
