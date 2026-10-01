@@ -163,6 +163,7 @@ in
         RestartSec = "1min";
         RestartSteps = 8;
         RestartMaxDelaySec = "4h";
+        RuntimeMaxSec = "2h";
         Environment = [
           "SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock"
           "REPO_DIR=${config.securix.self.machine.infraRepositoryPath}"
