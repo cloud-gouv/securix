@@ -48,7 +48,6 @@ in
   config = mkIf cfg.enable {
     systemd.services.system-infrastructure-sync = {
       description = "Synchronization of the system infrastructure repository";
-      wantedBy = [ "multi-user.target" ];
       # The upgrade must always retry, even after many consecutive failures
       # (e.g. no network, TPM2 not ready). Disabling the start rate limit
       # prevents systemd from leaving the unit in a permanent failed state
