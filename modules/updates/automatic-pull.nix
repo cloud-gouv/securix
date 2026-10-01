@@ -182,7 +182,7 @@ in
         # elapsed, which would immediately re-trigger the unit on success.
         OnUnitInactiveSec = "1h";
       };
-      wantedBy = [ "timer.target" ];
+      wantedBy = [ "timers.target" ];
     };
   };
 }
