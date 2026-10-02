@@ -235,6 +235,7 @@ in
       "strongswan.conf".text = ''
         charon-nm {
           ca_dir = /etc/ipsec.d/certs
+          rdn_matching = reordered
           plugins {
             pkcs11 {
               modules {
