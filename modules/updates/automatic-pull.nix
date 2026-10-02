@@ -48,7 +48,6 @@ in
   config = mkIf cfg.enable {
     systemd.services.system-infrastructure-sync = {
       description = "Synchronization of the system infrastructure repository";
-      wantedBy = [ "multi-user.target" ];
       # The upgrade must always retry, even after many consecutive failures
       # (e.g. no network, TPM2 not ready). Disabling the start rate limit
       # prevents systemd from leaving the unit in a permanent failed state
@@ -164,6 +163,7 @@ in
         RestartSec = "1min";
         RestartSteps = 8;
         RestartMaxDelaySec = "4h";
+        RuntimeMaxSec = "2h";
         Environment = [
           "SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock"
           "REPO_DIR=${config.securix.self.machine.infraRepositoryPath}"
@@ -182,7 +182,7 @@ in
         # elapsed, which would immediately re-trigger the unit on success.
         OnUnitInactiveSec = "1h";
       };
-      wantedBy = [ "timer.target" ];
+      wantedBy = [ "timers.target" ];
     };
   };
 }
