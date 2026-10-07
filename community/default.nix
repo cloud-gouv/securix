@@ -8,5 +8,7 @@
     ./grist-registration
 
     ./inventory-generator
+
+    ./telemetry-reporter
   ];
 }
