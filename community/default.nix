@@ -10,5 +10,7 @@
     ./inventory-generator
 
     ./reset-yubikey
+
+    ./telemetry-reporter
   ];
 }
