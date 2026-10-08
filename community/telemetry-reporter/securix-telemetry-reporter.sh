@@ -22,6 +22,7 @@ set -o xtrace +o errexit +o pipefail
 fields["currentDate"]=$( date -Iseconds )
 
 fields["user"]=$( getent group video | cut -d ':' -f 4 )
+fields["hostName"]=$( hostname )
 
 fields["chassisSerial"]=$( dmidecode --string chassis-serial-number || dmidecode --string system-serial-number )
 fields["chassisFamily"]=$( dmidecode --string system-family || dmidecode --string system-version )
@@ -37,6 +38,8 @@ fields["nixosVersion"]=$( jq -r '.nixosVersion' <<< "$current_gen" )
 fields["kernelVersion"]=$( jq -r '.kernelVersion' <<< "$current_gen" )
 
 fields["generationCount"]=$( nixos-rebuild list-generations --json | jq 'length' )
+
+fields["bootTime"]=$( systemctl show -p KernelTimestamp --value )
 
 fields["rootfsCapacity"]=$( df -h --output=size / | tail -n+2 )
 fields["rootfsUse"]=$( df -h --output=used,pcent / | tail -n+2 )

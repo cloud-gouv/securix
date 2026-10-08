@@ -25,6 +25,7 @@ let
       curl
       dmidecode
       getent
+      hostname
       jq
       nixos-rebuild
       sbctl
