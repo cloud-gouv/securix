@@ -220,6 +220,14 @@ rec {
           box_message "No TPM2 device detected, skipping TPM2-backed SSH key generation."
         fi
       '';
+      # Keys for the sealing of the journal, see modules/journald-fss.nix.
+      journaldFSS = targetSystem.config.securix.journaldFSS.enable or false;
+      journaldFSSProvisionScript = ''
+        box_message "Generating the journal sealing keys..."
+        LANG=C.UTF-8 TERM=linux ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.systemd}/bin/systemd-machine-id-setup && mkdir -p /var/log/journal/\$(cat /etc/machine-id) && ${pkgs.systemd}/bin/journalctl --setup-keys"
+        log_info "The verification key above is not stored on the machine, keep it in a safe place."
+        ${pkgs.gum}/bin/gum confirm "Verification key written down?" || log_warn "Generate new keys with journalctl --setup-keys --force if the key is lost."
+      '';
       installProcedureScript =
         config:
         let
@@ -388,6 +396,7 @@ rec {
                         ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
                         ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
                         ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
+                        ${optionalString journaldFSS journaldFSSProvisionScript}
                         ${postInstallScript}
                         lsblk
                         log_info "Installation is complete. You can now reboot in the installed system."
