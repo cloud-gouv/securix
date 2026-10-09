@@ -63,7 +63,7 @@ publish_proxy() {
   fi
 
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
-  
+
   if [ "$selected_proxy_ipv4" = "$INTERNAL_FORWARD_PROXY" ]; then
     _notify_current_user "[Proxy-Switcher] Connexion" "Pas de proxy distant utilisé (forward proxy local actif)."
   else
