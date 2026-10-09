@@ -9,10 +9,10 @@
   ...
 }:
 let
-  cfg = config.securix.reset-yubikey;
+  cfg = config.securix.programs.reset-yubikey;
 in
 {
-  options.securix.reset-yubikey = {
+  options.securix.programs.reset-yubikey = {
     enable = lib.mkEnableOption "Reset yubikey service";
   };
 
@@ -30,6 +30,18 @@ in
         NC='\033[0m' # No Color
 
         LOG_FILE="yubikey_erasure_report.txt"
+        failed=0
+
+        # Run a reset step: on failure, flag it and continue
+        step() {
+            "$@" || { echo -e "''${RED}Failed: $*''${NC}"; failed=1; }
+        }
+
+        # Run a command for the report: never abort, record exit code
+        run() {
+            echo "\$ $*"
+            "$@" 2>&1 || echo "[exit code: $?]"
+        }
 
         echo -e "''${BLUE}===============================================''${NC}"
         echo -e "''${BLUE}   YUBIKEY FACTORY RESET & AUDIT TOOL          ''${NC}"
@@ -65,7 +77,7 @@ in
         echo -e "''${BLUE}ACTION REQUIRED:''${NC} Unplug your YubiKey, plug it back in, and press ENTER immediately."
         read -s # Wait for enter
         echo "Touch the YubiKey when it flashes..."
-        ykman fido reset -f
+        step ykman fido reset -f
 
         echo -e "\n''${YELLOW}[STEP 2/5] Resetting OTP Slots...''${NC}"
         ykman otp delete 1 -f || echo -e "''${YELLOW}Slot 1 already empty or restricted.''${NC}"
@@ -73,13 +85,13 @@ in
         ykman otp delete 2 -f || echo -e "''${YELLOW}Slot 2 already empty or restricted.''${NC}"
 
         echo -e "\n''${YELLOW}[STEP 3/5] Resetting PIV (Smart Card)...''${NC}"
-        ykman piv reset -f
+        step ykman piv reset -f
 
         echo -e "\n''${YELLOW}[STEP 4/5] Resetting OpenPGP...''${NC}"
-        ykman openpgp reset -f
+        step ykman openpgp reset -f
 
         echo -e "\n''${YELLOW}[STEP 5/5] Resetting OATH (TOTP/HOTP)...''${NC}"
-        ykman oath reset -f
+        step ykman oath reset -f
 
         # 5. Evidence Generation
         echo -e "\n''${BLUE}===============================================''${NC}"
@@ -92,23 +104,33 @@ in
             echo "            Date: $(date -u) (UTC)"
             echo "==============================================================="
             echo -e "\n[1] HARDWARE IDENTIFICATION"
-            ykman info
+            run ykman info
             echo -e "\n[2] FIDO2 STATUS (Should show 'Not set')"
-            ykman fido info
+            run ykman fido info
             echo -e "\n[3] OTP STATUS (Slots should be 'empty')"
-            ykman otp info
+            run ykman otp info
             echo -e "\n[4] PIV STATUS (Should show default PIN/PUK warnings)"
-            ykman piv info
+            run ykman piv info
             echo -e "\n[5] OATH STATUS (Should be empty)"
-            ykman oath accounts list
+            run ykman oath accounts list
             echo -e "\n[6] OPENPGP STATUS (Keys should be 'None')"
-            ykman openpgp info
+            run ykman openpgp info
             echo "==============================================================="
+            if [ "$failed" -ne 0 ]; then
+                echo "RESULT: ONE OR MORE RESET STEPS FAILED"
+            else
+                echo "RESULT: ALL RESET STEPS SUCCEEDED"
+            fi
             echo "END OF REPORT"
         } > "$LOG_FILE"
 
         # 6. Final Output
         cat "$LOG_FILE"
+
+        if [ "$failed" -ne 0 ]; then
+            echo -e "\n''${RED}[WARNING] Some reset steps failed, see report: ''${NC}$LOG_FILE"
+            exit 1
+        fi
 
         echo -e "\n''${GREEN}[SUCCESS] YubiKey has been factory reset.''${NC}"
         echo -e "''${GREEN}[SUCCESS] Audit report saved to: ''${NC}$LOG_FILE"
