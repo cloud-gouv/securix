@@ -49,7 +49,7 @@ _notify_current_user() {
               notify-send "$title" "$message" || true
       else
           # Terminal notification for non-GUI sessions
-          sudo -u "$user" echo "$title: $message" | wall
+          echo "$title: $message" | wall
       fi
   done
 }
