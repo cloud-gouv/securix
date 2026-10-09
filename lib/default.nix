@@ -43,6 +43,13 @@ let
     # started.
     # We could also use a Yubikey for the signing.
     secureBoot = "self-contained";
+    # On some machines, the UEFI driver set SecureBoot variable
+    # immutable which makes the enrollment failing. It is possible to
+    # force this enrollment on a list of PRODUCT_NAME. To get the
+    # PRODUCT_NAME of a machine, run dmidecode -s
+    # baseboard-product-name.
+    # WARNING: set this option really carfully since this could brick the hardware!
+    forceSecureBootEnrollOnProductNames = [ ];
     tpm2HostKeys = true;
     ageHostKeys = true;
     skipPreflightChecks = false;
@@ -185,10 +192,36 @@ rec {
           ''
       );
       enrollSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
-      secureBootEnrollmentScript = ''
-        box_message "Enrolling Secure Boot keys..."
-        ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
-      '';
+      secureBootEnrollmentScript =
+        let
+          productNames = concatStringsSep " " preprovisionOptions.forceSecureBootEnrollOnProductNames;
+        in
+        ''
+          box_message "Enrolling Secure Boot keys..."
+          # These UUIDs are hardcoded by the UEFI spec
+          if [[ "$(lsattr -d "/sys/firmware/efi/efivars/KEK-8be4df61-93ca-11d2-aa0d-00e098032b8c" | cut -d' ' -f1)" == *i* ]] \
+            || [[ "$(lsattr -d "/sys/firmware/efi/efivars/db-d719b2cb-3d3a-4596-a3bc-dad00e67656f" | cut -d' ' -f1)" == *i* ]]
+          then
+            PRODUCT_NAME="$(${pkgs.dmidecode}/bin/dmidecode -s baseboard-product-name)"
+            ok=1
+            for p in ${productNames}
+            do
+              if [[ "$PRODUCT_NAME" == "$p" ]]
+              then
+                ok=0
+                break
+              fi
+            done
+            if [ $ok == 0 ]
+            then
+              ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.e2fsprogs}/bin/chattr -i /sys/firmware/efi/efivars/KEK-8be4df61-93ca-11d2-aa0d-00e098032b8c"
+              ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.e2fsprogs}/bin/chattr -i /sys/firmware/efi/efivars/db-d719b2cb-3d3a-4596-a3bc-dad00e67656f"
+            else
+              log_warn("EFI variables are immutable and are not modified because the current product name '$PRODUCT_NAME' is not in the list '${productNames}'")
+            if
+          fi
+          ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
+        '';
       # This is actually an normal host SSH key generation step.
       # SSH host keys can be used as age keys.
       # We export the public key here.
