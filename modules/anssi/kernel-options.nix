@@ -11,10 +11,13 @@ let
       normalizeWhitespace = "tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//' ";
       mkCheckSingularSysctl = attr: expectedValue: ''
         # Check for sysctl '${attr}'
-        actual_value=$(sysctl -n "${attr}" | ${normalizeWhitespace}) || {
+        # Check the read itself, not the exit status of the last command of
+        # a pipeline.
+        if ! raw_value=$(sysctl -n "${attr}" 2>/dev/null); then
           echo "Check failed for ${attr}: unable to read sysctl value"
           exit 1
-        }
+        fi
+        actual_value=$(printf '%s\n' "$raw_value" | ${normalizeWhitespace})
         expected_value=$(echo "${toString expectedValue}" | ${normalizeWhitespace})
         if [[ "$actual_value" != "$expected_value" ]]; then
           echo "Check failed for ${attr}: expected $expected_value, got $actual_value"
@@ -229,6 +232,10 @@ in
         "net.ipv4.conf.default.rp_filter" = "1";
         "net.ipv4.conf.all.rp_filter" = "1";
 
+        # Do not accept source-routed packets
+        "net.ipv4.conf.all.accept_source_route" = "0";
+        "net.ipv4.conf.default.accept_source_route" = "0";
+
         # Disable sending ICMP redirects (normal for routers but unnecessary for end hosts)
         "net.ipv4.conf.default.send_redirects" = "0";
         "net.ipv4.conf.all.send_redirects" = "0";
@@ -253,12 +260,39 @@ in
       severity = "intermediary";
       category = "base";
 
-      config = _: { boot.kernel.sysctl = ipv4_sysctls; };
+      config =
+        { config, lib, ... }:
+        {
+          # NetworkManager loosens a strict rp_filter (1 -> 2) on interfaces
+          # where it handles MPTCP, which by default are those with a default
+          # route. Keep its MPTCP handling off by default so that R12 holds;
+          # a connection can still enable it with `connection.mptcp-flags`.
+          networking.networkmanager.settings = lib.mkIf config.networking.networkmanager.enable {
+            connection."connection.mptcp-flags" = lib.mkDefault "0x1";
+          };
+          boot.kernel.sysctl = ipv4_sysctls // {
+            # systemd's 50-default.conf sets `net.ipv4.conf.*.rp_filter = 2`
+            # (loose) on every interface, and the kernel uses the maximum of
+            # `all` and the interface's value: strict filtering needs every
+            # interface at 1. This file is applied after systemd's.
+            "net.ipv4.conf.*.rp_filter" = "1";
+          };
+        };
 
       checkScript =
         pkgs:
         pkgs.writeShellScript "check-R12" ''
           ${mkSysctlChecker pkgs.lib ipv4_sysctls}
+          # Effective reverse path filtering is max(all, interface): check
+          # every interface, not only `all` and `default`.
+          for f in /proc/sys/net/ipv4/conf/*/rp_filter; do
+            value=$(cat "$f")
+            if [[ "$value" != 1 ]]; then
+              echo "Check failed for $f: expected 1, got $value"
+              exit 1
+            fi
+          done
+          echo "Check passed for rp_filter on every interface"
         '';
     };
 
