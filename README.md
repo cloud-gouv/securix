@@ -5,7 +5,7 @@ SPDX-FileCopyrightText: 2026 Julien Dauphant <julien.dauphant@numerique.gouv.fr>
 SPDX-License-Identifier: MIT
 -->
 
-# SécurixOS: Base OS pour poste sécurisé
+# SécurixOS : Base OS pour poste sécurisé
 > [!NOTE]
 > Ce projet est en **alpha**, aucun support n'est proposé pour l'heure.
 
@@ -15,7 +15,7 @@ SécurixOS est une distribution NixOS développée par la DINUM pour équiper de
 
 Il constitue un modèle de PC sécurisé conçu pour permettre des accès à la production et d'autres usages critiques en garantissant un niveau de sécurité variable selon la configuration employée.
 
-Grace à NixOS, ce modèle de PC sécurisé est ré-instantiable pour des cas d'usages variables: poste multi-agent, poste multi-niveaux, poste en intranet seulement, etc. avec des équipes différentes, des souches de VPN différents.
+Grâce à NixOS, ce modèle de PC sécurisé est ré-instanciable pour des cas d'usages variables : poste multi-agent, poste multi-niveaux, poste en intranet seulement, etc. avec des équipes différentes, des souches de VPN différentes.
 
 Construit selon les recommandations de l'ANSSI : <https://cyber.gouv.fr/publications/recommandations-relatives-ladministration-securisee-des-si>.
 
@@ -31,7 +31,7 @@ Sécurix repose sur NixOS avec un noyau Linux personnalisé conformément aux r�
 - Support avancé de TPM2 et Yubikey pour la gestion des clés d'authentification.
 - Chiffrement des données à l'aide de `age` ou d'un serveur Vault.
 - Enrôlement centralisé pour Secure Boot avec gestion PK/KEK.
-- Connexion au poste de travail en FIDO2 et le mot de passe n'est qu'un mode secours.
+- Connexion au poste de travail en FIDO2 et le mot de passe n'est qu'un mode de secours.
 - Déchiffrement du poste à l'aide d'une clé FIDO2 (une clé de secours est générée à l'installation). 
 
 ## Fonctionnalités en développement (par priorité)
@@ -56,14 +56,12 @@ Consultez les tickets ouverts et le guide de contribution pour participer.
 Vous pouvez ouvrir des tickets pour proposer des fonctionnalités et discuter de l'architecture.
 Les PR générées par IA sans relecture ni test seront fermées, les contributions par le même auteur pourront être bloquées par la suite.
 
-Ce README est en français mais le reste du code, les issuers et les PR sont en anglais.
+Ce README est en français, mais le reste du code, les issues et les PR sont en anglais.
 
 
 ### Lancement des tests
 
-Les tests sont basés sur le framework de test NixOS. Ils permettent de
-lancer sécurix dans une VM puis exécuter des tests sur le comportement
-de cette VM.
+Les tests sont basés sur le framework de test NixOS. Ils permettent de lancer Sécurix dans une VM puis d'exécuter des tests sur le comportement de cette VM.
 
 `nix-build -A tests`
 
