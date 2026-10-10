@@ -25,6 +25,13 @@ SPDX-License-Identifier: MIT
 
 ## Fixed
 
+- A failed Secure Boot key enrollment is now reported: when sbctl refused to
+  enroll (for instance because the boot chain loads option ROMs), the
+  installer went on silently and the installed system booted with Secure
+  Boot disabled and the firmware still in setup mode. The new
+  `preprovisionOptions.secureBootEnrollFlags` (default `[ ]`) passes flags
+  such as `--microsoft` or `--tpm-eventlog` to `sbctl enroll-keys`
+  (https://github.com/cloud-gouv/securix/issues/287).
 - `system-infrastructure-sync` no longer stays stuck in a permanent failed
   state after hitting systemd's `StartLimit` on repeated errors (e.g. missing
   network, unready TPM2). The start rate limit is disabled and failures are
