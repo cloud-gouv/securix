@@ -1,21 +1,29 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+name: '[Sécurix] Garbage collect documentation previews'
+
 on:
   pull_request:
     types:
       - closed
 
-permissions:
-  pull-requests: write
-  contents: write
+permissions: {}
 
 concurrency:
   group: preview-pages-${{ github.ref }}
 
-name: '[Sécurix] Garbage collect documentation previews'
 jobs:
   clean-up:
+    permissions:
+      contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        # zizmor: ignore[artipacked] - the persisted credential is required to
+        # `git push` the cleaned-up gh-pages branch back to the remote.
         with:
           ref: gh-pages
 
