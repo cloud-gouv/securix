@@ -10,4 +10,5 @@
   portail = import ./portail.nix { inherit pkgs libSecurix; };
   sway-keybindings = import ./sway-keybindings.nix { inherit pkgs libSecurix; };
   tools = import ./tools.nix { inherit pkgs libSecurix; };
+  tpm-agent-socket = import ./tpm-agent-socket.nix { inherit pkgs libSecurix; };
 }

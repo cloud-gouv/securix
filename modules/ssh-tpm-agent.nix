@@ -97,7 +97,7 @@ in
         };
 
         socketConfig = {
-          ListenStream = "/var/tmp/ssh-tpm-agent.sock";
+          ListenStream = "/run/ssh-tpm-agent.sock";
           SocketMode = "0600";
           Service = "ssh-tpm-agent.service";
         };
@@ -131,7 +131,7 @@ in
       };
       services.openssh.hostKeys = [ ];
       services.openssh.extraConfig = lib.mkAfter ''
-        HostKeyAgent /var/tmp/ssh-tpm-agent.sock
+        HostKeyAgent /run/ssh-tpm-agent.sock
         HostKey /etc/ssh/ssh_tpm_host_ecdsa_key
       '';
     })
