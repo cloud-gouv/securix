@@ -213,8 +213,17 @@ rec {
         if [ -e /dev/tpm0 ]; then
           # TPM2 is available, generate TPM2-backed host SSH keys
           box_message "TPM2 device detected, generating TPM2-backed host SSH keys..."
-          ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.ssh-tpm-agent}/bin/ssh-tpm-keygen -A"
-          log_info "TPM2-backed host SSH keys available in /mnt/etc/ssh/ssh_tpm_host_ecdsa_key*"
+          # Run from the installer and write under /mnt, as `ssh-keygen -A -f`
+          # does: ssh-tpm-agent is in the installer's closure, not necessarily
+          # in the target's, so it cannot be run through nixos-enter.
+          mkdir -p /mnt/etc/ssh
+          if ${pkgs.ssh-tpm-agent}/bin/ssh-tpm-keygen -A -f /mnt \
+            && [ -e /mnt/etc/ssh/ssh_tpm_host_ecdsa_key.tpm ]; then
+            log_info "TPM2-backed host SSH keys available in /mnt/etc/ssh/ssh_tpm_host_ecdsa_key*"
+          else
+            log_error "TPM2-backed host SSH keys could not be generated."
+            false
+          fi
         else
           # No TPM2 device detected, skip key generation
           box_message "No TPM2 device detected, skipping TPM2-backed SSH key generation."
