@@ -136,16 +136,5 @@ in
         echo -e "''${GREEN}[SUCCESS] Audit report saved to: ''${NC}$LOG_FILE"
       '')
     ];
-    security.sudo.extraRules = [
-      {
-        groups = [ "operator" ];
-        commands = [
-          {
-            command = "/run/current-system/sw/bin/reset-yubikey";
-            options = [ "NOPASSWD" ];
-          }
-        ];
-      }
-    ];
   };
 }
