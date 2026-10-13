@@ -14,7 +14,7 @@ Journal sealing (Forward Secure Sealing, FSS) lets an administrator check that a
 securix.journaldFSS.enable = true;
 ```
 
-The journal is then stored persistently and sealed.
+Persistent storage and sealing are already the defaults, the option makes the installer generate the keys.
 
 ## At install time
 
@@ -22,13 +22,13 @@ When the option is enabled, `autoinstall-terminal` generates the keys in the ins
 
 ## Verify a journal
 
-On the machine, with the verification key:
+The verification key also allows computing the sealing keys, so it must never be typed on the machine itself. Copy the `.journal` files from `/var/log/journal/<machine-id>/` to a trusted machine, for example with a USB stick or `scp`, then verify them there:
 
 ```sh
-journalctl --verify --verify-key=<key>
+journalctl --verify --verify-key=<key> --directory=<copy>
 ```
 
-Each verified file is reported as `PASS` or `FAIL`.
+The `fss` file in the same directory is the sealing key and does not need to be copied. Each verified file is reported as `PASS` or `FAIL`.
 
 ## Machines already installed
 
@@ -39,10 +39,10 @@ journalctl --setup-keys
 journalctl --rotate
 ```
 
-The rotation opens a new, sealed journal file. Earlier files stay unsealed.
+The first command prints the verification key and a QR code: keep the key away from the machine, in a safe place. The rotation opens a new, sealed journal file. Earlier files stay unsealed.
 
 ## Limitations
 
-Verification can fail wrongly on archived files when entries carry a timestamp later than the last seal, see systemd issue 17833. Keep the default sealing interval of fifteen minutes.
+Verification can fail wrongly on archived files when entries carry a timestamp later than the last seal, for example when the clock went backwards and journald rotated the file, which can happen on the first boot. See systemd issue 17833. Keep the default sealing interval of fifteen minutes.
 
 If the verification key is lost, generate a new pair with `journalctl --setup-keys --force`. Files sealed with the old key cannot be verified anymore.

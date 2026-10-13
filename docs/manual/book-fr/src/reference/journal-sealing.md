@@ -14,7 +14,7 @@ Le scellement du journal (Forward Secure Sealing, FSS) permet à un administrate
 securix.journaldFSS.enable = true;
 ```
 
-Le journal est alors stocké de façon persistante et scellé.
+Le stockage persistant et le scellement sont déjà actifs par défaut, l'option demande à l'installateur de générer les clés.
 
 ## À l'installation
 
@@ -22,13 +22,13 @@ Quand l'option est active, `autoinstall-terminal` génère les clés dans le sys
 
 ## Vérifier un journal
 
-Sur la machine, avec la clé de vérification :
+La clé de vérification permet aussi de recalculer les clés de scellement : elle ne doit jamais être saisie sur la machine elle-même. Copiez les fichiers `.journal` de `/var/log/journal/<machine-id>/` vers une machine de confiance, par exemple avec une clé USB ou `scp`, puis vérifiez-les depuis cette machine :
 
 ```sh
-journalctl --verify --verify-key=<clé>
+journalctl --verify --verify-key=<clé> --directory=<copie>
 ```
 
-Chaque fichier vérifié est marqué `PASS` ou `FAIL`.
+Le fichier `fss` du même dossier est la clé de scellement, inutile de le copier. Chaque fichier vérifié est marqué `PASS` ou `FAIL`.
 
 ## Machines déjà installées
 
@@ -39,10 +39,10 @@ journalctl --setup-keys
 journalctl --rotate
 ```
 
-La rotation ouvre un nouveau fichier de journal, scellé. Les fichiers antérieurs restent non scellés.
+La première commande affiche la clé de vérification et un QR code : conservez la clé hors de la machine, en lieu sûr. La rotation ouvre un nouveau fichier de journal, scellé. Les fichiers antérieurs restent non scellés.
 
 ## Limites
 
-La vérification peut échouer à tort sur des fichiers archivés quand des entrées portent un horodatage postérieur au dernier scellement, voir le ticket systemd 17833. Conservez l'intervalle de scellement par défaut de quinze minutes.
+La vérification peut échouer à tort sur des fichiers archivés quand des entrées portent un horodatage postérieur au dernier scellement, par exemple quand l'horloge a reculé et que journald a archivé le fichier, ce qui peut arriver au premier démarrage. Voir le ticket systemd 17833. Conservez l'intervalle de scellement par défaut de quinze minutes.
 
 Si la clé de vérification est perdue, générez une nouvelle paire avec `journalctl --setup-keys --force`. Les fichiers scellés avec l'ancienne clé ne sont plus vérifiables.

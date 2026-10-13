@@ -117,12 +117,15 @@ pkgs.testers.nixosTest {
     machine.wait_for_unit("multi-user.target")
 
     with subtest("the installer generates the keys and prints the verification key"):
-        machine.succeed("expect ${installRun} > /tmp/install.out 2>&1")
+        # The test driver shell has no usable TERM, a console has TERM=linux.
+        machine.succeed("TERM=linux expect ${installRun} > /tmp/install.out 2>&1")
         out = machine.succeed("tr -d '\\r' < /tmp/install.out")
-        found = re.search(r"[0-9a-f]{6}(?:-[0-9a-f]{6}){3}/[0-9a-f]+-[0-9a-f]+", out)
+        after = out.split("secret verification key", 1)[-1]
+        found = re.search(r"[0-9a-f]{6}(?:-[0-9a-f]{6}){3}/[0-9a-f]+-[0-9a-f]+", after)
         assert found, "no verification key in the installer output"
         key = found.group(0)
-        machine.succeed("grep -q -E '█|▀|▄' /tmp/install.out")
+        # journalctl prints this header only when it prints the QR code.
+        machine.succeed("grep -q 'Scan the verification key' /tmp/install.out")
         machine.succeed("test -s /mnt/var/log/journal/$(cat /mnt/etc/machine-id)/fss")
 
     machine.succeed("sync")
@@ -140,12 +143,18 @@ pkgs.testers.nixosTest {
     with subtest("the installed system seals its journal"):
         booted.succeed("journalctl --header | grep -q 'Compatible flags:.*SEALED'")
         booted.succeed("logger -t fss-test 'hello sealed journal'")
-        booted.sleep(5)
-        booted.succeed(f"journalctl --verify --verify-key={key}")
-        booted.succeed("journalctl -t fss-test | grep -q 'hello sealed journal'")
+        booted.wait_until_succeeds("journalctl -t fss-test | grep -q 'hello sealed journal'", 15)
+
+    # Verified from a copy, as documented. Only the active file: a clock jump at
+    # first boot may rotate the journal, see systemd/systemd#17833.
+    booted.succeed("journalctl --sync")
+    booted.succeed("mkdir /tmp/copy && cp /var/log/journal/*/system.journal /tmp/copy/")
+
+    with subtest("the copied journal verifies with the key printed at install"):
+        booted.succeed(f"journalctl --verify --verify-key={key} --directory=/tmp/copy")
 
     with subtest("a wrong key is rejected"):
         wrong = "000000-000000-000000-000000/" + key.split("/")[1]
-        booted.fail(f"journalctl --verify --verify-key={wrong}")
+        booted.fail(f"journalctl --verify --verify-key={wrong} --directory=/tmp/copy")
   '';
 }
