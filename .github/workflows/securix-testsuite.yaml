@@ -1,3 +1,17 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+name: '[Sécurix] Test suite'
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+
+permissions: {}
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -8,6 +22,8 @@ jobs:
       HAS_CACHE_CREDENTIALS: ${{ secrets.AWS_ACCESS_KEY_ID != '' && secrets.AWS_SECRET_KEY != '' && secrets.NIX_SIGNING_PRIVATE_KEY != '' }}
     steps:
     - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+      with:
+        persist-credentials: false
     - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
     - uses: zombiezen/setup-nix-cache-action@cacc7abf0a6636b0ef45ec2ae055a9734cdd4122 # main
       if: env.HAS_CACHE_CREDENTIALS == 'true'
@@ -52,9 +68,3 @@ jobs:
         echo "Patched post-build-hook successfully."
     - name: Build tests
       run: nix-build -A tests
-name: '[Sécurix] Test suite'
-on:
-  pull_request:
-  push:
-    branches:
-    - main

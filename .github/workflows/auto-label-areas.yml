@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+name: "Auto-label: areas"
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions: {}
+
+jobs:
+  label:
+    # pull_request_target is safe here: labeler is pinned, configuration is
+    # read from the base branch, and the action only uses the GitHub API.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@bf12e9b00b37c5c0ca2b87b79b2daf7891dbda13 # v7
+        with:
+          configuration-path: .github/labeler.yml
+          sync-labels: false
+          dot: false
