@@ -12,7 +12,7 @@ let
   cfg = config.securix.programs.reset-yubikey;
 
   script = pkgs.writeShellApplication {
-    name = "reset-yubikey";
+    name = "securix-reset-yubikey";
 
     runtimeInputs = [ pkgs.yubikey-manager ];
 
@@ -128,7 +128,7 @@ let
 in
 {
   options.securix.programs.reset-yubikey = {
-    enable = lib.mkEnableOption "Reset yubikey service";
+    enable = lib.mkEnableOption "Reset yubikey script";
   };
 
   config = lib.mkIf cfg.enable { environment.systemPackages = [ script ]; };
