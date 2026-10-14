@@ -13,9 +13,10 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from PySide6.QtCore import QTimer, QSize
 from PySide6.QtGui import QIcon, QPixmap, QPainter, QColor, QAction
-from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QMessageBox, QWidget
+from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QWidget
 import signal
 import json
+import time
 
 class ProxyOperationalState(Enum):
     # Whether we have healthy backends we can use for requests and the service is running.
@@ -284,19 +285,49 @@ class PortailTrayIcon:
 
     def quit_app(self):
         self.tray_icon.hide()
-        self.app.quit()
+        QApplication.instance().quit()
+
+
+def _wait_for_tray(app, timeout_ms=30000, interval_ms=500):
+    """Wait for the system tray to become available.
+
+    On Plasma Wayland, autostart applications may launch before the panel
+    (and thus the system tray) is ready. QSystemTrayIcon.isSystemTrayAvailable()
+    returns False during this window, but the tray typically appears within
+    a few seconds. This polls non-blockingly (letting Qt process Wayland/D-Bus
+    events) until the tray is ready or the timeout elapses.
+
+    See: QTBUG-61898 (on X11), https://github.com/keepassxreboot/keepassxc/issues/13076 for example.
+    """
+    if QSystemTrayIcon.isSystemTrayAvailable():
+        return True
+
+    print("System tray not available yet, waiting up to {}s...".format(
+        timeout_ms // 1000))
+
+    elapsed = 0
+    while elapsed < timeout_ms:
+        app.processEvents()
+        time.sleep(interval_ms / 1000.0)
+        elapsed += interval_ms
+        if QSystemTrayIcon.isSystemTrayAvailable():
+            print("System tray is now available (waited {}s).".format(
+                elapsed // 1000))
+            return True
+
+    return False
 
 
 def main():
     try:
         app = QApplication(sys.argv)
-        if not QSystemTrayIcon.isSystemTrayAvailable():
-            print("Fatal error: no system tray available.")
-            QMessageBox.critical(None, "Fatal error",
-                                 "No system tray available in this environment")
+        app.setQuitOnLastWindowClosed(False)
+
+        if not _wait_for_tray(app):
+            print("Fatal error: no system tray available after waiting.",
+                  file=sys.stderr)
             sys.exit(1)
 
-        app.setQuitOnLastWindowClosed(False)
         tray_app = PortailTrayIcon()
         tray_app.show()
         sys.exit(app.exec())
