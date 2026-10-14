@@ -257,24 +257,22 @@ in
       severity = "intermediary";
       category = "base";
 
-      config =
-        { config, lib, ... }:
-        {
-          # NetworkManager loosens a strict rp_filter (1 -> 2) on interfaces
-          # where it handles MPTCP, which by default are those with a default
-          # route. Keep its MPTCP handling off by default so that R12 holds;
-          # a connection can still enable it with `connection.mptcp-flags`.
-          networking.networkmanager.settings = lib.mkIf config.networking.networkmanager.enable {
-            connection."connection.mptcp-flags" = lib.mkDefault "0x1";
-          };
-          boot.kernel.sysctl = ipv4_sysctls // {
-            # systemd's 50-default.conf sets `net.ipv4.conf.*.rp_filter = 2`
-            # (loose) on every interface, and the kernel uses the maximum of
-            # `all` and the interface's value: strict filtering needs every
-            # interface at 1. This file is applied after systemd's.
-            "net.ipv4.conf.*.rp_filter" = "1";
-          };
+      config = { config, lib, ... }: {
+        # NetworkManager loosens a strict rp_filter (1 -> 2) on interfaces
+        # where it handles MPTCP, which by default are those with a default
+        # route. Keep its MPTCP handling off by default so that R12 holds;
+        # a connection can still enable it with `connection.mptcp-flags`.
+        networking.networkmanager.settings = lib.mkIf config.networking.networkmanager.enable {
+          connection."connection.mptcp-flags" = lib.mkDefault "0x1";
         };
+        boot.kernel.sysctl = ipv4_sysctls // {
+          # systemd's 50-default.conf sets `net.ipv4.conf.*.rp_filter = 2`
+          # (loose) on every interface, and the kernel uses the maximum of
+          # `all` and the interface's value: strict filtering needs every
+          # interface at 1. This file is applied after systemd's.
+          "net.ipv4.conf.*.rp_filter" = "1";
+        };
+      };
 
       checkScript =
         pkgs:
