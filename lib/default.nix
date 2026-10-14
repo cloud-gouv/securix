@@ -465,6 +465,19 @@ rec {
             boot.initrd.availableKernelModules = [ "cdc_ncm" ];
             system.nixos.tags = [ "netinstaller" ];
           }
+          (
+            { config, ... }:
+            {
+              system.build.netbootIpxeScript = pkgs.writeTextDir "netboot.ipxe" ''
+                #!ipxe
+                kernel ${
+                  config.boot.kernelPackages.kernel.target or pkgs.stdenv.hostPlatform.linux-kernel.target
+                } init=${config.system.build.toplevel}/init initrd=initrd ${toString config.boot.kernelParams} ''${cmdline}
+                initrd initrd
+                boot
+              '';
+            }
+          )
         ];
       }
     );
