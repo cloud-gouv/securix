@@ -43,11 +43,6 @@ let
     # started.
     # We could also use a Yubikey for the signing.
     secureBoot = "self-contained";
-    # Extra flags for `sbctl enroll-keys`. When the boot chain loads option
-    # ROMs (discrete GPUs, some NVMe or network cards, virtual machines),
-    # sbctl refuses to enroll without `[ "--microsoft" ]` or
-    # `[ "--tpm-eventlog" ]`.
-    secureBootEnrollFlags = [ ];
     tpm2HostKeys = true;
     ageHostKeys = true;
     skipPreflightChecks = false;
@@ -192,11 +187,8 @@ rec {
       enrollSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
       secureBootEnrollmentScript = ''
         box_message "Enrolling Secure Boot keys..."
-        if ! ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys ${
-          lib.escapeShellArgs (preprovisionOptions.secureBootEnrollFlags or [ ])
-        }"; then
+        if ! ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"; then
           log_error "Secure Boot keys were not enrolled: the installed system would boot with Secure Boot disabled."
-          log_error "If sbctl reported option ROMs, set preprovisionOptions.secureBootEnrollFlags (for example [ \"--microsoft\" ]), or run sbctl enroll-keys on the installed system."
           false
         fi
       '';
