@@ -187,7 +187,10 @@ rec {
       enrollSecureBootKeys = preprovisionOptions.secureBoot or "disabled" == "self-contained";
       secureBootEnrollmentScript = ''
         box_message "Enrolling Secure Boot keys..."
-        ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
+        if ! ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"; then
+          log_error "Secure Boot keys were not enrolled: the installed system would boot with Secure Boot disabled."
+          false
+        fi
       '';
       # This is actually an normal host SSH key generation step.
       # SSH host keys can be used as age keys.
