@@ -175,14 +175,19 @@ in
           # Check for rule ${ruleId}
           if [ -n "${rule.checkScript}" ]; then
             result=$(bash -c "${rule.checkScript}")
+            statuses["${ruleId}"]=$?
             results["${ruleId}"]=$result
           else
+            statuses["${ruleId}"]=2
             results["${ruleId}"]="Check script not defined: cannot be checked."
           fi
         '';
       in
       pkgs.writeShellScriptBin "anssi-nixos-compliance-check" ''
         declare -A results
+        # Exit status of each check: 0 passed, 2 not implemented or not
+        # checkable, anything else failed.
+        declare -A statuses
 
         ${lib.concatStringsSep "\n" (
           lib.mapAttrsToList mkCheckSingularRule (
@@ -194,13 +199,12 @@ in
         echo "ANSSI Compliance Check Results:"
         for rule in "''${!results[@]}"; do
           result="''${results[$rule]}"
-          if [[ "$result" =~ .*TODO.* ]]; then
-            printf "\033[33m%-40s : %s\033[0m\n" "$rule" "$result"
-          elif [[ "$result" =~ (fail|WARNING|DIVERGENCE|UNSET|error|not\ completed|incomplete) ]]; then
-            printf "\033[31m%-40s : %s\033[0m\n" "$rule" "$result"
-          else
-            printf "\033[32m%-40s : %s\033[0m\n" "$rule" "$result"
-          fi
+          case "''${statuses[$rule]}" in
+            0) colour=32 ;;
+            2) colour=33 ;;
+            *) colour=31 ;;
+          esac
+          printf "\033[%sm%-40s : %s\033[0m\n" "$colour" "$rule" "$result"
         done
       '';
 

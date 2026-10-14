@@ -25,6 +25,12 @@ SPDX-License-Identifier: MIT
 
 ## Fixed
 
+- `anssi-nixos-compliance-check` colours each rule from its check's exit
+  status (0 passed, 2 not implemented, other failed) instead of matching
+  words in its output: R12 was always red and a failing R7 green. R1, R2,
+  R4, R5 and R6 report themselves as not implemented, and an unreadable
+  sysctl is reported as a failure
+  (https://github.com/cloud-gouv/securix/issues/293).
 - `system-infrastructure-sync` no longer stays stuck in a permanent failed
   state after hitting systemd's `StartLimit` on repeated errors (e.g. missing
   network, unready TPM2). The start rate limit is disabled and failures are
