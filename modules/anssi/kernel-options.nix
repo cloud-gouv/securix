@@ -11,13 +11,10 @@ let
       normalizeWhitespace = "tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//' ";
       mkCheckSingularSysctl = attr: expectedValue: ''
         # Check for sysctl '${attr}'
-        # Check the read itself, not the exit status of the last command of
-        # a pipeline.
-        if ! raw_value=$(sysctl -n "${attr}" 2>/dev/null); then
+        actual_value=$(sysctl -n "${attr}" | ${normalizeWhitespace}) || {
           echo "Check failed for ${attr}: unable to read sysctl value"
           exit 1
-        fi
-        actual_value=$(printf '%s\n' "$raw_value" | ${normalizeWhitespace})
+        }
         expected_value=$(echo "${toString expectedValue}" | ${normalizeWhitespace})
         if [[ "$actual_value" != "$expected_value" ]]; then
           echo "Check failed for ${attr}: expected $expected_value, got $actual_value"
