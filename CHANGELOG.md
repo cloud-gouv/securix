@@ -6,6 +6,12 @@ SPDX-License-Identifier: MIT
 
 # Unreleased
 
+## Added
+
+- `anssi-nixos-compliance-check --json` prints the result of each rule
+  (`passed`, `not-implemented` or `failed`, with its exit code and output)
+  as a machine-readable document.
+
 ## Breaking
 
 - `availableHttpProxies` definition in `vpnProfiles` is deprecated, if you were using this option, you can replace it by something along these lines:

@@ -169,44 +169,11 @@ in
   config = lib.mkIf cfg.enable {
     system.build.complianceReport = complianceReport;
     system.build.complianceReportDocument = pkgs.writers.writeJSON "anssi-compliance.json" complianceReport;
-    system.build.complianceCheckScript =
-      let
-        mkCheckSingularRule = ruleId: rule: ''
-          # Check for rule ${ruleId}
-          if [ -n "${rule.checkScript}" ]; then
-            result=$(bash -c "${rule.checkScript}")
-            statuses["${ruleId}"]=$?
-            results["${ruleId}"]=$result
-          else
-            statuses["${ruleId}"]=2
-            results["${ruleId}"]="Check script not defined: cannot be checked."
-          fi
-        '';
-      in
-      pkgs.writeShellScriptBin "anssi-nixos-compliance-check" ''
-        declare -A results
-        # Exit status of each check: 0 passed, 2 not implemented or not
-        # checkable, anything else failed.
-        declare -A statuses
-
-        ${lib.concatStringsSep "\n" (
-          lib.mapAttrsToList mkCheckSingularRule (
-            lib.filterAttrs (_: rule: rule.enable) config.security.anssi.rules
-          )
-        )}
-
-        # Output the results in a matrix format
-        echo "ANSSI Compliance Check Results:"
-        for rule in "''${!results[@]}"; do
-          result="''${results[$rule]}"
-          case "''${statuses[$rule]}" in
-            0) colour=32 ;;
-            2) colour=33 ;;
-            *) colour=31 ;;
-          esac
-          printf "\033[%sm%-40s : %s\033[0m\n" "$colour" "$rule" "$result"
-        done
-      '';
+    system.build.complianceCheckScript = pkgs.callPackage ./check-script.nix { } (
+      lib.mapAttrs (_: rule: rule.checkScript) (
+        lib.filterAttrs (_: rule: rule.enable) config.security.anssi.rules
+      )
+    );
 
     environment.systemPackages = [ config.system.build.complianceCheckScript ];
   };
