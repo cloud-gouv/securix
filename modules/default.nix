@@ -8,6 +8,7 @@
     ./anssi
 
     ./journal.nix
+    ./journald-fss.nix
     ./console.nix
     ./distribution.nix
     ./bootloader.nix
