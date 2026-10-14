@@ -25,6 +25,11 @@ SPDX-License-Identifier: MIT
 
 ## Fixed
 
+- The installer now generates the TPM2-backed host SSH keys: it ran
+  `ssh-tpm-keygen` through `nixos-enter`, from a store path that is not in
+  the target system, and reported success although no key was created.
+  It now runs from the installer with `-A -f /mnt` and checks the keys
+  exist (https://github.com/cloud-gouv/securix/issues/288).
 - `system-infrastructure-sync` no longer stays stuck in a permanent failed
   state after hitting systemd's `StartLimit` on repeated errors (e.g. missing
   network, unready TPM2). The start rate limit is disabled and failures are
