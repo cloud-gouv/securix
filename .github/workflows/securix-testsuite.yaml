@@ -16,6 +16,7 @@ jobs:
         secret_keys: ${{ secrets.NIX_SIGNING_PRIVATE_KEY }}
         aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
+        use_nixcached: true
     # Necessary until https://gerrit.lix.systems/c/lix/+/4995 lands in a released version.
     - name: Patch post-build-hook with retry logic
       run: |
