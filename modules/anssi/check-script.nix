@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MIT
 
 # Builds `anssi-nixos-compliance-check` from { RXX = <check script or null>; }.
-# A check exits 0 when it passes, 2 when it is not implemented or cannot be
-# checked, and with any other status when it fails.
+# A check exits 0 when it passes and with any other status when it fails.
+# Rules without a check script are reported as not implemented.
 {
   lib,
   jq,
@@ -17,6 +17,7 @@ let
     if checkScript == null then
       ''
         statuses[${ruleId}]=2
+        status_names[${ruleId}]=not-implemented
         results[${ruleId}]="Check script not defined: cannot be checked."
       ''
     else
@@ -27,20 +28,18 @@ in
 writeShellScriptBin "anssi-nixos-compliance-check" ''
   declare -A results
   declare -A statuses
+  declare -A status_names
 
   run_check() {
     local status=0 result
     result=$(bash "$2") || status=$?
     results["$1"]=$result
     statuses["$1"]=$status
-  }
-
-  status_name() {
-    case "$1" in
-      0) echo passed ;;
-      2) echo not-implemented ;;
-      *) echo failed ;;
-    esac
+    if (( status == 0 )); then
+      status_names["$1"]=passed
+    else
+      status_names["$1"]=failed
+    fi
   }
 
   ${lib.concatStringsSep "\n" (lib.mapAttrsToList mkCheckSingularRule checkScripts)}
@@ -49,7 +48,7 @@ writeShellScriptBin "anssi-nixos-compliance-check" ''
     for rule in "''${!results[@]}"; do
       ${jq}/bin/jq -n \
         --arg rule "$rule" \
-        --arg status "$(status_name "''${statuses[$rule]}")" \
+        --arg status "''${status_names[$rule]}" \
         --argjson exitCode "''${statuses[$rule]}" \
         --arg output "''${results[$rule]}" \
         '{ ($rule): { $status, $exitCode, $output } }'
@@ -60,7 +59,7 @@ writeShellScriptBin "anssi-nixos-compliance-check" ''
   # Output the results in a matrix format
   echo "ANSSI Compliance Check Results:"
   for rule in "''${!results[@]}"; do
-    case "$(status_name "''${statuses[$rule]}")" in
+    case "''${status_names[$rule]}" in
       passed) colour=32 ;;
       not-implemented) colour=33 ;;
       *) colour=31 ;;

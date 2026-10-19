@@ -12,8 +12,8 @@ It can be copy-pasted outside of Sécurix for your own needs.
 ## Compliance check
 
 `anssi-nixos-compliance-check` runs the check of every enabled rule. Each
-check exits 0 when it passes, 2 when it is not implemented or cannot be
-checked, and with any other status when it fails; the rules are shown in
+check exits 0 when it passes and with any other status when it fails. Rules
+without a check script are shown as not implemented. The rules are shown in
 green, yellow and red accordingly.
 
 With `--json`, it prints the results as a machine-readable document:
