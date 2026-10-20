@@ -26,7 +26,6 @@ let
       imports = [
         "${pkgs.disko.src}/module.nix"
         ../modules/filesystems
-        ../modules/journald-fss.nix
         (modulesPath + "/testing/test-instrumentation.nix")
         (modulesPath + "/profiles/qemu-guest.nix")
       ];
@@ -36,7 +35,6 @@ let
       config = {
         securix.self.mainDisk = "/dev/vdb";
         securix.filesystems.layout = "securix_v1";
-        securix.journaldFSS.enable = true;
 
         disko.devices.disk."/dev/vdb".content.partitions.luks.content.passwordFile = "${diskKey}";
         boot.initrd.secrets."/etc/secrets/disk.key" = diskKey;
@@ -60,6 +58,7 @@ let
       skipPreflightChecks = true;
       tpm2HostKeys = false;
       ageHostKeys = false;
+      journaldFSS = true;
     };
   };
 

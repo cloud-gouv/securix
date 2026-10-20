@@ -10,11 +10,19 @@ Le scellement du journal (Forward Secure Sealing, FSS) permet à un administrate
 
 ## Activer
 
+Les clés sont générées par l'installateur, l'interrupteur est donc une option de l'installateur, passée à `buildUSBInstallerISO` ou `buildNetbootInstaller` :
+
 ```nix
-securix.journaldFSS.enable = true;
+preprovisionOptions = {
+  secureBoot = "self-contained";
+  tpm2HostKeys = true;
+  ageHostKeys = true;
+  skipPreflightChecks = false;
+  journaldFSS = true;
+};
 ```
 
-Le stockage persistant et le scellement sont déjà actifs par défaut, l'option demande à l'installateur de générer les clés.
+Les autres options gardent ici leurs valeurs par défaut. Le stockage persistant et le scellement sont déjà les valeurs par défaut de journald, rien ne change dans le système installé lui-même.
 
 ## À l'installation
 
@@ -28,7 +36,7 @@ La clé de vérification permet aussi de recalculer les clés de scellement : el
 journalctl --verify --verify-key=<clé> --directory=<copie>
 ```
 
-Le fichier `fss` du même dossier est la clé de scellement, inutile de le copier. Chaque fichier vérifié est marqué `PASS` ou `FAIL`.
+Le fichier `fss` du même dossier est la clé de scellement, inutile de le copier. Chaque fichier vérifié est marqué `PASS` ou `FAIL`. Le test `tests/journald-fss.nix` déroule toute la séquence, de l'installation à la vérification d'une copie.
 
 ## Machines déjà installées
 
