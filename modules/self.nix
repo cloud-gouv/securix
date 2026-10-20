@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -95,10 +96,12 @@ in
         '';
       };
 
-      defaultLoginShell = mkOption {
-        type = types.package;
-        default = pkgs.zsh;
-        description = "Shell par défaut de connexion pour la session utilisateur.";
+      shell = {
+        defaultLogin = mkOption {
+          type = types.package;
+          default = pkgs.zsh;
+          description = "Shell par défaut de connexion pour la session utilisateur.";
+        };
       };
 
       bit = mkOption {
@@ -216,6 +219,10 @@ in
       [ "securix" "self" "defaultLoginShell" ]
       [ "securix" "self" "user" "defaultLoginShell" ]
     )
+    (mkRenamedOptionModule
+      [ "securix" "self" "user" "defaultLoginShell" ]
+      [ "securix" "self" "user" "shell" "defaultLogin" ]
+    )
     (mkRenamedOptionModule [ "securix" "self" "bit" ] [ "securix" "self" "user" "bit" ])
     (mkRenamedOptionModule [ "securix" "self" "allowedVPNs" ] [ "securix" "self" "user" "allowedVPNs" ])
     (mkRenamedOptionModule [ "securix" "self" "teams" ] [ "securix" "self" "user" "teams" ])
@@ -261,7 +268,7 @@ in
       networking.hostName = mkDefault "securix-${cfg.edition}-${toString machineIdentifier}";
     }
     (mkIf isUserConfig {
-      users.users.${cfg.user.username}.shell = cfg.user.defaultLoginShell;
+      users.users.${cfg.user.username}.shell = cfg.user.shell.defaultLogin;
       securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
     })
   ];
