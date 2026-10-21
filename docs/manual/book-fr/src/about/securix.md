@@ -1,6 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa@numerique.gouv.fr>
-SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
+SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
