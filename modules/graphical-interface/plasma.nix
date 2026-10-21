@@ -32,7 +32,16 @@ in
   };
   config = mkIf (cfg.variant == "kde") {
     services.xserver.enable = true;
-    services.displayManager.sddm.enable = true;
+
+    services.displayManager.sddm = {
+      enable = true;
+      settings = mkIf config.securix.admins.enable {
+        Users.HideUsers = lib.concatMapAttrsStringSep "," (
+          _: admin: admin.name
+        ) config.securix.admins.accounts;
+      };
+    };
+
     services.desktopManager.plasma6.enable = true;
 
     environment.systemPackages = cfg.kde.lookAndFeelPackages;

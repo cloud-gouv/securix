@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
-# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -348,7 +348,7 @@ rec {
 
                         ${pkgs.systemd}/bin/udevadm settle
 
-                        ${lib.optionalString (preprovisionOptions.skipPreflightChecks or false) ''
+                        ${lib.optionalString (!(preprovisionOptions.skipPreflightChecks or false)) ''
                           box_message "Preflight checks..."
 
                           log_info "Checking for FIDO2 security keys..."
@@ -490,6 +490,19 @@ rec {
             boot.initrd.availableKernelModules = [ "cdc_ncm" ];
             system.nixos.tags = [ "netinstaller" ];
           }
+          (
+            { config, ... }:
+            {
+              system.build.netbootIpxeScript = pkgs.writeTextDir "netboot.ipxe" ''
+                #!ipxe
+                kernel ${
+                  config.boot.kernelPackages.kernel.target or pkgs.stdenv.hostPlatform.linux-kernel.target
+                } init=${config.system.build.toplevel}/init initrd=initrd ${toString config.boot.kernelParams} ''${cmdline}
+                initrd initrd
+                boot
+              '';
+            }
+          )
         ];
       }
     );

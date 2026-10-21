@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
+SPDX-FileCopyrightText: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->

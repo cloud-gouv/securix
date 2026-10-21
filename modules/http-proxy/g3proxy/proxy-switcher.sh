@@ -49,7 +49,7 @@ _notify_current_user() {
               notify-send "$title" "$message" || true
       else
           # Terminal notification for non-GUI sessions
-          sudo -u "$user" echo "$title: $message" | wall
+          echo "$title: $message" | wall
       fi
   done
 }
@@ -63,7 +63,7 @@ publish_proxy() {
   fi
 
   g3proxy-ctl -G "$DAEMON_GROUP" -p "$PID" escaper dynamic publish "{\"addr\": \"$selected_proxy_ipv4\", \"type\": \"http\"}"
-  
+
   if [ "$selected_proxy_ipv4" = "$INTERNAL_FORWARD_PROXY" ]; then
     _notify_current_user "[Proxy-Switcher] Connexion" "Pas de proxy distant utilisé (forward proxy local actif)."
   else

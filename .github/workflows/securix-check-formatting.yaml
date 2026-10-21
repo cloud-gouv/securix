@@ -1,3 +1,4 @@
+permissions: {}
 jobs:
   reuse_lint:
     runs-on: ubuntu-latest

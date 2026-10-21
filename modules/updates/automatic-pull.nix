@@ -48,7 +48,12 @@ in
   config = mkIf cfg.enable {
     systemd.services.system-infrastructure-sync = {
       description = "Synchronization of the system infrastructure repository";
-      wantedBy = [ "multi-user.target" ];
+      # The upgrade must always retry, even after many consecutive failures
+      # (e.g. no network, TPM2 not ready). Disabling the start rate limit
+      # prevents systemd from leaving the unit in a permanent failed state
+      # once StartLimitBurst is reached. The exponential backoff below keeps
+      # the retry rate bounded instead.
+      startLimitIntervalSec = 0;
       wants = [ "network-online.target" ];
       after = [ "network-online.target" ];
       path = [
@@ -60,112 +65,105 @@ in
         pkgs.libnotify
         pkgs.sudo
         pkgs.nixos-rebuild
+        config.nix.package
       ];
       script = ''
         _notify_current_user() {
-            local title="$1"
-            local message="$2"
+          local title="$1"
+          local message="$2"
 
-            # Get all active sessions with a valid user
-            mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
+          # Get all active sessions with a valid user
+          mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
 
-            # Check if there are active sessions
-            if [[ ''${#sessions[@]} -eq 0 ]]; then
-                echo "No active sessions found." >&2
-                return 1
-            fi
-
-            for session in "''${sessions[@]}"; do
-                # Extract session details: ID, user, and display
-                local session_id user display
-                session_id=$(echo "$session" | awk '{print $1}')
-                uid=$(echo "$session" | awk '{print $2}')
-                user=$(echo "$session" | awk '{print $3}')
-
-                # Notify each user/session
-                if [[ -n "$user" ]]; then
-                    # Graphical notification for GUI sessions
-                    sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
-                        notify-send "$title" "$message" || true
-                else
-                    # Terminal notification for non-GUI sessions
-                    echo "$title: $message" | wall
-                fi
-            done
-          }
-
-          nm-online -q --timeout=30 || { echo "No Internet, skipping synchronization..."; exit 100; }
-          if ssh-add -L &>/dev/null; then
-              echo "SSH identities are loaded:"
-              ssh-add -L
-          else
-              echo "No system SSH identities loaded, is the TPM2 broken or the onboarding was insufficient?"
-              exit 101
+          # Check if there are active sessions
+          if [[ ''${#sessions[@]} -eq 0 ]]; then
+              echo "No active sessions found." >&2
+              return 1
           fi
-          if [ -d "$REPO_DIR/.git" ]; then
-            echo "Repository exists, pulling latest changes..."
-            cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
 
-            git remote set-url origin "${cfg.repoUrl}"
-            git fetch origin || exit 1
-            git branch --set-upstream-to="origin/${cfg.branch}" "${cfg.branch}"
+          for session in "''${sessions[@]}"; do
+              # Extract session details: ID, user, and display
+              local session_id user display
+              session_id=$(echo "$session" | awk '{print $1}')
+              uid=$(echo "$session" | awk '{print $2}')
+              user=$(echo "$session" | awk '{print $3}')
 
-            UPSTREAM='${cfg.branch}@{u}'
-            LOCAL=$(git rev-parse @)
-            REMOTE=$(git rev-parse "$UPSTREAM")
-            BASE=$(git merge-base @ "$UPSTREAM")
+              # Notify each user/session
+              if [[ -n "$user" ]]; then
+                  # Graphical notification for GUI sessions
+                  sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
+                      notify-send "$title" "$message" || true
+              else
+                  # Terminal notification for non-GUI sessions
+                  echo "$title: $message" | wall
+              fi
+          done
+        }
 
-            if [ $LOCAL = $REMOTE ]; then
-                echo "Up-to-date. Skipping."
-                exit 0
-            elif [ $LOCAL = $BASE ]; then
-                _notify_current_user "[Sécurix] Mises à jour" "Une mise à jour est disponible du système et sera téléchargé."
-            elif [ $REMOTE = $BASE ]; then
-                _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code à cause de changements locaux."
-                exit 102
-            else
-                _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code et ne peut etre synchronisé automatiquement."
-                exit 103
-            fi
+        nm-online -q --timeout=30 || { echo "No Internet, skipping synchronization..."; exit 100; }
+        if ssh-add -L &>/dev/null; then
+            echo "SSH identities are loaded:"
+            ssh-add -L
+        else
+            echo "No system SSH identities loaded, is the TPM2 broken or the onboarding was insufficient?"
+            exit 101
+        fi
+        if [ -d "$REPO_DIR/.git" ]; then
+          echo "Repository exists, pulling latest changes..."
+          cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
 
-            git pull || exit 1
+          git remote set-url origin "${cfg.repoUrl}"
+          git fetch origin || exit 1
+          git branch --set-upstream-to="origin/${cfg.branch}" "${cfg.branch}"
 
-            _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
-            
-            # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
-            # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
-            # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
-            
-            nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system --option narinfo-cache-positive-ttl 0
-            _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
+          UPSTREAM='${cfg.branch}@{u}'
+          LOCAL=$(git rev-parse @)
+          REMOTE=$(git rev-parse "$UPSTREAM")
+          BASE=$(git merge-base @ "$UPSTREAM")
+
+          if [ $LOCAL = $REMOTE ]; then
+              echo "Up-to-date. Skipping."
+              exit 0
+          elif [ $LOCAL = $BASE ]; then
+              _notify_current_user "[Sécurix] Mises à jour" "Une mise à jour est disponible du système et sera téléchargé."
+          elif [ $REMOTE = $BASE ]; then
+              _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code à cause de changements locaux."
+              exit 102
           else
-            echo "Repository does not exist, cloning..."
-            mkdir -p "$REPO_DIR" || exit 1
-
-            _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
-            git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
-
-            cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
-
-            # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
-            # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
-            # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
-
-            nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system --option narinfo-cache-positive-ttl 0
-            nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.maxGenerationsToKeep}
-            nix-store --gc --max-freed 10G
-
-            _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
+              _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code et ne peut etre synchronisé automatiquement."
+              exit 103
           fi
+
+          git pull || exit 1
+
+          _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
+        else
+          echo "Repository does not exist, cloning..."
+          mkdir -p "$REPO_DIR" || exit 1
+
+          _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
+          git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
+
+          cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
+        fi
+
+        # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
+        # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
+        # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
+
+        nixos-rebuild boot --attr terminals."${config.securix.self.machine.identifier}".system --option narinfo-cache-positive-ttl 0
+        nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.maxGenerationsToKeep}
+        nix-store --gc --max-freed 10G
+
+        _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
       '';
       serviceConfig = {
         Restart = "on-failure";
-        RestartPreventExitStatus = [
-          100
-          101
-          102
-          103
-        ];
+        # Exponential backoff: RestartSec * 2^n, capped at restartMaxDelay.
+        RestartSec = "1min";
+        RestartSteps = 8;
+        RestartMaxDelaySec = "4h";
+        RuntimeMaxSec = "2h";
         Environment = [
           "SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock"
           "REPO_DIR=${config.securix.self.machine.infraRepositoryPath}"
@@ -179,10 +177,12 @@ in
       description = "Timer for synchronization of the system infrastructure repository";
       timerConfig = {
         OnBootSec = "10m"; # Delay before the first execution (10 minutes after boot)
-        OnUnitActiveSec = "1h"; # Set the interval to 1 hour (adjust as needed)
-        Persistent = true;
+        # Base the hourly check on inactivity rather than activity: after a
+        # long backoff sequence the OnUnitActiveSec deadline may already have
+        # elapsed, which would immediately re-trigger the unit on success.
+        OnUnitInactiveSec = "1h";
       };
-      wantedBy = [ "timer.target" ];
+      wantedBy = [ "timers.target" ];
     };
   };
 }

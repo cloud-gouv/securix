@@ -22,3 +22,11 @@ SPDX-License-Identifier: MIT
   The advantage of this method is that you can refer to the context of the
   Securix system and do not suffer from
   https://github.com/cloud-gouv/securix/issues/195 limitations.
+
+## Fixed
+
+- `system-infrastructure-sync` no longer stays stuck in a permanent failed
+  state after hitting systemd's `StartLimit` on repeated errors (e.g. missing
+  network, unready TPM2). The start rate limit is disabled and failures are
+  retried with an exponential backoff capped at 4 hours, so an automatic
+  upgrade always eventually runs.
