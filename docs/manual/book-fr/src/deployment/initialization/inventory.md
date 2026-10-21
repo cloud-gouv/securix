@@ -44,8 +44,18 @@ Pour ajouter une nouvelle personne, il suffit d'ajouter un nouveau fichier `.nix
     u2f_keys = [
       "..."
     ];
+
     shell = {
       defaultLogin = pkgs.zsh; # Optionnellement, shell pour l'utilisateur
+
+      initInteractive = ''
+        alias ":e"="nvim"
+        alias ":q"="exit"
+      '';
+
+      environment = {
+        EDITOR = "nvim";
+      };
     };
   };
 }
