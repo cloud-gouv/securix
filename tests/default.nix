@@ -1,5 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Antoine Eiche <aei.ext@hackcyom.com>
-# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
