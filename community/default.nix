@@ -8,5 +8,9 @@
     ./grist-registration
 
     ./inventory-generator
+
+    ./reset-yubikey
+
+    ./telemetry-reporter
   ];
 }

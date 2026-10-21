@@ -909,6 +909,11 @@ function loadOptions() {
   securixOptions = data.options || FALLBACK_OPTIONS;
 
   for (const opt of securixOptions) {
+    
+    if (opt.type && opt.type.values) {
+      opt.type.values = opt.type.values.map(v => v.replace(/["\\]/g, ''));
+    }
+
     if (opt.isEnable === undefined) {
       opt.isEnable = opt.path.endsWith('.enable');
     }
