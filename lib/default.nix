@@ -46,6 +46,8 @@ let
     tpm2HostKeys = true;
     ageHostKeys = true;
     skipPreflightChecks = false;
+    # Generate the journal sealing keys, see docs/manual/*/src/reference/journal-sealing.md.
+    journaldFSS = false;
   };
 in
 rec {
@@ -220,6 +222,14 @@ rec {
           box_message "No TPM2 device detected, skipping TPM2-backed SSH key generation."
         fi
       '';
+      # Keys for the sealing of the journal. journalctl needs the machine id and
+      # the journal directory to exist.
+      journaldFSSProvisionScript = ''
+        box_message "Generating the journal sealing keys..."
+        ${pkgs.nixos-enter}/bin/nixos-enter --command "${pkgs.systemd}/bin/systemd-machine-id-setup && mkdir -p /var/log/journal/\$(cat /etc/machine-id) && ${pkgs.systemd}/bin/journalctl --setup-keys"
+        log_info "The verification key above is not stored on the machine, keep it in a safe place."
+        ${pkgs.gum}/bin/gum confirm "Verification key written down?" || log_warn "Generate new keys with journalctl --setup-keys --force if the key is lost."
+      '';
       installProcedureScript =
         config:
         let
@@ -388,6 +398,7 @@ rec {
                         ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
                         ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
                         ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
+                        ${optionalString (preprovisionOptions.journaldFSS or false) journaldFSSProvisionScript}
                         ${postInstallScript}
                         lsblk
                         log_info "Installation is complete. You can now reboot in the installed system."
