@@ -1,5 +1,6 @@
 <!--
 SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa@numerique.gouv.fr>
+SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 
 SPDX-License-Identifier: CC-BY-SA-4.0
 -->
@@ -43,7 +44,19 @@ Pour ajouter une nouvelle personne, il suffit d'ajouter un nouveau fichier `.nix
     u2f_keys = [
       "..."
     ];
-    defaultLoginShell = pkgs.zsh; # Optionnellement, shell pour l'utilisateur
+
+    shell = {
+      defaultLogin = pkgs.zsh; # Optionnellement, shell pour l'utilisateur
+
+      initInteractive = ''
+        alias ":e"="nvim"
+        alias ":q"="exit"
+      '';
+
+      environment = {
+        EDITOR = "nvim";
+      };
+    };
   };
 }
 ```
