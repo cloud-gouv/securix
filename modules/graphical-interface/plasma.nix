@@ -30,7 +30,8 @@ in
       default = true;
     };
   };
-  config = mkIf (cfg.variant == "kde") {
+
+  config = mkIf (cfg.enable && cfg.variant == "kde") {
     services.xserver.enable = true;
 
     services.displayManager.sddm = {
