@@ -14,7 +14,7 @@ let
   terminal = if cfg.terminalVariant == "default" then "foot" else cfg.terminalVariant;
 in
 {
-  config = mkIf (cfg.variant == "sway") {
+  config = mkIf (cfg.enable && cfg.variant == "sway") {
     environment.etc."sway/config".source = pkgs.writeText "sway.config" ''
       # Default config for sway
       #

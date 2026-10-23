@@ -11,7 +11,10 @@ let
     modules = [
       {
         securix = {
-          graphical-interface.variant = "kde";
+          graphical-interface = {
+            enable = true;
+            variant = "kde";
+          };
           self = {
             mainDisk = "/dev/nvme0n1";
             machine = {

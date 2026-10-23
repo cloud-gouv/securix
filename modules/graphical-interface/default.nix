@@ -36,5 +36,14 @@ in
     ./fonts.nix
   ];
 
-  config = mkIf cfg.enable { services.libinput.enable = true; };
+  config = {
+    assertions = [
+      {
+        assertion = cfg ? variant -> cfg.enable;
+        message = "You must set `securix.graphical-interface.enable` to true to select a variant";
+      }
+    ];
+
+    services.libinput = mkIf cfg.enable { enable = true; };
+  };
 }
