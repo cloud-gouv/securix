@@ -8,7 +8,7 @@ let
   cfg = config.securix.graphical-interface;
 in
 {
-  config = mkIf (cfg.variant == "cinnamon") {
+  config = mkIf (cfg.enable && cfg.variant == "cinnamon") {
     services.xserver = {
       enable = true;
       displayManager = {

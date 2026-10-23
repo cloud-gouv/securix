@@ -15,7 +15,7 @@ in
 {
   imports = [ ./sway-config.nix ];
 
-  config = mkIf (cfg.variant == "sway") {
+  config = mkIf (cfg.enable && cfg.variant == "sway") {
     environment.systemPackages = with pkgs; [
       grim # screenshot functionality
       slurp # screenshot functionality
