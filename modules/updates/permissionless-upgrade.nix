@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
 # SPDX-FileContributor: Elias Coppens <elias.coppens@numerique.gouv.fr>
+# SPDX-FileContributor: Lucas Desgouilles <lucas.desgouilles@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -258,7 +259,7 @@ let
 
       # Default values
       BRANCH="${config.securix.auto-updates.branch}"
-      REPO_PATH="${self.machine.infraRepositoryPath}"
+      REPO_PATH="$(realpath -m -- ${self.machine.infraRepositoryPath})"
       SUBDIR="${self.machine.infraRepositorySubdir}"
       REMOTE_PULL=true
       USE_SN=false
@@ -345,6 +346,12 @@ let
         exit 1
       fi
 
+      FILE=$(realpath -m -- "$REPO_PATH/$SUBDIR")
+      case $FILE in
+        "$REPO_PATH" | "$REPO_PATH"/* ) ;;
+        *) echo "Supplied --subdir does not target a path inside the repository." >&2; exit 1 ;;
+      esac
+
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
 
@@ -416,7 +423,7 @@ let
       # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
       # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
 
-      nixos-rebuild "$1" --file "$REPO_PATH/$SUBDIR" --attr terminals."$TERMINAL".system --option narinfo-cache-positive-ttl 0
+      nixos-rebuild "$1" --file "$FILE" --attr terminals."$TERMINAL".system --option narinfo-cache-positive-ttl 0
     '';
   };
 in
