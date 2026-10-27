@@ -265,6 +265,7 @@ let
       SECURIX_BRANCH=""
       INFRA_TEMP_DIR=""
       SECURIX_OVERRIDE_TEMP_DIR=""
+      ALLOW_ANY_BRANCH="${optionalString cfg.enableAnyBranch "1"}"
 
       # Parse arguments
       while [[ "$#" -gt 0 ]]; do
@@ -274,6 +275,10 @@ let
             exit 0
             ;;
           --branch)
+            if [ "$ALLOW_ANY_BRANCH" != "1" ]; then
+              echo "The --branch option is disabled"
+              exit 1
+            fi
             BRANCH="$2"
             shift 2
             ;;
@@ -286,6 +291,10 @@ let
             shift 1
             ;;
           --securix-branch)
+            if [ "$ALLOW_ANY_BRANCH" != "1" ]; then
+              echo "The --securix-branch option is disabled"
+              exit 1
+            fi
             SECURIX_BRANCH="$2"
             shift 2
             ;;
@@ -371,9 +380,6 @@ let
           git -C "${self.machine.infraRepositoryPath}" switch "${config.securix.auto-updates.branch}"
           git -C "$REPO_PATH" pull --ff-only || exit 1
         else
-          ${optionalString (
-            !cfg.enableAnyBranch
-          ) ''echo "Branch $BRANCH is not eligible for manual upgrade." && exit 1''}
           # Create a secure temporary directory
           INFRA_TEMP_DIR=$(mktemp -d)
 
