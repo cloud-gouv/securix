@@ -47,7 +47,7 @@ let
       par un membre du groupe
       .IR operator .
       Elle utilise l'agent SSH TPM2
-      .RI ( /var/tmp/ssh-tpm-agent.sock )
+      .RI ( /run/ssh-tpm-agent.sock )
       pour authentifier les accès au dépôt distant.
       .
       .SH VERBES
@@ -173,7 +173,7 @@ let
       .
       .SH FICHIERS
       .TP
-      .I /var/tmp/ssh-tpm-agent.sock
+      .I /run/ssh-tpm-agent.sock
       Socket de l'agent SSH TPM2 utilisé pour l'authentification Git.
       .
       .SH CONFIGURATION NIX
@@ -353,7 +353,7 @@ let
       esac
 
       # Set the TPM2 SSH agent to retrieve the repository.
-      export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
+      export SSH_AUTH_SOCK=/run/ssh-tpm-agent.sock
 
       upgrade_cleanup() {
         local exit_code=$?
