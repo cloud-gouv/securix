@@ -261,7 +261,8 @@ rec {
               This is the Securix live offline installer image edition ${edition}.
 
               This installer will install your system in ${mainDisk}, if that's not what you want,
-              contact the system administrators.
+              contact the system administrators. If that disk is missing, the installer will ask
+              which disk to use instead.
 
               Run: `autoinstall-terminal` to start the automatic installation process.
             '';
@@ -366,11 +367,35 @@ rec {
 
                         box_message "All preflight checks passed."
 
-                        log_info "${mainDisk} will be re-initialized and formatted, please confirm this is the right target."
+                        main_disk="${mainDisk}"
+                        if [ ! -b "$main_disk" ]; then
+                          log_warn "$main_disk does not exist on this machine."
+                          candidates=()
+                          while read -r name size type model; do
+                            [ "$type" = "disk" ] || continue
+                            # Skip the disks in use, such as the installer medium.
+                            if lsblk -no MOUNTPOINTS "/dev/$name" | grep -q .; then
+                              continue
+                            fi
+                            candidates+=("/dev/$name $size $model")
+                          done < <(lsblk -dn -o NAME,SIZE,TYPE,MODEL -e 2,7,11)
+                          if [ "''${#candidates[@]}" -eq 0 ]; then
+                            log_error "No disk available for the installation."
+                            exit 1
+                          fi
+                          choice=$(${pkgs.gum}/bin/gum choose --header "Installation disk" "''${candidates[@]}") || { log_warn "Operation cancelled."; exit 0; }
+                          main_disk="''${choice%% *}"
+                          # The partitioning scripts only know the configured path, so point it at the chosen disk.
+                          mkdir -p "$(dirname "${mainDisk}")"
+                          ln -s "$main_disk" "${mainDisk}"
+                          log_info "${mainDisk} now points to $main_disk."
+                        fi
+
+                        log_info "$main_disk will be re-initialized and formatted, please confirm this is the right target."
                         ${pkgs.gum}/bin/gum confirm "Proceed with reformatting?" || { log_warn "Operation cancelled."; exit 0; }
 
-                        wipefs -fa "${mainDisk}" ; sudo dd if=/dev/zero of="${mainDisk}" bs=4M count=1024;
-                        log_info "${mainDisk} re-initialized and formatted."
+                        wipefs -fa "$main_disk" ; sudo dd if=/dev/zero of="$main_disk" bs=4M count=1024;
+                        log_info "$main_disk re-initialized and formatted."
 
                         ${pkgs.systemd}/bin/udevadm settle
                         ${diskProcedureScript}
@@ -383,7 +408,7 @@ rec {
                           exit 1
                         fi
                         ${optionalString createSecureBootKeys createSecureBootKeysScript}
-                        box_message "Burning the image on ${mainDisk}..."
+                        box_message "Burning the image on $main_disk..."
                         ${installProcedureScript config}
                         ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
                         ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
