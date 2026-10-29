@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2026 Pauline Legrand <pauline.legrand@numerique.gouv.fr>
+ * SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
  * SPDX-License-Identifier: MIT
  */
 
@@ -338,7 +339,7 @@ function buildUserPanel(options) {
 
   const u2fPaths = new Set(['securix.self.user.u2f_keys']);
   const reqPaths = new Set(['securix.self.user.allowedVPNs', 'securix.self.user.teams']);
-  const optPaths = new Set(['securix.self.user.hashedPassword', 'securix.self.user.defaultLoginShell', 'securix.self.user.bit']);
+  const optPaths = new Set(['securix.self.user.hashedPassword', 'securix.self.user.shell.defaultLogin', 'securix.self.user.bit']);
 
   const u2f = options.filter(function (o) { return u2fPaths.has(o.path) && !o.internal; });
   const req  = options.filter(function (o) { return reqPaths.has(o.path) && !o.internal; });

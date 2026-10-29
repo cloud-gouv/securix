@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso.ext@numerique.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -95,10 +96,27 @@ in
         '';
       };
 
-      defaultLoginShell = mkOption {
-        type = types.package;
-        default = pkgs.zsh;
-        description = "Shell par défaut de connexion pour la session utilisateur.";
+      shell = {
+        defaultLogin = mkOption {
+          type = types.package;
+          default = pkgs.zsh;
+          description = "Shell par défaut de connexion pour la session utilisateur.";
+        };
+
+        initInteractive = mkOption {
+          type = types.nullOr types.str;
+          default = null;
+          description = "Code appelé lors de l'initialisation d'un shell intéractif.";
+        };
+
+        environment = mkOption {
+          type = types.attrsOf types.str;
+          default = [ ];
+          description = "Variables d'environnement à charger lors de l'initialisation du shell.";
+          example = {
+            EDITOR = "nvim";
+          };
+        };
       };
 
       bit = mkOption {
@@ -216,6 +234,10 @@ in
       [ "securix" "self" "defaultLoginShell" ]
       [ "securix" "self" "user" "defaultLoginShell" ]
     )
+    (mkRenamedOptionModule
+      [ "securix" "self" "user" "defaultLoginShell" ]
+      [ "securix" "self" "user" "shell" "defaultLogin" ]
+    )
     (mkRenamedOptionModule [ "securix" "self" "bit" ] [ "securix" "self" "user" "bit" ])
     (mkRenamedOptionModule [ "securix" "self" "allowedVPNs" ] [ "securix" "self" "user" "allowedVPNs" ])
     (mkRenamedOptionModule [ "securix" "self" "teams" ] [ "securix" "self" "user" "teams" ])
@@ -260,9 +282,30 @@ in
       '';
       networking.hostName = mkDefault "securix-${cfg.edition}-${toString machineIdentifier}";
     }
-    (mkIf isUserConfig {
-      users.users.${cfg.user.username}.shell = cfg.user.defaultLoginShell;
-      securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
-    })
+    (
+      let
+        shellProgram = lib.replaceString "-interactive" "" (lib.getName cfg.user.shell.defaultLogin);
+      in
+      mkIf isUserConfig {
+        users.users.${cfg.user.username}.shell = cfg.user.shell.defaultLogin;
+
+        # This is somewhat hackish, as it configures the global shell init file, and discriminate users at runtime;
+        # We would rather setup user specific configuration, but it doesn't seem we have the mean to with the vanilla NixOS options.
+        programs.${shellProgram}.interactiveShellInit =
+          let
+            environment = lib.join "\n" (
+              lib.mapAttrsToList (variable: value: "${variable}=\"${value}\"") cfg.user.shell.environment
+            );
+          in
+          ''
+            if [ "$(id --user --name)" == "${cfg.user.username}" ]; then
+              ${environment}
+              ${cfg.user.shell.initInteractive}
+            fi
+          '';
+
+        securix.pam.u2f.keys.${cfg.user.username} = cfg.user.u2f_keys;
+      }
+    )
   ];
 }
