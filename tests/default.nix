@@ -11,4 +11,5 @@
   portail = import ./portail.nix { inherit pkgs libSecurix; };
   tools = import ./tools.nix { inherit pkgs libSecurix; };
   browsers = import ./browsers.nix { inherit pkgs libSecurix; };
+  hostname-without-identity = import ./hostname-without-identity.nix { inherit pkgs libSecurix; };
 }
