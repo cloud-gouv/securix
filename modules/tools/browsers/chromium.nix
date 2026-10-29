@@ -169,7 +169,7 @@ in
         HighEfficiencyModeEnabled = true;
         IntensiveWakeUpThrottlingEnabled = true;
         MemorySaverModeSavings = 1; # 0 or 2
-        BatterySaverModeAvailability = true;
+        BatterySaverModeAvailability = 1;
 
         # Allow DNS interception to determine whether
         # we have a proxy that knows how to deal with certain DNS.
