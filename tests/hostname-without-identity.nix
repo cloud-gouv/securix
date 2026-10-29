@@ -11,7 +11,6 @@ let
     modules = [
       {
         securix = {
-          graphical-interface.variant = "sway";
           self = {
             mainDisk = "/dev/nvme0n1";
             machine.hardwareSKU = "x280";
