@@ -6,10 +6,12 @@
 { pkgs, libSecurix }: {
   minimal = import ./minimal.nix { inherit pkgs libSecurix; };
   anssi-minimal = import ./anssi-minimal.nix { inherit pkgs libSecurix; };
+  auditd = import ./auditd.nix { inherit pkgs libSecurix; };
   idempotent-autoinstall = import ./idempotent-autoinstall.nix { inherit pkgs libSecurix; };
   netboot-ipxe-script = import ./netboot-ipxe-script.nix { inherit pkgs libSecurix; };
   portail = import ./portail.nix { inherit pkgs libSecurix; };
   tools = import ./tools.nix { inherit pkgs libSecurix; };
   browsers = import ./browsers.nix { inherit pkgs libSecurix; };
   hostname-without-identity = import ./hostname-without-identity.nix { inherit pkgs libSecurix; };
+  headless-terminal = import ./headless-terminal.nix { inherit pkgs libSecurix; };
 }

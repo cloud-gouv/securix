@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  options,
+  ...
+}:
 let
   inherit (lib) mkIf;
   cfg = config.securix.graphical-interface;
@@ -39,7 +44,9 @@ in
   config = {
     assertions = [
       {
-        assertion = cfg ? variant -> cfg.enable;
+        # `cfg ? variant` is always true: the attribute exists even when the
+        # option has no value, so check whether it is defined instead.
+        assertion = options.securix.graphical-interface.variant.isDefined -> cfg.enable;
         message = "You must set `securix.graphical-interface.enable` to true to select a variant";
       }
     ];
