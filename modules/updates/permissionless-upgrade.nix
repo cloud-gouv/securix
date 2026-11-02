@@ -346,12 +346,6 @@ let
         exit 1
       fi
 
-      FILE=$(realpath -m -- "$REPO_PATH/$SUBDIR")
-      case $FILE in
-        "$REPO_PATH" | "$REPO_PATH"/* ) ;;
-        *) echo "Supplied --subdir does not target a path inside the repository." >&2; exit 1 ;;
-      esac
-
       # Set the TPM2 SSH agent to retrieve the repository.
       export SSH_AUTH_SOCK=/var/tmp/ssh-tpm-agent.sock
 
@@ -419,6 +413,13 @@ let
             exit 1
           fi
       fi
+
+      FILE=$(realpath -e -- "$REPO_PATH/$SUBDIR")
+      case $FILE in
+        "$REPO_PATH" | "$REPO_PATH"/* ) ;;
+        *) echo "Supplied --subdir does not target a path inside the repository." >&2; exit 1 ;;
+      esac
+
       # use narinfo-cache-positive-ttl option to 0 forces a revalidation on each rebuild because when renewing the cache signing key, 
       # the substitution was not made because the narinfo entry has a TTL of 30 days and is not invalidated. 
       # (https://git.lix.systems/lix-project/lix/issues/1268 and https://git.lix.systems/lix-project/lix/issues/1269)
