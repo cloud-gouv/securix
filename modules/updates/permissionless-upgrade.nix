@@ -414,7 +414,10 @@ let
           fi
       fi
 
-      FILE=$(realpath -e -- "$REPO_PATH/$SUBDIR")
+      FILE=$(realpath -e -- "$REPO_PATH/$SUBDIR" 2>/dev/null) || {
+        echo "Supplied --subdir does not target a path inside the repository." >&2
+        exit 1
+      }
       case $FILE in
         "$REPO_PATH" | "$REPO_PATH"/* ) ;;
         *) echo "Supplied --subdir does not target a path inside the repository." >&2; exit 1 ;;
