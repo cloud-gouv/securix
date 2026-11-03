@@ -6,6 +6,7 @@
 { pkgs, libSecurix }: {
   minimal = import ./minimal.nix { inherit pkgs libSecurix; };
   anssi-minimal = import ./anssi-minimal.nix { inherit pkgs libSecurix; };
+  anssi-compliance-check = import ./anssi-compliance-check.nix { inherit pkgs libSecurix; };
   idempotent-autoinstall = import ./idempotent-autoinstall.nix { inherit pkgs libSecurix; };
   netboot-ipxe-script = import ./netboot-ipxe-script.nix { inherit pkgs libSecurix; };
   portail = import ./portail.nix { inherit pkgs libSecurix; };
