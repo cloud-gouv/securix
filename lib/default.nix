@@ -50,6 +50,7 @@ let
     # baseboard-product-name.
     # WARNING: set this option really carfully since this could brick the hardware!
     forceSecureBootEnrollOnProductNames = [ ];
+    forceSecureBootEnrollExtraArgs = "";
     tpm2HostKeys = true;
     ageHostKeys = true;
     skipPreflightChecks = false;
@@ -220,7 +221,7 @@ rec {
               log_warn "EFI variables are immutable and are not modified because the current product name '$PRODUCT_NAME' is not in the list '${productNames}'"
             if
           fi
-          ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys"
+          ${pkgs.nixos-enter}/bin/nixos-enter --command "sbctl enroll-keys ${preprovisionOptions.forceSecureBootEnrollExtraArgs}"
         '';
       # This is actually an normal host SSH key generation step.
       # SSH host keys can be used as age keys.
