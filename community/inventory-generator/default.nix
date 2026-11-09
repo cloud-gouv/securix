@@ -59,7 +59,9 @@ in
                       && (lib.hasInfix \"options.securix\" content
                           || (\"$REPO_PREFIX\" != \"\" && lib.hasInfix (\"options.$REPO_PREFIX\") content));
 
-                    optionFiles = builtins.filter isOptionFile (securixFiles ++ repoFiles);
+                    optionFiles = map (x: lib.removeSuffix \"/default.nix\" (toString x)) (
+                      builtins.filter isOptionFile (securixFiles ++ repoFiles)
+                    );
 
                     eval = lib.evalModules {
                       modules = optionFiles ++ [ { _module.check = false; } ];
