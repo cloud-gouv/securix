@@ -99,7 +99,7 @@ let
       anssiRef = cfg.rules.${ruleId}.anssiRef;
       knownCheckScript = rule.checkScript pkgs;
     }
-    // lib.optionalAttrs (cfg.exceptions ? ruleId) {
+    // lib.optionalAttrs (cfg.exceptions ? ${ruleId}) {
       declaredExceptionRationale = cfg.exceptions.${ruleId}.rationale;
     }
     // lib.optionalAttrs (rule ? implementations) {
