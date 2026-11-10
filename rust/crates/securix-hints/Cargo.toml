@@ -21,10 +21,15 @@ path = "src/bin/hintd.rs"
 name = "securix-hintctl"
 path = "src/bin/hintctl.rs"
 
+[[bin]]
+name = "securix-hint-agent"
+path = "src/bin/hint-agent.rs"
+
 [dependencies]
 clap.workspace = true
 futures-util.workspace = true
 listenfd.workspace = true
+notify-rust.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

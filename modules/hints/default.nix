@@ -10,7 +10,12 @@
 }:
 let
   cfg = config.securix.hints;
-  inherit (lib) mkEnableOption mkIf mkPackageOption;
+  inherit (lib)
+    mkIf
+    mkOption
+    mkPackageOption
+    types
+    ;
 
   runDir = "/run/securix-hints";
   controlSocket = "${runDir}/control.sock";
@@ -18,8 +23,26 @@ let
 in
 {
   options.securix.hints = {
-    enable = mkEnableOption "the Sécurix hint subsystem";
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Enable the Sécurix hint subsystem. The updater and the manual upgrade
+        send their notices as hints, so a machine without the daemon shows no
+        update notice.
+      '';
+    };
     package = mkPackageOption pkgs "securix-hints" { };
+
+    autoReboot = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Reboot the machine when a critical hint stays for a long time. The hint
+        appears in every case. Only the automatic reboot changes.
+      '';
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -54,6 +77,28 @@ in
         SocketGroup = "root";
         FileDescriptorName = "consumer";
         Service = "securix-hintd.service";
+      };
+    };
+
+    systemd.user.services.securix-hint-agent = {
+      description = "Sécurix hint agent";
+
+      environment = {
+        SECURIX_HINTS_AUTO_REBOOT = if cfg.autoReboot then "1" else "0";
+      };
+
+      path = [
+        pkgs.systemd
+        pkgs.util-linux
+      ];
+      wantedBy = [ "graphical-session.target" ];
+      partOf = [ "graphical-session.target" ];
+
+      serviceConfig = {
+        ExecStart = "${cfg.package}/bin/securix-hint-agent --socket ${consumerSocket}";
+        Type = "simple";
+        Restart = "on-failure";
+        RestartSec = 5;
       };
     };
 
