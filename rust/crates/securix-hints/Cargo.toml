@@ -17,7 +17,12 @@ publish = false
 name = "securix-hintd"
 path = "src/bin/hintd.rs"
 
+[[bin]]
+name = "securix-hintctl"
+path = "src/bin/hintctl.rs"
+
 [dependencies]
+clap.workspace = true
 futures-util.workspace = true
 listenfd.workspace = true
 serde.workspace = true
