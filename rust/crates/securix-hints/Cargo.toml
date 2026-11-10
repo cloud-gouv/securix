@@ -15,11 +15,16 @@ publish = false
 
 [dependencies]
 serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
 zlink = { workspace = true, features = [
   "service",
   "proxy",
   "introspection",
 ] }
+
+[dev-dependencies]
+tempfile.workspace = true
 
 [lints]
 workspace = true
