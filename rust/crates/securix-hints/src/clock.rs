@@ -35,6 +35,14 @@ pub fn sweep_interval() -> std::time::Duration {
 /// Return the path of the store.
 #[must_use]
 pub fn store_path() -> PathBuf {
-    std::env::var("SECURIX_HINTS_STORE")
-        .map_or_else(|_| PathBuf::from(crate::STORE_PATH), PathBuf::from)
+    if let Ok(path) = std::env::var("SECURIX_HINTS_STORE") {
+        return PathBuf::from(path);
+    }
+    if let Ok(directory) = std::env::var("RUNTIME_DIRECTORY") {
+        // systemd separates several directories with a colon.
+        if let Some(first) = directory.split(':').next() {
+            return PathBuf::from(first).join("hints.json");
+        }
+    }
+    PathBuf::from(crate::STORE_PATH)
 }
