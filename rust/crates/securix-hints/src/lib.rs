@@ -16,7 +16,9 @@
 //! - [`hints_control`] writes the hints. Only the root user and the
 //!   `securix-hints` group can open its socket.
 
+pub mod clock;
 pub mod cooldown;
+pub mod daemon;
 pub mod hints;
 pub mod hints_control;
 pub mod severity;
