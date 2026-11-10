@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+[package]
+name = "securix-hints"
+description = "Hints about the state of the machine, shown to the user"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+zlink = { workspace = true, features = [
+  "service",
+  "proxy",
+  "introspection",
+] }
+
+[lints]
+workspace = true
