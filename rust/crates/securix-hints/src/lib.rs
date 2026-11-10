@@ -16,8 +16,11 @@
 //! - [`hints_control`] writes the hints. Only the root user and the
 //!   `securix-hints` group can open its socket.
 
+pub mod cooldown;
 pub mod hints;
 pub mod hints_control;
+pub mod severity;
+pub mod store;
 pub mod types;
 
 /// The path of the control socket.
