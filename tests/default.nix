@@ -13,4 +13,5 @@
   browsers = import ./browsers.nix { inherit pkgs libSecurix; };
   hostname-without-identity = import ./hostname-without-identity.nix { inherit pkgs libSecurix; };
   headless-terminal = import ./headless-terminal.nix { inherit pkgs libSecurix; };
+  hints = import ./hints.nix { inherit pkgs libSecurix; };
 }

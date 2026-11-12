@@ -112,6 +112,11 @@ in
       pkgs'.mdbook
       pkgs'.mdbook-mermaid
       (pkgs'.callPackage "${sources.agenix}/pkgs/agenix.nix" { })
+      # The Rust workspace, for the contributors and for the CI.
+      pkgs'.cargo
+      pkgs'.rustc
+      pkgs'.rustfmt
+      pkgs'.clippy
     ]
     ++ git-checks.enabledPackages;
 

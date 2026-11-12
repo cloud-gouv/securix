@@ -1,0 +1,28 @@
+permissions: {}
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+    - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
+    - name: Check the Rust formatting
+      run: nix-shell --run 'cd rust && cargo fmt --all --check'
+    - name: Lint the Rust workspace
+      run: nix-shell --run 'cd rust && cargo clippy --workspace --all-targets --locked -- -D warnings'
+    - name: Test the Rust workspace
+      run: nix-shell --run 'cd rust && cargo test --workspace --locked'
+    - name: Build from a rust-only sparse checkout
+      run: |
+        git clone --no-checkout "file://$GITHUB_WORKSPACE" /tmp/rust-only
+        cd /tmp/rust-only
+        git sparse-checkout init --cone
+        git sparse-checkout set rust
+        git checkout "$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
+        cd "$GITHUB_WORKSPACE"
+        nix-shell --run 'cd /tmp/rust-only/rust && cargo build --workspace --locked'
+name: '[Sécurix] Rust workspace'
+on:
+  pull_request:
+  push:
+    branches:
+    - main
