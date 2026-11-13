@@ -1,12 +1,16 @@
 # SPDX-FileCopyrightText: 2026 Mattias Kockum <mattias@kockum.net>
+# SPDX-FileContributor: 2026 Sébastien Celles <s.celles@gmail.com>
 #
 # SPDX-License-Identifier: MIT
 #
 # Regression test for https://github.com/cloud-gouv/securix/issues/171
+# and https://github.com/cloud-gouv/securix/issues/288
 #
 # Boots a Securix installer then runs `autoinstall-terminal` twice.
 # The second run must succeed, which only happens if dm-crypt
 # handles are properly closed before wiping the disk.
+# The TPM-backed host SSH keys must be written to the target, which
+# does not include ssh-tpm-agent.
 
 { pkgs, libSecurix }:
 
@@ -57,7 +61,7 @@ let
     preprovisionOptions = {
       secureBoot = "disabled";
       skipPreflightChecks = true;
-      tpm2HostKeys = false;
+      tpm2HostKeys = true;
       ageHostKeys = false;
     };
   };
@@ -73,6 +77,7 @@ pkgs.testers.nixosTest {
 
   nodes.machine = _: {
     virtualisation.emptyDiskImages = [ 4096 ];
+    virtualisation.tpm.enable = true;
     environment.systemPackages = [
       autoinstallPkg
       pkgs.expect
@@ -103,5 +108,9 @@ pkgs.testers.nixosTest {
 
     machine.succeed(run_autoinstall)
     machine.succeed(run_autoinstall)
+
+    for key in ["ecdsa", "rsa"]:
+        machine.succeed(f"test -s /mnt/etc/ssh/ssh_tpm_host_{key}_key.tpm")
+        machine.succeed(f"test -s /mnt/etc/ssh/ssh_tpm_host_{key}_key.pub")
   '';
 }
