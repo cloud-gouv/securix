@@ -382,20 +382,33 @@ rec {
                           log_error "/mnt is not a mountpoint or resides on a /tmpfs. The installation cannot succeed. Exiting."
                           exit 1
                         fi
-                        ${optionalString createSecureBootKeys createSecureBootKeysScript}
-                        box_message "Burning the image on ${mainDisk}..."
-                        ${installProcedureScript config}
-                        ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
-                        ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
-                        ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
-                        ${postInstallScript}
-                        lsblk
-                        log_info "Installation is complete. You can now reboot in the installed system."
+                        (
+                          set -e
+                          ${optionalString createSecureBootKeys createSecureBootKeysScript}
+                          box_message "Burning the image on ${mainDisk}..."
+                          ${installProcedureScript config}
+                          ${optionalString enrollSecureBootKeys secureBootEnrollmentScript}
+                          ${optionalString (preprovisionOptions.tpm2HostKeys or false) tpm2ProvisionScript}
+                          ${optionalString (preprovisionOptions.ageHostKeys or false) ageKeysProvisionScript}
+                          ${postInstallScript}
+                        )
+                        INSTALL_FAILED=$?
+                        if [ "$INSTALL_FAILED" -ne 0 ]; then
+                          log_error "Installation failed."
+                          box_message "Installation aborted: see /tmp/install.log for details."
+                        else
+                          lsblk
+                          log_info "Installation is complete. You can now reboot in the installed system."
+                        fi
 
                         if [ -f "$INSTALL_LOG" ]; then
                           mkdir -p /mnt/var/log
                           cp "$INSTALL_LOG" /mnt/var/log/securix-install.log
                           log_info "Install log saved to /var/log/securix-install.log on the target system."
+                        fi
+
+                        if [ "$INSTALL_FAILED" -ne 0 ]; then
+                          exit 1
                         fi
 
               '')
