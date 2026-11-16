@@ -10,6 +10,9 @@
   boot.lanzaboote = {
     enable = true;
     pkiBundle = "/etc/secureboot";
+    # Keep a bounded number of signed, bootable generations (rollback stays
+    # possible) instead of every past one.
+    configurationLimit = lib.mkDefault 10;
   };
 
   environment.systemPackages = [ pkgs.sbctl ];
