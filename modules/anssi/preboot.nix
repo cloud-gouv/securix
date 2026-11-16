@@ -19,8 +19,8 @@
     checkScript =
       pkgs:
       pkgs.writeShellScript "check-R1" ''
-        echo "TODO: check hardware configuration for R1"
-        exit 0
+        echo "Not implemented: check the hardware configuration for R1 by hand."
+        exit 2
       '';
   };
 
@@ -38,8 +38,8 @@
     checkScript =
       pkgs:
       pkgs.writeShellScript "check-R2" ''
-        echo "TODO: check BIOS / UEFI secure configuration"
-        exit 0
+        echo "Not implemented: check BIOS / UEFI secure configuration by hand."
+        exit 2
       '';
   };
 
@@ -96,8 +96,8 @@
     checkScript =
       pkgs:
       pkgs.writeShellScript "check-R4" ''
-        echo "TODO: check all loaded certificates"
-        exit 0
+        echo "Not implemented: check the loaded certificates by hand."
+        exit 2
       '';
   };
 
@@ -127,8 +127,8 @@
     checkScript =
       pkgs:
       pkgs.writeShellScript "check-R5" ''
-        echo "R5 depends on R3."
-        exit 0
+        echo "Not implemented: no boot loader password (R5 depends on R3)."
+        exit 2
       '';
   };
 
@@ -148,7 +148,8 @@
     checkScript =
       pkgs:
       pkgs.writeShellScript "check-R6" ''
-        echo "R6 depends on R3."
+        echo "Not implemented: kernel command line and initramfs are not protected (R6 depends on R3)."
+        exit 2
       '';
   };
 
