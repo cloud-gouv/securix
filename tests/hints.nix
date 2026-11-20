@@ -18,7 +18,12 @@ let
               inventoryId = 0;
             };
           };
-          hints.enable = true;
+          hints = {
+            enable = true;
+            autoRebootAfterSeconds = 28800;
+            # Use another name, to prove the option reaches the producer.
+            criticalSource = "test-kernel";
+          };
         };
 
         # Make the removal of expired hints fast.
@@ -76,6 +81,51 @@ pkgs.testers.nixosTest {
     securix_unbranded_0.wait_until_succeeds(
         "! securix-hintctl list | grep -q 'Expired hint'"
     )
+
+    # The option reaches the producer: the timer writes under the new name.
+    securix_unbranded_0.succeed(
+        "grep -q 'source=test-kernel' $(command -v securix-hints-kernel-reboot)"
+    )
+
+    # The kernel timer proposes a reboot only if a new kernel waits. The uptime
+    # sets the severity.
+    kernel = "/nix/store/00000000000000000000000000000000-linux-6.13.0/bzImage"
+
+    def run_timer(running, uptime):
+        securix_unbranded_0.succeed(
+            f"SECURIX_HINTS_TARGET_KERNEL={kernel} "
+            f"SECURIX_HINTS_RUNNING_KERNEL={running} "
+            f"SECURIX_HINTS_UPTIME_SECONDS={uptime} "
+            "securix-hints-kernel-reboot"
+        )
+
+    # One day on an old kernel. The hint is advisory.
+    run_timer("6.12.34", 86400)
+    securix_unbranded_0.succeed("securix-hintctl get test-kernel reboot | grep -q '\"severity\": 1'")
+    securix_unbranded_0.succeed("securix-hintctl get test-kernel reboot | grep -q 'Redémarrer maintenant'")
+    securix_unbranded_0.succeed("securix-hintctl get test-kernel reboot | grep -q 'Plus tard'")
+
+    # Four days. The hint is important.
+    run_timer("6.12.34", 345600)
+    securix_unbranded_0.succeed("securix-hintctl get test-kernel reboot | grep -q '\"severity\": 2'")
+
+    # Six days. The machine reboots itself. The hint is critical.
+    run_timer("6.12.34", 518400)
+    securix_unbranded_0.succeed("securix-hintctl get test-kernel reboot | grep -q '\"severity\": 3'")
+    securix_unbranded_0.fail("securix-hintctl get test-kernel reboot | grep -q 'Plus tard'")
+
+    # The kernel is the same. There is no hint.
+    run_timer("6.13.0", 345600)
+    securix_unbranded_0.fail("securix-hintctl get test-kernel reboot")
+
+    # A fresh update. There is no hint.
+    run_timer("6.12.34", 3600)
+    securix_unbranded_0.fail("securix-hintctl get test-kernel reboot")
+
+    # The module passes the configuration to the agent unit.
+    unit = securix_unbranded_0.succeed("cat /etc/systemd/user/securix-hint-agent.service")
+    assert "SECURIX_HINTS_AUTO_REBOOT_AFTER_SECONDS=28800" in unit, unit
+    assert "SECURIX_HINTS_CRITICAL_SOURCE=test-kernel" in unit, unit
 
     # A restart keeps the hints. The store is on disk.
     environ = securix_unbranded_0.succeed(

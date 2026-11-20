@@ -22,6 +22,8 @@ let
   consumerSocket = "${runDir}/consumer.sock";
 in
 {
+  imports = [ ./kernel-reboot.nix ];
+
   options.securix.hints = {
     enable = mkOption {
       type = types.bool;
@@ -43,6 +45,23 @@ in
       '';
     };
 
+    autoRebootAfterSeconds = mkOption {
+      type = types.int;
+      default = 8 * 60 * 60;
+      description = ''
+        How long a critical hint waits before the machine reboots. The delay
+        starts when the agent first sees the hint as critical.
+      '';
+    };
+
+    criticalSource = mkOption {
+      type = types.str;
+      default = "securix-kernel";
+      description = ''
+        The producer that can make the machine reboot itself. A hint from
+        another producer never reboots a machine.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -85,6 +104,8 @@ in
 
       environment = {
         SECURIX_HINTS_AUTO_REBOOT = if cfg.autoReboot then "1" else "0";
+        SECURIX_HINTS_AUTO_REBOOT_AFTER_SECONDS = toString cfg.autoRebootAfterSeconds;
+        SECURIX_HINTS_CRITICAL_SOURCE = cfg.criticalSource;
       };
 
       path = [
