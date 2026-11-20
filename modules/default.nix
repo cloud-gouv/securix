@@ -59,5 +59,7 @@
     ./networkmanager-events.nix
     # For upstream https://github.com/NixOS/nixpkgs/pull/551055
     ./chromium
+    # Hints about the state of the machine, e.g. a pending reboot.
+    ./hints
   ];
 }
