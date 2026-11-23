@@ -10,6 +10,14 @@ jobs:
     steps:
     - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
     - uses: samueldr/lix-gha-installer-action@f526e761e1ad201b0f4231f61a2a569f17bcc2ac # main
+    - name: Configure nix-daemon environment
+      run: |
+        sudo systemctl edit nix-daemon --stdin <<'EOF'
+        [Service]
+        Environment=AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+        Environment=AWS_REQUEST_CHECKSUM_CALCULATION=when_required
+        EOF
+        sudo systemctl restart nix-daemon
     - uses: zombiezen/setup-nix-cache-action@cacc7abf0a6636b0ef45ec2ae055a9734cdd4122 # main
       if: env.HAS_CACHE_CREDENTIALS == 'true'
       with:
