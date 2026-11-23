@@ -7,6 +7,8 @@
     # Grist registration
     ./grist-registration
 
+    ./generate-csr-piv
+
     ./inventory-generator
 
     ./reset-yubikey
