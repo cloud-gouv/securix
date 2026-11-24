@@ -66,6 +66,12 @@ in
         description = "Adresse email de l'agent";
       };
 
+      fullname = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "Le nom complet de l'agent";
+      };
+
       username = mkOption {
         type = types.nullOr types.str;
         default = null;
