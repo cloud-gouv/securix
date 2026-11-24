@@ -1,4 +1,5 @@
 # SPDX-FileCopyrightText: 2025 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+# SPDX-FileContributor: 2026 Xavier Maso <xavier.maso@beta.gouv.fr>
 #
 # SPDX-License-Identifier: MIT
 
@@ -70,9 +71,9 @@ in
         default = null;
         defaultText = "<première lettre de prénom><nom de famille> tronqué à 32 caractères";
         description = ''
-          Nom d'utilisateur de la session PAM, dérivé par l'email en calculant:
+          Nom d'utilisateur de la session PAM, suivant la convention :
 
-          <première lettre de l'email><nom de famille>
+          <première lettre du prénom><nom de famille>
 
           Tronqué à 32 caractères, limite de PAM.
         '';
