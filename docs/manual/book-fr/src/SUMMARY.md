@@ -34,6 +34,7 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 - [Options de déploiement](./reference/deployment.md)
 - [Cache binaire CI/CD](./reference/cache.md)
+- [Scellement du journal](./reference/journal-sealing.md)
 - [Matériels supportés](./user/hardware.md)
 
 # Guide contributeur
