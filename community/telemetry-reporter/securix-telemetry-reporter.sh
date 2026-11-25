@@ -17,42 +17,12 @@ log_journal() {
 
 declare -A fields=()
 
+current_gen=$( nixos-rebuild list-generations --json | jq '.[] | select(.current == true)' )
+: "$current_gen"
+
 set -o xtrace +o errexit +o pipefail
 
-fields["currentDate"]=$( date -Iseconds )
-
-fields["user"]=$( getent group video | cut -d ':' -f 4 )
-fields["hostName"]=$( hostname )
-
-fields["chassisSerial"]=$( dmidecode --string chassis-serial-number || dmidecode --string system-serial-number )
-fields["chassisFamily"]=$( dmidecode --string system-family || dmidecode --string system-version )
-
-fields["energyCapacity"]=$( acpi --battery --details | grep "Battery 0:" | tail -n 1 )
-
-fields["displayResolution"]=$( cat /sys/class/drm/card*-eDP-*/modes | sort --numeric-sort --reverse | uniq | head -n 1 )
-
-current_gen=$( nixos-rebuild list-generations --json | jq '.[] | select(.current == true)' )
-
-fields["nixosBuildDate"]=$( jq -r '.date' <<< "$current_gen" )
-fields["nixosVersion"]=$( jq -r '.nixosVersion' <<< "$current_gen" )
-fields["kernelVersion"]=$( jq -r '.kernelVersion' <<< "$current_gen" )
-
-fields["generationCount"]=$( nixos-rebuild list-generations --json | jq 'length' )
-
-fields["bootTime"]=$( systemctl show -p KernelTimestamp --value )
-
-fields["rootfsCapacity"]=$( df -h --output=size / | tail -n+2 )
-fields["rootfsUse"]=$( df -h --output=used,pcent / | tail -n+2 )
-fields["espCapacity"]=$( df -h --output=size /boot | tail -n+2 )
-fields["espUse"]=$( df -h --output=used,pcent /boot | tail -n+2 )
-
-fields["secureBoot"]=$( sbctl status --json | jq -r '
-  if .secure_boot and .installed and (.setup_mode | not) then
-    "OK"
-  else
-    del(.guid, .firmware_quirks) | @json | gsub("[\"{}]"; "")
-  end
-' )
+#COMMANDS#
 
 set +o xtrace -o errexit -o pipefail
 

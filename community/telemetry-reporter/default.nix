@@ -16,23 +16,23 @@
 let
   cfg = config.securix.telemetry-reporter;
 
+  commands = lib.concatMapAttrsStringSep "\n\n" (
+    field: command: if command != null then "fields[${field}]=$(${command})" else ""
+  ) cfg.fields;
+
   script = pkgs.writeShellApplication {
     name = "securix-telemetry-report";
 
     runtimeInputs = with pkgs; [
-      acpi
       coreutils
       curl
-      dmidecode
-      getent
-      hostname
       jq
       nixos-rebuild
-      sbctl
-      util-linux
     ];
 
-    text = builtins.readFile ./securix-telemetry-reporter.sh;
+    text = builtins.replaceStrings [ "#COMMANDS#" ] [ commands ] (
+      builtins.readFile ./securix-telemetry-reporter.sh
+    );
   };
 in
 {
@@ -57,9 +57,49 @@ in
       '';
       default = "daily";
     };
+
+    fields = lib.mkOption { type = with lib.types; attrsOf (nullOr str); };
   };
 
   config = lib.mkIf cfg.enable {
+    securix.telemetry-reporter.fields = lib.mapAttrs (_: lib.mkDefault) {
+      currentDate = "date -Iseconds";
+
+      user = "${pkgs.getent}/bin/getent group video | cut -d ':' -f 4";
+      hostName = "${pkgs.hostname}/bin/hostname";
+
+      chassisSerial = "${pkgs.dmidecode}/bin/dmidecode --string chassis-serial-number || ${pkgs.dmidecode}/bin/dmidecode --string system-serial-number";
+      chassisFamily = "${pkgs.dmidecode}/bin/dmidecode --string system-family || ${pkgs.dmidecode}/bin/dmidecode --string system-version";
+
+      energyCapacity = "${pkgs.acpi}/bin/acpi --battery --details | grep 'Battery 0:' | tail -n 1";
+
+      displayResolution = "cat /sys/class/drm/card*-eDP-*/modes | sort --numeric-sort --reverse | uniq | head -n 1";
+
+      nixosBuildDate = "jq -r '.date' <<< \"$current_gen\"";
+      nixosVersion = "jq -r '.nixosVersion' <<< \"$current_gen\"";
+      kernelVersion = "jq -r '.kernelVersion' <<< \"$current_gen\"";
+      currentGeneration = "jq -r '.generation' <<< \"$current_gen\"";
+
+      generationCount = "nixos-rebuild list-generations --json | jq 'length'";
+
+      bootTime = "systemctl show -p KernelTimestamp --value";
+
+      rootfsCapacity = "df -h --output=size / | tail -n+2";
+      rootfsUse = "df -h --output=used,pcent / | tail -n+2";
+      espCapacity = "df -h --output=size /boot | tail -n+2";
+      espUse = "df -h --output=used,pcent /boot | tail -n+2";
+
+      secureBoot = ''
+         ${pkgs.sbctl}/bin/sbctl status --json | jq -r '
+          if .secure_boot and .installed and (.setup_mode | not) then
+            "OK"
+          else
+            del(.guid, .firmware_quirks) | @json | gsub("[\"{}]"; "")
+          end
+        '
+      '';
+    };
+
     systemd.services.securix-telemetry-reporter = {
       wantedBy = [ "multi-user.target" ];
       wants = [ "network-online.target" ];
