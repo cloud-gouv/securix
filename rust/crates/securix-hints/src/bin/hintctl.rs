@@ -8,6 +8,7 @@ use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use securix_hints::hints::Hints as _;
+use securix_hints::hints_control::HintAction;
 use securix_hints::hints_control::HintsControl as _;
 
 /// The command-line client.
@@ -72,6 +73,9 @@ enum Command {
         /// The Unix time at which the hint expires. Zero means no expiry.
         #[arg(long, default_value_t = 0)]
         expires_at: i64,
+
+        #[arg(long = "action", value_name = "ID:LABEL[:STYLE]")]
+        actions: Vec<String>,
     },
 
     /// Remove one hint.
@@ -127,10 +131,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             title,
             body,
             expires_at,
+            actions,
         } => {
+            let actions: Vec<HintAction> = actions
+                .iter()
+                .map(|action| parse_action(action))
+                .collect::<Result<_, _>>()?;
+
             let mut connection = zlink::tokio::unix::connect(&control).await?;
             let reply = connection
-                .upsert_hint(source, key, kind, *severity, title, body, *expires_at, &[])
+                .upsert_hint(
+                    source,
+                    key,
+                    kind,
+                    *severity,
+                    title,
+                    body,
+                    *expires_at,
+                    &actions,
+                )
                 .await?
                 .map_err(display)?;
             print(&reply)?;
@@ -146,6 +165,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     Ok(())
+}
+
+fn parse_action(text: &str) -> Result<HintAction, Box<dyn std::error::Error>> {
+    let mut fields = text.splitn(3, ':');
+    let id = fields.next().unwrap_or_default();
+    let label = fields.next().unwrap_or_default();
+    let style = fields.next().unwrap_or("secondary");
+
+    if id.is_empty() || label.is_empty() {
+        return Err(format!("the action `{text}` is not `id:label[:style]`").into());
+    }
+
+    Ok(HintAction {
+        id: id.to_owned(),
+        label: label.to_owned(),
+        style: style.to_owned(),
+    })
 }
 
 /// Print a value as JSON.

@@ -10,16 +10,58 @@
 }:
 let
   cfg = config.securix.hints;
-  inherit (lib) mkEnableOption mkIf mkPackageOption;
+  inherit (lib)
+    mkIf
+    mkOption
+    mkPackageOption
+    types
+    ;
 
   runDir = "/run/securix-hints";
   controlSocket = "${runDir}/control.sock";
   consumerSocket = "${runDir}/consumer.sock";
 in
 {
+  imports = [ ./kernel-reboot.nix ];
+
   options.securix.hints = {
-    enable = mkEnableOption "the Sécurix hint subsystem";
+    enable = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Enable the Sécurix hint subsystem. The updater and the manual upgrade
+        send their notices as hints, so a machine without the daemon shows no
+        update notice.
+      '';
+    };
     package = mkPackageOption pkgs "securix-hints" { };
+
+    autoReboot = mkOption {
+      type = types.bool;
+      default = true;
+      description = ''
+        Reboot the machine when a critical hint stays for a long time. The hint
+        appears in every case. Only the automatic reboot changes.
+      '';
+    };
+
+    autoRebootAfterSeconds = mkOption {
+      type = types.int;
+      default = 8 * 60 * 60;
+      description = ''
+        How long a critical hint waits before the machine reboots. The delay
+        starts when the agent first sees the hint as critical.
+      '';
+    };
+
+    criticalSource = mkOption {
+      type = types.str;
+      default = "securix-kernel";
+      description = ''
+        The producer that can make the machine reboot itself. A hint from
+        another producer never reboots a machine.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -54,6 +96,30 @@ in
         SocketGroup = "root";
         FileDescriptorName = "consumer";
         Service = "securix-hintd.service";
+      };
+    };
+
+    systemd.user.services.securix-hint-agent = {
+      description = "Sécurix hint agent";
+
+      environment = {
+        SECURIX_HINTS_AUTO_REBOOT = if cfg.autoReboot then "1" else "0";
+        SECURIX_HINTS_AUTO_REBOOT_AFTER_SECONDS = toString cfg.autoRebootAfterSeconds;
+        SECURIX_HINTS_CRITICAL_SOURCE = cfg.criticalSource;
+      };
+
+      path = [
+        pkgs.systemd
+        pkgs.util-linux
+      ];
+      wantedBy = [ "graphical-session.target" ];
+      partOf = [ "graphical-session.target" ];
+
+      serviceConfig = {
+        ExecStart = "${cfg.package}/bin/securix-hint-agent --socket ${consumerSocket}";
+        Type = "simple";
+        Restart = "on-failure";
+        RestartSec = 5;
       };
     };
 

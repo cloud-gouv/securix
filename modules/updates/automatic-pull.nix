@@ -62,42 +62,60 @@ in
         pkgs.openssh
         pkgs.util-linux
         pkgs.gawk
+        # The fallback path. Keep it until the hints replace the notifications.
         pkgs.libnotify
         pkgs.sudo
         pkgs.nixos-rebuild
         config.nix.package
+        config.securix.hints.package
       ];
       script = ''
         _notify_current_user() {
           local title="$1"
           local message="$2"
 
-          # Get all active sessions with a valid user
           mapfile -t sessions < <(loginctl list-sessions --no-legend | awk '{print $1, $2, $3}' | grep -v '^ ')
 
-          # Check if there are active sessions
           if [[ ''${#sessions[@]} -eq 0 ]]; then
               echo "No active sessions found." >&2
               return 1
           fi
 
           for session in "''${sessions[@]}"; do
-              # Extract session details: ID, user, and display
-              local session_id user display
-              session_id=$(echo "$session" | awk '{print $1}')
+              local uid user
               uid=$(echo "$session" | awk '{print $2}')
               user=$(echo "$session" | awk '{print $3}')
 
-              # Notify each user/session
               if [[ -n "$user" ]]; then
-                  # Graphical notification for GUI sessions
                   sudo -u "$user" DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$uid/bus" \
                       notify-send "$title" "$message" || true
               else
-                  # Terminal notification for non-GUI sessions
                   echo "$title: $message" | wall
               fi
           done
+        }
+
+        _hint_set() {
+          local key="$1"
+          local kind="$2"
+          local severity="$3"
+          local title="$4"
+          local body="$5"
+          shift 5
+
+          securix-hintctl set \
+            --source securix-auto-updates \
+            --key "$key" \
+            --kind "$kind" \
+            --severity "$severity" \
+            --title "$title" \
+            --body "$body" \
+            "$@" || _notify_current_user "$title" "$body" || true
+        }
+
+
+        _hint_clear() {
+          securix-hintctl clear securix-auto-updates "$1" || true
         }
 
         nm-online -q --timeout=30 || { echo "No Internet, skipping synchronization..."; exit 100; }
@@ -106,6 +124,9 @@ in
             ssh-add -L
         else
             echo "No system SSH identities loaded, is the TPM2 broken or the onboarding was insufficient?"
+            _hint_set onboarding-failed security 3 \
+              "Initialisation échouée" \
+              "L'initialisation a échoué. Vérifiez que le TPM2 est correctement onboardé."
             exit 101
         fi
         if [ -d "$REPO_DIR/.git" ]; then
@@ -123,26 +144,40 @@ in
 
           if [ $LOCAL = $REMOTE ]; then
               echo "Up-to-date. Skipping."
+              _hint_clear update-available
+              _hint_clear rebuilding
               exit 0
           elif [ $LOCAL = $BASE ]; then
-              _notify_current_user "[Sécurix] Mises à jour" "Une mise à jour est disponible du système et sera téléchargé."
+              _hint_set update-available maintenance 1 \
+                "Mises à jour" \
+                "Une mise à jour du système est disponible et sera téléchargée."
           elif [ $REMOTE = $BASE ]; then
-              _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code à cause de changements locaux."
+              _hint_set diverged-local maintenance 2 \
+                "Divergence locale" \
+                "Votre système diverge du dépôt à cause de changements locaux."
               exit 102
           else
-              _notify_current_user "[Sécurix] Mises à jour" "Votre système diverge du dépot de code et ne peut etre synchronisé automatiquement."
+              _hint_set diverged-remote maintenance 2 \
+                "Divergence distante" \
+                "Votre système diverge du dépôt et ne peut pas être synchronisé automatiquement."
               exit 103
           fi
 
           git pull || exit 1
 
-          _notify_current_user "[Sécurix] Mises à jour" "Le code de votre système a été mis à jour. La reconstruction de votre système en arrière plan va commencer."
+          _hint_set rebuilding maintenance 1 \
+            "Reconstruction" \
+            "Le code du système a été mis à jour. La reconstruction en arrière-plan commence."
         else
           echo "Repository does not exist, cloning..."
           mkdir -p "$REPO_DIR" || exit 1
 
-          _notify_current_user "[Sécurix] Mises à jour" "Initialisation du code d'infrastructure..."
-          git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || (_notify_current_user "[Sécurix] Mises à jour" "Initialisation échoué; est-ce que votre TPM2 est correctement onboardé?"; exit 1) && _notify_current_user "[Sécurix] Mises à jour" "Initialisation réussie. Reconstruction du système..."
+          git clone "$REPO_URL" "$REPO_DIR" -b "${cfg.branch}" || {
+            _hint_set onboarding-failed security 3 \
+              "Initialisation échouée" \
+              "L'initialisation a échoué. Vérifiez que le TPM2 est correctement onboardé."
+            exit 1
+          }
 
           cd "$REPO_DIR/$REPO_SUBDIR" || exit 1
         fi
@@ -155,7 +190,9 @@ in
         nix-env -p /nix/var/nix/profiles/system --delete-generations +${toString cfg.maxGenerationsToKeep}
         nix-store --gc --max-freed 10G
 
-        _notify_current_user "[Sécurix] Mises à jour" "La reconstruction du système est complète, au prochain redémarrage, votre système sera mis à jour."
+        _hint_clear rebuilding
+        _hint_clear onboarding-failed
+        _hint_clear reboot
       '';
       serviceConfig = {
         Restart = "on-failure";
