@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.88"
+license = "MIT"
+repository = "https://github.com/cloud-gouv/securix"
+authors = ["Ryan Lahfa", "Sécurix contributors"]
+
+[workspace.dependencies]
+clap = { version = "4.5", features = ["derive"] }
+listenfd = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+futures-util = "0.3"
+tempfile = "3.0"
+thiserror = "2.0"
+tokio = { version = "1.0", features = ["rt", "macros", "time", "sync"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+uuid = { version = "1.0", features = ["v4"] }
+zlink = { version = "0.7.1", default-features = false, features = [
+  "tokio",
+  "tracing",
+] }
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+unreachable_pub = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }

@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: 2026 Ryan Lahfa <ryan.lahfa.ext@numerique.gouv.fr>
+#
+# SPDX-License-Identifier: MIT
+
+[package]
+name = "securix-hints"
+description = "Hints about the state of the machine, shown to the user"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+publish = false
+
+[[bin]]
+name = "securix-hintd"
+path = "src/bin/hintd.rs"
+
+[[bin]]
+name = "securix-hintctl"
+path = "src/bin/hintctl.rs"
+
+[dependencies]
+clap.workspace = true
+futures-util.workspace = true
+listenfd.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tokio-stream.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+uuid.workspace = true
+zlink = { workspace = true, features = [
+  "service",
+  "proxy",
+  "introspection",
+] }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
