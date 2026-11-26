@@ -3,12 +3,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}:
+{ config, lib, ... }:
 let
   cfg = config.securix.audit;
   inherit (lib)
@@ -48,8 +43,13 @@ let
   # Adjusted for NixOS: binaries live in the Nix store, so module loading
   # is tracked at the syscall level instead of by watching /sbin/insmod.
   rules = [
-    # Changes to the system configuration.
-    "-w /etc/ -p wa -k etc"
+    # Changes to accounts and privileges. ANSSI watches all of /etc, but on
+    # NixOS every switch rewrites the /etc symlinks, which floods the log.
+    "-w /etc/passwd -p wa -k identity"
+    "-w /etc/shadow -p wa -k identity"
+    "-w /etc/group -p wa -k identity"
+    "-w /etc/gshadow -p wa -k identity"
+    "-w /etc/sudoers -p wa -k sudoers"
     # Reads and changes to the audit trail and audit configuration.
     "-w /var/log/audit/ -p rwa -k audit-log"
     "-w ${lib.getExe' config.security.audit.package "auditctl"} -p x -k audit-tools"
@@ -144,7 +144,7 @@ let
       filters = "-F exit=-EACCES";
     }
     {
-      key = "access-denied";
+      key = "perm-denied";
       syscalls.common = [
         "creat"
         "open"
@@ -214,9 +214,12 @@ in
 
     # The rules load before auditd.service creates /var/log/audit. A watch on
     # a missing directory makes auditctl abort, leaving no rules loaded at all.
-    systemd.services.audit-rules-nixos = {
-      unitConfig.RequiresMountsFor = [ "/var/log" ];
-      serviceConfig.ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p -m 0700 /var/log/audit";
-    };
+    systemd.tmpfiles.rules = [ "d /var/log/audit 0700 root root -" ];
+    systemd.services.audit-rules-nixos.after = [ "systemd-tmpfiles-setup.service" ];
+
+    # journald also reads every audit event from the kernel, which stores the
+    # whole trail a second time. auditd's log is the one ausearch, aureport
+    # and the disk space actions above work with.
+    systemd.sockets.systemd-journald-audit.enable = false;
   };
 }

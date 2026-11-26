@@ -27,8 +27,8 @@ SPDX-License-Identifier: MIT
 
 - `securix.audit` now applies the ANSSI-BP-028 R73 audit rule set: program
   execution, kernel module loading, kexec, mounts, ptrace, hostname changes,
-  file deletion, denied file access, changes under `/etc`, and access to the
-  audit trail and tools. Every syscall rule also covers the 32-bit ABI, and
+  file deletion, denied file access, changes to accounts and sudoers, and
+  access to the audit trail and tools. Every syscall rule also covers the 32-bit ABI, and
   every rule has a key for `ausearch -k`. New options: `securix.audit.lockRules`
   makes the rules immutable until reboot, and `securix.audit.extraRules` adds
   site-specific rules.
@@ -39,6 +39,9 @@ SPDX-License-Identifier: MIT
   conflicting duplicate settings from both Sécurix and NixOS.
 - With `securix.audit.enable`, audit events are no longer dropped during
   boot: the kernel backlog is raised to 32768.
+- With `securix.audit.enable`, audit events are no longer stored twice:
+  journald stops collecting them, and `/var/log/audit/audit.log` is the
+  only copy.
 - `system-infrastructure-sync` no longer stays stuck in a permanent failed
   state after hitting systemd's `StartLimit` on repeated errors (e.g. missing
   network, unready TPM2). The start rate limit is disabled and failures are

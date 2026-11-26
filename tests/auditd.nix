@@ -131,10 +131,26 @@ pkgs.testers.nixosTest {
         unlocked.succeed("useradd -m mallory")
         unlocked.fail("su mallory -c 'cat /etc/shadow'")
         audited(unlocked, "access-denied", "/etc/shadow")
+        # O_NOATIME on a file the caller does not own fails with EPERM.
+        unlocked.succeed(
+            "printf 'import os\\nos.open(\"/etc/machine-id\", os.O_RDONLY | os.O_NOATIME)\\n' > /tmp/noatime.py"
+        )
+        unlocked.fail("su mallory -c 'python3 /tmp/noatime.py'")
+        audited(unlocked, "perm-denied", "/etc/machine-id")
 
-    with subtest("configuration changes under /etc"):
+    with subtest("account and privilege changes"):
+        # useradd above rewrote /etc/passwd, /etc/shadow and /etc/group.
+        audited(unlocked, "identity", "/etc/passwd")
+        audited(unlocked, "identity", "/etc/shadow")
+        unlocked.succeed("touch /etc/sudoers")
+        audited(unlocked, "sudoers", "/etc/sudoers")
+        # Other files under /etc are not watched.
         unlocked.succeed("echo x > /etc/audit-marker")
-        audited(unlocked, "etc", "/etc/audit-marker")
+        unlocked.fail("ausearch --input-logs -f /etc/audit-marker")
+
+    with subtest("audit events are stored once, by auditd only"):
+        unlocked.fail("systemctl is-active systemd-journald-audit.socket")
+        unlocked.succeed("test -z \"$(journalctl -q _TRANSPORT=audit)\"")
 
     with subtest("tampering with the audit trail and tools"):
         unlocked.succeed("cat /var/log/audit/audit.log > /dev/null")
