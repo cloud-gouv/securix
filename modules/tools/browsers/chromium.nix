@@ -302,11 +302,9 @@ in
         # Do not care if Chromium is by default.
         DefaultBrowserSettingEnabled = false;
 
-        # New Tab parameters.
-        # Provide some customizations options someday.
-        NTPCardsVisible = false;
-        NTPCustomBackgroundEnabled = false;
+        # Display a message when an extension modifies the "New Tab" page
         NTPFooterExtensionAttributionEnabled = true;
+        # Display a message on the "New Tab" page that this browser is managed
         NTPFooterManagementNoticeEnabled = true;
 
         # Future architecture for the PDF viewer.
